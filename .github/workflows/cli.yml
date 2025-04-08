@@ -1,0 +1,25 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main # Defina aqui a branch que você usa como principal (pode ser master ou outra)
+
+jobs:
+  test:
+    runs-on: ubuntu-latest # Define o ambiente para rodar os testes (pode usar também windows-latest ou macos-latest)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14" # Defina a versão do Node.js que você está utilizando
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: yarn test # Ou o comando que você usa para rodar os testes
