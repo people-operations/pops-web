@@ -1,0 +1,90 @@
+/* =======================
+   RESET E BASE
+======================= */
+html,
+body {
+  height: 100%;
+  min-height: 100vh;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* =======================
+   CONTAINER PRINCIPAL
+======================= */
+.auth-container {
+  width: 800px;
+  max-width: 95vw;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  overflow: hidden;
+}
+
+/* =======================
+   PAINÉIS (ESQUERDO E DIREITO)
+======================= */
+.auth-pane {
+  flex: 1;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* =======================
+   RESPONSIVIDADE
+======================= */
+@media (max-width: 900px) {
+  .auth-container {
+    flex-direction: column;
+    width: 98vw;
+  }
+  .auth-pane {
+    padding: 30px 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .auth-container {
+    width: 100vw;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .auth-pane {
+    padding: 20px 5px;
+  }
+}
+
+/* =======================
+   CAPTCHA
+======================= */
+.captcha-container img {
+  height: 40px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.refresh-icon {
+  cursor: pointer;
+  margin-left: 8px;
+  font-size: 20px;
+  user-select: none;
+}
+
+/* =======================
+   CHECKBOX
+======================= */
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.checkbox-wrapper input {
+  margin-right: 10px;
+}

@@ -1,0 +1,18 @@
+{
+  "loginTitle": "Olá",
+  "loginUsername": "Usuário",
+  "loginPassword": "Senha",
+  "loginCaptcha": "Código de segurança",
+  "loginButton": "ENTRAR",
+  "registerTitle": "Crie sua conta",
+  "registerFullName": "Nome completo",
+  "registerEmail": "Email",
+  "registerPassword": "Senha",
+  "registerConfirmPassword": "Confirmar senha",
+  "registerButton": "CADASTRAR",
+  "ctaNoAccount": "Ainda não tem conta?",
+  "ctaRegister": "Cadastre-se",
+  "ctaHasAccount": "Já tem conta?",
+  "ctaLogin": "Login",
+  "rememberMe": "Lembre-se nesse computador"
+}
