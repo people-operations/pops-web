@@ -15,18 +15,16 @@ const submitLoginRight = document.getElementById("submitLoginRight");
 // =======================
 showRegisterBtn.addEventListener("click", () => {
   leftLoginCTA.style.display = "none";
-  leftRegisterForm.style.display = "";
-  leftRegisterForm.style.flexDirection = "";
+  leftRegisterForm.style.display = "flex";
   rightLoginForm.style.display = "none";
-  rightRegisterCTA.style.display = "";
+  rightRegisterCTA.style.display = "flex";
 });
 
 showLoginBtn.addEventListener("click", () => {
   leftRegisterForm.style.display = "none";
-  leftLoginCTA.style.display = "";
+  leftLoginCTA.style.display = "flex";
   rightRegisterCTA.style.display = "none";
-  rightLoginForm.style.display = "";
-  rightLoginForm.style.flexDirection = "";
+  rightLoginForm.style.display = "flex";
 });
 
 // =======================
