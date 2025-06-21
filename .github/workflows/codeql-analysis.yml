@@ -22,7 +22,7 @@ jobs:
       - name: Init CodeQL
         uses: github/codeql-action/init@v2
         with:
-          languages: ["javascript", "typescript"]
+          languages: ["javascript"]
 
       # 3) build automático (tenta rodar npm/yarn build)
       - name: Autobuild
