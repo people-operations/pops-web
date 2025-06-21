@@ -9,6 +9,9 @@ on:
   schedule:
     - cron: "0 3 * * 0" # opcional: todo domingo às 03h
 
+permissions:
+  contents: read
+
 jobs:
   analyze:
     name: Análise CodeQL
