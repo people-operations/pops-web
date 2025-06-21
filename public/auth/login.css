@@ -1,0 +1,180 @@
+/* =========================
+   Variáveis globais e reset
+   ========================= */
+:root {
+  --purple: #7c3aed;
+  --blue: #3b82f6;
+  --border-radius: 0.5rem;
+  --gap: 1rem;
+  --transition: 0.3s;
+  font-size: 16px;
+}
+
+/* Reset básico para todos os elementos */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================
+   Estilos gerais
+   ========================= */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  height: 100vh;
+}
+
+/* =========================
+   Layout principal
+   ========================= */
+.container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+/* =========================
+   Painel Esquerdo (Login)
+   ========================= */
+.left-panel {
+  flex: 0 0 40%;
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #fff;
+}
+
+.left-panel h1 {
+  font-size: 2rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.left-panel p.lead {
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin-bottom: 2rem;
+}
+
+/* =========================
+   Formulário de Login
+   ========================= */
+form {
+  width: 100%;
+}
+
+.form-group {
+  margin-bottom: var(--gap);
+}
+
+/* Botão de envio */
+.btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--purple);
+  color: #fff;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.btn:hover {
+  background: #6938b9;
+}
+
+/* Texto de ajuda */
+.help-text {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+}
+.help-text a {
+  color: var(--purple);
+  text-decoration: none;
+}
+.help-text a:hover {
+  text-decoration: underline;
+}
+
+/* =========================
+   Painel Direito (Info/Ilustração)
+   ========================= */
+.right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  padding: 2rem;
+}
+
+/* Fundo animado e estilização do painel direito */
+.right-panel-bg {
+  position: relative;
+  background: linear-gradient(120deg, #7512f9, #60a5fa, #7512f9, #60a5fa);
+  background-size: 300% 300%;
+  animation: gradientMove 8s ease-in-out infinite;
+  color: #fff;
+  padding: 1rem;
+  border-radius: 32px;
+  width: 100%;
+  height: 98%;
+  max-height: 600px;
+  box-shadow: 0 4px 24px rgba(60, 30, 90, 0.08);
+}
+
+/* Animação do gradiente de fundo */
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Organização dos elementos internos do painel direito */
+.right-panel-bg .row {
+  margin-bottom: 1.5rem;
+}
+.right-panel-bg .title-row h2 {
+  font-size: 4.5rem;
+  margin: 1rem 3rem -1rem;
+}
+.right-panel-bg .subtitle-row p {
+  font-size: 1.3rem;
+  line-height: 1.5;
+  margin: 0 3rem;
+}
+.right-panel-bg .icon-row {
+  display: flex;
+  justify-content: flex-end;
+}
+.right-panel-bg .svg {
+  position: absolute;
+  bottom: -8px;
+  right: 0px;
+}
+
+/* =========================
+   Responsividade
+   ========================= */
+@media (max-width: 1024px) {
+  .container {
+    flex-direction: column;
+  }
+  .left-panel,
+  .right-panel {
+    width: 100%;
+    padding: 2rem;
+  }
+}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>POPS - Autenticação</title>
+    <link rel="stylesheet" href="login.css" />
+    <link rel="stylesheet" href="../styles/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Painel esquerdo: área de login -->
+      <div class="left-panel">
+        <!-- Saudação ao usuário -->
+        <h1>Bem-vindo de volta!</h1>
+        <!-- Orientação para quem não tem acesso -->
+        <p class="lead">
+          Se você ainda não possui acesso,<br />entre em contato com o RH para
+          solicitar.
+        </p>
+        <!-- Formulário de login -->
+        <form id="login-form">
+          <!-- Campo de e-mail com label flutuante -->
+          <div class="form-group floating">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="seunome@gmail.com"
+              required
+            />
+            <label for="email">E-mail:</label>
+          </div>
+          <!-- Campo de senha com label flutuante -->
+          <div class="form-group floating">
+            <label for="password">Senha:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <!-- Botão de envio do formulário -->
+          <button type="submit" class="btn">Entrar</button>
+          <!-- Texto de ajuda para problemas de acesso -->
+          <p class="help-text">
+            <span>Problemas ao entrar?</span>&nbsp;
+            <a href="#">Entre em contato</a>
+          </p>
+        </form>
+      </div>
+
+      <!-- Painel direito: informações e ilustração -->
+      <div class="right-panel">
+        <div class="right-panel-bg">
+          <div class="content">
+            <!-- Título da plataforma -->
+            <div class="row title-row">
+              <h2>POPs</h2>
+            </div>
+            <!-- Descrição da plataforma -->
+            <div class="row subtitle-row">
+              <p>
+                Plataforma para alocação de squads, feedbacks e acompanhamento
+                contínuo do desenvolvimento dos colaboradores.
+              </p>
+            </div>
+            <!-- Ícone ilustrativo de login -->
+            <div class="row icon-row">
+              <div class="svg">
+                <img
+                  src="../assets/login-icon.svg"
+                  alt="Ícone de login"
+                  width="332"
+                  height="348"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+<script src="login.js"></script>
