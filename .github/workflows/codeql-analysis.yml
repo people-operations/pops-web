@@ -1,0 +1,36 @@
+name: CodeQL
+
+# dispara em push na main, PRs contra main e agendado
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 3 * * 0" # opcional: todo domingo às 03h
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Análise CodeQL
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) pega o código
+      - uses: actions/checkout@v3
+
+      # 2) inicializa CodeQL para JS/TS (remova github-actions)
+      - name: Init CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ["javascript"]
+
+      # 3) build automático (tenta rodar npm/yarn build)
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      # 4) roda a análise
+      - name: Analyze
+        uses: github/codeql-action/analyze@v2

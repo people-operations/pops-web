@@ -1,27 +1,47 @@
-# PopsWeb
+# Meu Projeto Frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.2.1.
+Este é um projeto frontend simples que utiliza HTML, CSS e JavaScript. O objetivo é criar uma página web interativa que pode ser servida localmente usando Node.js.
 
-## Development server
+## Estrutura do Projeto
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+O projeto possui a seguinte estrutura de diretórios:
 
-## Code scaffolding
+```
+meu-projeto-frontend
+├── public
+│   ├── index.html        # Página principal do projeto
+│   ├── styles
+│   │   └── style.css     # Estilos CSS para o projeto
+│   └── scripts
+│       └── app.js        # Código JavaScript para interatividade
+├── package.json           # Configuração do npm
+├── server.js              # Configuração do servidor local
+└── README.md              # Documentação do projeto
+```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Instalação
 
-## Build
+1. Clone o repositório:
+   ```
+   git clone <URL_DO_REPOSITORIO>
+   cd meu-projeto-frontend
+   ```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+2. Instale as dependências:
+   ```
+   npm install
+   ```
 
-## Running unit tests
+## Uso
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Para iniciar o servidor local, execute o seguinte comando:
 
-## Running end-to-end tests
+```
+node server.js
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+O servidor estará disponível em `http://localhost:3000` (ou outra porta configurada no `server.js`).
 
-## Further help
+## Contribuição
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Sinta-se à vontade para contribuir com melhorias ou correções. Faça um fork do repositório e envie suas alterações através de um pull request.
