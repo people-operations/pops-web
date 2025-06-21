@@ -4,14 +4,27 @@
   "description": "Um projeto front-end com HTML, CSS e JavaScript.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "jest"
   },
   "dependencies": {
     "express": "^4.17.1"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
+    "jest": "^30.0.2",
+    "jest-environment-jsdom": "^30.0.2",
     "serve": "^14.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/people-operations/pops-web.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/people-operations/pops-web/issues"
+  },
+  "homepage": "https://github.com/people-operations/pops-web#readme",
+  "jest": {
+    "testEnvironment": "jsdom"
   }
 }
