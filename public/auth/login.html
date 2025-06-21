@@ -4,180 +4,84 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>POPS - Autenticação</title>
-
-    <!-- =======================
-         ESTILOS
-    ======================== -->
     <link rel="stylesheet" href="login.css" />
     <link rel="stylesheet" href="../styles/style.css" />
   </head>
   <body>
-    <!-- =======================
-         CONTAINER PRINCIPAL
-    ======================== -->
-    <div class="auth-container">
-      <!-- =======================
-           PAINEL ESQUERDO
-           (Login CTA ou Formulário de Cadastro)
-      ======================== -->
-      <div class="auth-pane left">
-        <!-- ===== CTA para Cadastro (Login View) ===== -->
-        <div id="leftLoginCTA" class="cta section-container">
-          <h2 style="margin-bottom: 20px">Ainda não tem conta?</h2>
-          <button
-            id="showRegister"
-            class="btn outlined"
-            style="max-width: 200px; width: 100%"
-          >
-            Cadastre-se
-          </button>
-        </div>
-
-        <!-- ===== Formulário de Cadastro (Register View) ===== -->
-        <form
-          id="leftRegisterForm"
-          class="form-container"
-          style="display: none"
-        >
-          <h2 style="margin-bottom: 20px">Crie sua conta</h2>
-
-          <!-- Nome completo -->
-          <div class="form-group">
-            <label for="fullName" class="label">Nome completo</label>
+    <div class="container">
+      <!-- Painel esquerdo: área de login -->
+      <div class="left-panel">
+        <!-- Saudação ao usuário -->
+        <h1>Bem-vindo de volta!</h1>
+        <!-- Orientação para quem não tem acesso -->
+        <p class="lead">
+          Se você ainda não possui acesso,<br />entre em contato com o RH para
+          solicitar.
+        </p>
+        <!-- Formulário de login -->
+        <form id="login-form">
+          <!-- Campo de e-mail com label flutuante -->
+          <div class="form-group floating">
             <input
-              type="text"
-              id="fullName"
-              name="fullName"
-              class="input-field"
-              placeholder="Seu nome"
-            />
-          </div>
-
-          <!-- Email -->
-          <div class="form-group">
-            <label for="regEmail" class="label">Email</label>
-            <input
-              type="text"
-              id="regEmail"
+              type="email"
+              id="email"
               name="email"
-              class="input-field"
-              placeholder="email@exemplo.com"
+              placeholder="seunome@gmail.com"
+              required
             />
+            <label for="email">E-mail:</label>
           </div>
-
-          <!-- Senha -->
-          <div class="form-group">
-            <label for="regPassword" class="label">Senha</label>
+          <!-- Campo de senha com label flutuante -->
+          <div class="form-group floating">
+            <label for="password">Senha:</label>
             <input
               type="password"
-              id="regPassword"
+              id="password"
               name="password"
-              class="input-field"
-              placeholder="Senha"
+              placeholder="••••••••"
+              required
             />
           </div>
-
-          <!-- Confirmar senha -->
-          <div class="form-group">
-            <label for="confirmPassword" class="label">Confirmar senha</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              class="input-field"
-              placeholder="Confirmar senha"
-            />
-          </div>
-
-          <!-- Botão de cadastro -->
-          <button id="submitRegisterLeft" class="btn primary" type="submit">
-            CADASTRAR
-          </button>
+          <!-- Botão de envio do formulário -->
+          <button type="submit" class="btn">Entrar</button>
+          <!-- Texto de ajuda para problemas de acesso -->
+          <p class="help-text">
+            <span>Problemas ao entrar?</span>&nbsp;
+            <a href="#">Entre em contato</a>
+          </p>
         </form>
       </div>
 
-      <!-- =======================
-           PAINEL DIREITO
-           (Formulário de Login ou CTA para Login)
-      ======================== -->
-      <div class="auth-pane right">
-        <!-- ===== Formulário de Login (Login View) ===== -->
-        <form id="rightLoginForm" class="form-container">
-          <h2 style="margin-bottom: 20px">Olá</h2>
-
-          <!-- Usuário -->
-          <div class="form-group">
-            <label for="loginUsername" class="label">Usuário</label>
-            <input
-              type="text"
-              id="loginUsername"
-              name="username"
-              class="input-field"
-              placeholder="email@exemplo.com"
-            />
-          </div>
-
-          <!-- Senha -->
-          <div class="form-group">
-            <label for="loginPassword" class="label">Senha</label>
-            <input
-              type="password"
-              id="loginPassword"
-              name="password"
-              class="input-field"
-              placeholder="Senha"
-            />
-          </div>
-
-          <!-- Captcha -->
-          <div class="form-group">
-            <label for="loginCaptcha" class="label">Código de segurança</label>
-            <div
-              class="captcha-container"
-              style="display: flex; align-items: center"
-            >
-              <input
-                type="text"
-                id="loginCaptcha"
-                name="captcha"
-                class="input-field"
-                style="margin-bottom: 0; flex: 1; margin-right: 10px"
-                placeholder="Digite o texto mostrado"
-              />
-              <img src="captcha.png" alt="captcha" id="captchaImage" />
-              <span class="refresh-icon" id="refreshCaptcha">⟳</span>
+      <!-- Painel direito: informações e ilustração -->
+      <div class="right-panel">
+        <div class="right-panel-bg">
+          <div class="content">
+            <!-- Título da plataforma -->
+            <div class="row title-row">
+              <h2>POPs</h2>
+            </div>
+            <!-- Descrição da plataforma -->
+            <div class="row subtitle-row">
+              <p>
+                Plataforma para alocação de squads, feedbacks e acompanhamento
+                contínuo do desenvolvimento dos colaboradores.
+              </p>
+            </div>
+            <!-- Ícone ilustrativo de login -->
+            <div class="row icon-row">
+              <div class="svg">
+                <img
+                  src="../assets/login-icon.svg"
+                  alt="Ícone de login"
+                  width="332"
+                  height="348"
+                />
+              </div>
             </div>
           </div>
-
-          <!-- Lembre-se -->
-          <div class="checkbox-wrapper">
-            <input type="checkbox" id="rememberMe" name="rememberMe" checked />
-            <label for="rememberMe">Lembre-se nesse computador</label>
-          </div>
-
-          <!-- Botão de login -->
-          <button id="submitLoginRight" class="btn primary" type="submit">
-            ENTRAR
-          </button>
-        </form>
-
-        <!-- ===== CTA para Login (Register View) ===== -->
-        <div
-          id="rightRegisterCTA"
-          class="cta section-container"
-          style="display: none"
-        >
-          <h2 style="margin-bottom: 20px">Já tem conta?</h2>
-          <button
-            id="showLogin"
-            class="btn outlined"
-            style="max-width: 200px; width: 100%"
-          >
-            Login
-          </button>
         </div>
       </div>
     </div>
   </body>
 </html>
-<script src="login.js></script>
+<script src="login.js"></script>

@@ -1,49 +1,23 @@
-// =======================
-// ELEMENTOS DA INTERFACE
-// =======================
-const leftLoginCTA = document.getElementById("leftLoginCTA");
-const leftRegisterForm = document.getElementById("leftRegisterForm");
-const rightLoginForm = document.getElementById("rightLoginForm");
-const rightRegisterCTA = document.getElementById("rightRegisterCTA");
-const showRegisterBtn = document.getElementById("showRegister");
-const showLoginBtn = document.getElementById("showLogin");
-const submitRegisterLeft = document.getElementById("submitRegisterLeft");
-const submitLoginRight = document.getElementById("submitLoginRight");
-
-// =======================
-// TROCA DE TELAS (LOGIN <-> CADASTRO)
-// =======================
-showRegisterBtn.addEventListener("click", () => {
-  leftLoginCTA.style.display = "none";
-  leftRegisterForm.style.display = "flex";
-  rightLoginForm.style.display = "none";
-  rightRegisterCTA.style.display = "flex";
-});
-
-showLoginBtn.addEventListener("click", () => {
-  leftRegisterForm.style.display = "none";
-  leftLoginCTA.style.display = "flex";
-  rightRegisterCTA.style.display = "none";
-  rightLoginForm.style.display = "flex";
-});
-
-// =======================
-// CAPTCHA (ATUALIZAR IMAGEM)
-// =======================
-document.getElementById("refreshCaptcha").addEventListener("click", () => {
-  const img = document.getElementById("captchaImage");
-  img.src = "captcha.png?ts=" + new Date().getTime();
-});
-
-// =======================
-// SUBMISSÃO DE FORMULÁRIOS (DEMO)
-// =======================
-submitLoginRight.addEventListener("click", (e) => {
+// Adiciona um listener para o evento de envio do formulário de login
+document.getElementById("login-form").addEventListener("submit", (e) => {
+  // Impede o comportamento padrão do formulário (recarregar a página)
   e.preventDefault();
-  alert("Login enviado!");
-});
 
-submitRegisterLeft.addEventListener("click", (e) => {
-  e.preventDefault();
-  alert("Cadastro enviado!");
+  // Obtém e sanitiza o valor do campo de e-mail
+  const email = document.getElementById("email").value.trim();
+  // Obtém o valor do campo de senha
+  const password = document.getElementById("password").value;
+
+  // Validação simples: verifica se ambos os campos estão preenchidos
+  if (!email || !password) {
+    alert("Por favor, preencha todos os campos.");
+    return;
+  }
+
+  // Aqui seria implementada a lógica de autenticação (ex: chamada à API)
+  console.log("Email:", email);
+  console.log("Senha:", password);
+
+  // Exibe mensagem de sucesso (apenas para demonstração)
+  alert("Login realizado com sucesso!");
 });
