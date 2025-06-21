@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n="login.page_title"></title>
+    <link rel="stylesheet" href="login.css" />
+    <link rel="stylesheet" href="../../assets/css/style.css" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/svg/logo.svg" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Painel esquerdo: área de login -->
+      <div class="left-panel">
+        <!-- Saudação ao usuário -->
+        <div class="welcome-row">
+          <h1 data-i18n="login.welcome"></h1>
+          <button
+            id="theme-toggle"
+            class="theme-toggle-btn"
+            aria-label="Alternar tema"
+          >
+            <span id="theme-icon">🌞</span>
+          </button>
+        </div>
+        <!-- Orientação para quem não tem acesso -->
+        <p class="lead" data-i18n="login.no_access"></p>
+        <!-- Formulário de login -->
+        <form id="login-form">
+          <!-- Campo de e-mail com label flutuante -->
+          <div class="form-group floating">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="example@gmail.com"
+              required
+            />
+            <label for="email" data-i18n="login.email"></label>
+          </div>
+          <!-- Campo de senha com label flutuante -->
+          <div class="form-group floating">
+            <label for="password" data-i18n="login.password"></label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <!-- Botão de envio do formulário -->
+          <button type="submit" class="btn" data-i18n="login.submit"></button>
+          <!-- Texto de ajuda para problemas de acesso -->
+          <p class="help-text">
+            <span data-i18n="login.help"></span>&nbsp;
+            <a href="#" data-i18n="login.contact"></a>
+          </p>
+        </form>
+      </div>
+
+      <!-- Painel direito: informações e ilustração -->
+      <div class="right-panel">
+        <div class="right-panel-bg">
+          <div class="content">
+            <!-- Título da plataforma -->
+            <div class="row title-row">
+              <h2 data-i18n="login.platform.title"></h2>
+            </div>
+            <!-- Descrição da plataforma -->
+            <div class="row subtitle-row">
+              <p data-i18n="login.platform.description"></p>
+            </div>
+            <!-- Ícone ilustrativo de login -->
+            <div class="row icon-row">
+              <div class="svg">
+                <img
+                  src="../../assets/svg/login-icon.svg"
+                  alt="Ícone de login"
+                  width="332"
+                  height="348"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+<script src="login.js"></script>
+<script src="../../assets/js/app.js"></script>
+<script src="../../assets/js/i18nService.js" defer></script>
