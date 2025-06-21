@@ -1,0 +1,18 @@
+{
+  "login": {
+    "page_title": "POPS - Autenticação",
+    "welcome": "Bem-vindo de volta!",
+    "no_access": "Se você ainda não possui acesso, entre em contato com o RH para solicitar.",
+    "email": "E-mail:",
+    "email_placeholder": "seunome@gmail.com",
+    "password": "Senha:",
+    "password_placeholder": "••••••••",
+    "submit": "Entrar",
+    "help": "Problemas ao entrar?",
+    "contact": "Entre em contato",
+    "platform": {
+      "title": "POPs",
+      "description": "Plataforma para alocação de squads, feedbacks e acompanhamento contínuo do desenvolvimento dos colaboradores."
+    }
+  }
+}

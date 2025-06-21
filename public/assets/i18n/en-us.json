@@ -1,0 +1,18 @@
+{
+  "login": {
+    "page_title": "POPS - Authentication",
+    "welcome": "Welcome back!",
+    "no_access": "If you don't have access yet, please contact HR to request it.",
+    "email": "Email:",
+    "email_placeholder": "yourname@email.com",
+    "password": "Password:",
+    "password_placeholder": "••••••••",
+    "submit": "Sign in",
+    "help": "Having trouble signing in?",
+    "contact": "Contact us",
+    "platform": {
+      "title": "POPs",
+      "description": "Platform for squad allocation, feedback, and continuous monitoring of employee development."
+    }
+  }
+}

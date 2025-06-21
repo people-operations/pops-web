@@ -1,0 +1,16 @@
+{
+  "login": {
+    "page_title": "POPS - Autenticación",
+    "welcome": "¡Bienvenido de nuevo!",
+    "no_access": "Si aún no tienes acceso, contacta con RRHH para solicitarlo.",
+    "email": "Correo electrónico:",
+    "password": "Contraseña:",
+    "submit": "Entrar",
+    "help": "¿Problemas para iniciar sesión?",
+    "contact": "Contacta con nosotros",
+    "platform": {
+      "title": "POPs",
+      "description": "Plataforma para la asignación de squads, retroalimentaciones y seguimiento continuo del desarrollo de los colaboradores."
+    }
+  }
+}
