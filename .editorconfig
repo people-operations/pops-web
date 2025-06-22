@@ -1,18 +1,15 @@
 root = true
 
-# Define regras padrão para todos os arquivos
 [*]
-charset = utf-8                # Usa codificação UTF-8
-indent_style = space           # Usa espaços para indentação
-indent_size = 2                # Tamanho da indentação: 2 espaços
-insert_final_newline = true    # Insere uma linha em branco ao final do arquivo
-trim_trailing_whitespace = true # Remove espaços em branco ao final das linhas
+charset = utf-8
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
 
-# Regras específicas para arquivos TypeScript
 [*.ts]
-quote_type = single            # Usa aspas simples em arquivos .ts
+quote_type = single
 
-# Regras específicas para arquivos Markdown
 [*.md]
-max_line_length = off          # Não limita o tamanho das linhas em Markdown
-trim_trailing_whitespace = false # Mantém espaços em branco ao final das linhas em Markdown
+max_line_length = off
+trim_trailing_whitespace = false
