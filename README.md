@@ -1,47 +1,114 @@
-# Meu Projeto Frontend
+<h1 align="center">POPs - People Operations Web 🌐</h1>
 
-Este é um projeto frontend simples que utiliza HTML, CSS e JavaScript. O objetivo é criar uma página web interativa que pode ser servida localmente usando Node.js.
+<p align="center">
+  Front-end do sistema de gestão de squads, performance e desenvolvimento de colaboradores.
+</p>
 
-## Estrutura do Projeto
+<div align="center">
 
-O projeto possui a seguinte estrutura de diretórios:
+![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Made with](https://img.shields.io/badge/made%20with-JS%20%7C%20HTML%20%7C%20CSS-blueviolet)
+![Last Commit](https://img.shields.io/github/last-commit/people-operations/pops-web)
+
+</div>
+
+---
+
+## 📘 Sobre o Projeto
+
+**POPs (People Operations)** é uma plataforma de apoio à gestão ágil de times. Permite ao RH e líderes:
+
+- Alocar pessoas em squads com visibilidade clara
+- Avaliar performance por meio de feedbacks e PDI
+- Visualizar indicadores estratégicos de sobrecarga e alocação
+- Padronizar a organização por áreas, cargos e habilidades
+
+Esta interface web oferece o front-end completo do sistema.
+
+---
+
+## 🎯 Funcionalidades
+
+✅ Autenticação de login  
+✅ Recuperação de senha com verificação por e-mail  
+✅ Dashboard com KPIs e alertas de sobrecarga  
+✅ Gestão de squads, membros e líderes  
+✅ Controle de projetos por squads  
+✅ Cadastro e visualização de cargos, skills e áreas  
+✅ Caixa de entrada para ações pendentes (feedbacks e aprovações)  
+
+---
+
+## 📁 Estrutura do Projeto
 
 ```
-meu-projeto-frontend
-├── public
-│   ├── index.html        # Página principal do projeto
-│   ├── styles
-│   │   └── style.css     # Estilos CSS para o projeto
-│   └── scripts
-│       └── app.js        # Código JavaScript para interatividade
-├── package.json           # Configuração do npm
-├── server.js              # Configuração do servidor local
-└── README.md              # Documentação do projeto
-```
 
-## Instalação
+POPS-WEB/
+├── public/
+│   ├── app/
+│   │   ├── auth/                 # Login e recuperação de senha
+│   │   └── pages/                # Áreas principais do sistema
+│   └── assets/                   # Estáticos: css, img, i18n, svg
+├── .github/
+├── package.json
+└── README.md
 
-1. Clone o repositório:
-   ```
-   git clone <URL_DO_REPOSITORIO>
-   cd meu-projeto-frontend
-   ```
+````
 
-2. Instale as dependências:
-   ```
-   npm install
-   ```
+---
 
-## Uso
+## 🚀 Instalação e Execução
 
-Para iniciar o servidor local, execute o seguinte comando:
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/POPS-WEB.git
 
-```
-node server.js
-```
+# Acesse o diretório
+cd POPS-WEB
 
-O servidor estará disponível em `http://localhost:3000` (ou outra porta configurada no `server.js`).
+# (Opcional) Instale dependências
+npm install
 
-## Contribuição
+# Inicie um servidor local (ex: com `serve`)
+npx serve public/
+````
 
-Sinta-se à vontade para contribuir com melhorias ou correções. Faça um fork do repositório e envie suas alterações através de um pull request.
+---
+
+## 🧠 Tecnologias e Padrões
+
+* HTML5 / CSS3 / JS Vanilla
+* Arquitetura modular
+* Suporte a i18n
+* Padrão RESTful para consumo de APIs
+* Pronto para migração futura para frameworks modernos
+
+---
+
+## 🧪 Testes
+
+* Unitários com arquivos `.spec.js` no front-end
+* Scripts de testes localizados por módulo
+
+---
+
+## 🤝 Contribuindo
+
+1. Faça um fork 🍴
+2. Crie sua branch: `git checkout -b feat/nome-da-feature`
+3. Commit: `git commit -m 'feat: Minha feature'`
+4. Push: `git push origin feat/nome-da-feature`
+5. Crie um Pull Request ✨
+
+---
+
+## 📄 Licença
+
+Distribuído sob a licença MIT. Veja `LICENSE` para mais.
+
+---
+
+## 💡 Contato
+
+Desenvolvido com 💜 por Equipe People Operations
