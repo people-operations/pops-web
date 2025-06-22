@@ -1,0 +1,114 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: #fff;
+  color: #333;
+}
+
+header {
+  background-color: #fff;
+  padding: 16px 32px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+}
+
+header img {
+  height: 24px;
+  margin-right: 12px;
+}
+
+nav {
+  display: flex;
+  gap: 24px;
+  margin-left: 32px;
+}
+
+nav a {
+  text-decoration: none;
+  color: #888;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 4px;
+}
+
+nav a.active {
+  color: #f0a;
+  border-color: #f0a;
+}
+
+main {
+  padding: 32px;
+}
+
+h1 {
+  color: #e91e63;
+  font-size: 24px;
+}
+
+.subtitle {
+  color: #777;
+  margin-bottom: 32px;
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.card {
+  flex: 1;
+  min-width: 220px;
+  background: #f8f8f8;
+  border-radius: 12px;
+  padding: 24px;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.card .icon {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.card .value {
+  font-size: 28px;
+  font-weight: bold;
+  color: #111;
+}
+
+.tag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 12px;
+  background: #ddd;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+/* Cores específicas de cada card */
+.card.azul {
+  background-color: #c3efff;
+}
+.card.roxo {
+  background-color: #dcc8ff;
+}
+.card.verde {
+  background-color: #cce8d8;
+}
+.card.rosa {
+  background-color: #ffc9ec;
+}

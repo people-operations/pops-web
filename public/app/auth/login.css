@@ -2,12 +2,12 @@
    Variáveis globais e reset
    ========================= */
 :root {
-  --purple: #7c3aed;
-  --blue: #3b82f6;
-  --border-radius: 0.5rem;
-  --gap: 1rem;
-  --transition: 0.3s;
-  font-size: 16px;
+  --purple: #7c3aed; /* Roxo principal */
+  --blue: #3b82f6; /* Azul secundário */
+  --border-radius: 0.5rem; /* Raio padrão dos cantos */
+  --gap: 1rem; /* Espaçamento padrão */
+  --transition: 0.3s; /* Duração de transições */
+  font-size: 16px; /* Tamanho base da fonte */
 }
 
 /* Reset básico para todos os elementos */
@@ -21,8 +21,6 @@
    Estilos gerais
    ========================= */
 body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
   height: 100vh;
 }
 
@@ -127,6 +125,19 @@ form {
   height: 98%;
   max-height: 600px;
   box-shadow: 0 4px 24px rgba(60, 30, 90, 0.08);
+  overflow: hidden; /* garante que o canvas não vaze */
+}
+
+/* Canvas de estrelas animadas */
+#stars-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+  pointer-events: none; /* não interfere nos cliques */
 }
 
 /* Animação do gradiente de fundo */
@@ -166,6 +177,25 @@ form {
 }
 
 /* =========================
+   Botão de mostrar/ocultar senha
+   ========================= */
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  z-index: 2;
+  user-select: none;
+  color: var(--purple); /* cor padrão do olho */
+}
+.toggle-password svg {
+  pointer-events: none;
+}
+
+/* =========================
    Responsividade
    ========================= */
 @media (max-width: 1024px) {
@@ -179,6 +209,9 @@ form {
   }
 }
 
+/* =========================
+   Tema escuro (dark mode)
+   ========================= */
 body.dark .left-panel {
   background: #232336;
   color: #f3f3f3;
@@ -188,4 +221,7 @@ body.dark .right-panel-bg {
   background-size: 300% 300%;
   animation: gradientMove 8s ease-in-out infinite;
   color: #fff;
+}
+body.dark .toggle-password {
+  color: #3b82f6; /* cor do olho no modo dark */
 }

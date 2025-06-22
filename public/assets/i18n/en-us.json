@@ -8,8 +8,8 @@
     "password": "Password:",
     "password_placeholder": "••••••••",
     "submit": "Sign in",
-    "help": "Having trouble signing in?",
-    "contact": "Contact us",
+    "help": "Forgot your password?",
+    "reset": "Reset password",
     "platform": {
       "title": "POPs",
       "description": "Platform for squad allocation, feedback, and continuous monitoring of employee development."

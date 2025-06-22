@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recuperar Senha</title>
+    <!-- Estilos específicos da tela de recuperação -->
+    <link rel="stylesheet" href="recover.css" />
+    <!-- Estilos globais do projeto -->
+    <link rel="stylesheet" href="../../../assets/css/style.css" />
+    <!-- Ícone da aba do navegador -->
+    <link rel="icon" type="image/svg+xml" href="../../../assets/svg/logo.svg" />
+  </head>
+  <body>
+    <div class="recover-bg">
+      <!-- Canvas para animação de estrelas no fundo -->
+      <canvas id="stars-bg"></canvas>
+
+      <!-- Passo 1: Solicitar e-mail para recuperação -->
+      <div class="recover-form" id="step-email">
+        <h2>Recuperar Senha</h2>
+        <label for="recover-email">Digite seu e-mail</label>
+        <input
+          type="email"
+          id="recover-email"
+          placeholder="seu@email.com"
+          required
+        />
+        <button id="send-token-btn" class="btn">Enviar código</button>
+      </div>
+
+      <!-- Passo 2: Digitar código recebido por e-mail -->
+      <div class="recover-form" id="step-token" style="display: none">
+        <h2>Verifique seu e-mail</h2>
+        <p>Enviamos um código de 5 dígitos para seu e-mail.</p>
+        <div class="token-inputs">
+          <!-- Inputs para cada dígito do código -->
+          <input
+            maxlength="1"
+            class="token-digit"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+          />
+          <input
+            maxlength="1"
+            class="token-digit"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+          />
+          <input
+            maxlength="1"
+            class="token-digit"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+          />
+          <input
+            maxlength="1"
+            class="token-digit"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+          />
+          <input
+            maxlength="1"
+            class="token-digit"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+          />
+        </div>
+        <!-- Timer para reenvio do código -->
+        <div id="timer">00:30</div>
+        <!-- Botão para reenviar código (aparece após o timer) -->
+        <button
+          id="resend-token-btn"
+          style="display: none; margin-bottom: 1rem"
+          class="btn"
+        >
+          Reenviar código
+        </button>
+        <!-- Mensagem de erro para código inválido -->
+        <div id="token-error" class="error"></div>
+      </div>
+
+      <!-- Passo 3: Redefinir senha -->
+      <div class="recover-form" id="step-password" style="display: none">
+        <h2>Redefinir Senha</h2>
+        <label for="new-password">Nova senha</label>
+        <div class="password-group" style="position: relative">
+          <input type="password" id="new-password" required />
+          <!-- Botão para mostrar/ocultar senha -->
+          <span
+            class="toggle-password"
+            aria-label="Mostrar/ocultar senha"
+            tabindex="0"
+            data-target="new-password"
+            style="
+              position: absolute;
+              right: 0.75rem;
+              top: 50%;
+              transform: translateY(-50%);
+              cursor: pointer;
+            "
+          >
+            <!-- SVG de olho fechado (inicial) -->
+            <svg
+              class="eye-closed"
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <!-- SVG de olho aberto (escondido inicialmente) -->
+            <svg
+              class="eye-open"
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              fill="none"
+              viewBox="0 0 24 24"
+              style="display: none"
+            >
+              <path
+                fill="currentColor"
+                d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"
+              />
+            </svg>
+          </span>
+        </div>
+        <label for="confirm-password">Confirmar senha</label>
+        <div class="password-group" style="position: relative">
+          <input type="password" id="confirm-password" required />
+          <!-- Botão para mostrar/ocultar senha -->
+          <span
+            class="toggle-password"
+            aria-label="Mostrar/ocultar senha"
+            tabindex="0"
+            data-target="confirm-password"
+          >
+            <!-- SVG de olho fechado (inicial) -->
+            <svg
+              class="eye-closed"
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <!-- SVG de olho aberto (escondido inicialmente) -->
+            <svg
+              class="eye-open"
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              fill="none"
+              viewBox="0 0 24 24"
+              style="display: none"
+            >
+              <path
+                fill="currentColor"
+                d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"
+              />
+            </svg>
+          </span>
+        </div>
+        <button id="save-password-btn" class="btn">Salvar nova senha</button>
+        <!-- Mensagem de erro para senha inválida -->
+        <div id="password-error" class="error"></div>
+      </div>
+
+      <!-- Passo 4: Sucesso na redefinição -->
+      <div class="recover-form" id="step-success" style="display: none">
+        <h2>Senha redefinida!</h2>
+        <button id="go-login-btn" class="btn">Voltar para login</button>
+      </div>
+    </div>
+    <!-- Scripts da tela de recuperação -->
+    <script src="recover.js"></script>
+    <!-- Lógica da recuperação de senha -->
+    <script src="../../../assets/js/app.js"></script>
+    <!-- Tema (dark/light) -->
+  </body>
+</html>

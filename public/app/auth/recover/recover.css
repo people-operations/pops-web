@@ -1,0 +1,217 @@
+/* =========================
+   Variáveis globais
+   ========================= */
+:root {
+  --purple: #7c3aed; /* Roxo principal */
+  --blue: #3b82f6; /* Azul secundário */
+  --border-radius: 0.5rem; /* Raio padrão dos cantos */
+  --gap: 1rem; /* Espaçamento padrão */
+  --transition: 0.3s; /* Duração de transições */
+  font-size: 16px; /* Tamanho base da fonte */
+}
+
+/* =========================
+   Reset e estrutura básica
+   ========================= */
+body,
+html {
+  height: 100%;
+  margin: 0;
+}
+
+/* =========================
+   Fundo animado da tela de recuperação
+   ========================= */
+.recover-bg {
+  background: linear-gradient(120deg, #7512f9, #60a5fa, #7512f9, #60a5fa);
+  background-size: 300% 300%;
+  animation: gradientMove 8s ease-in-out infinite;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Canvas de estrelas animadas */
+#stars-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+  pointer-events: none; /* não interfere nos cliques */
+}
+
+/* Animação do gradiente de fundo */
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* =========================
+   Formulário de recuperação
+   ========================= */
+.recover-form {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 24px rgba(60, 30, 90, 0.08);
+  padding: 2.5rem 2rem;
+  min-width: 320px;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+.recover-form h2 {
+  margin-bottom: 1.5rem;
+  color: #2563eb;
+}
+
+.recover-form label {
+  align-self: flex-start;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.recover-form input[type="email"],
+.recover-form input[type="password"],
+.recover-form input[type="text"] {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1.2rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+}
+
+/* Botão de envio do formulário */
+.recover-form button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+.recover-form button:hover {
+  background: #174ea6;
+}
+
+/* =========================
+   Inputs de token (código de verificação)
+   ========================= */
+.token-inputs {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+.token-digit {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 2rem;
+  text-align: center;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+}
+
+/* Timer para reenvio de código */
+#timer {
+  margin-bottom: 1rem;
+  color: #2563eb;
+  font-weight: bold;
+}
+
+/* =========================
+   Grupo de senha com botão de mostrar/ocultar
+   ========================= */
+.password-group {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1.2rem;
+}
+.password-group input {
+  width: 100%;
+  padding-right: 2.5rem;
+}
+
+/* Botão de mostrar/ocultar senha */
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #2563eb;
+  font-size: 1.2rem;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  margin-top: -8px;
+}
+.toggle-password svg {
+  pointer-events: none;
+}
+
+/* =========================
+   Mensagem de erro
+   ========================= */
+.error {
+  color: #b91c1c;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  min-height: 1.2em;
+  text-align: center;
+}
+
+/* =========================
+   Botão padrão do projeto
+   ========================= */
+.btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--purple);
+  color: #fff;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.btn:hover {
+  background: #6938b9;
+}
+
+/* =========================
+   Tema escuro (dark mode)
+   ========================= */
+body.dark .recover-bg {
+  background: linear-gradient(120deg, #2a0859, #1e3a5c, #2a0859, #1e3a5c);
+  background-size: 300% 300%;
+  animation: gradientMove 8s ease-in-out infinite;
+  color: #fff;
+}
+body.dark .toggle-password {
+  color: #3b82f6; /* cor do olho no modo dark */
+}
+body.dark .recover-form {
+  background: #232336;
+  color: #f3f3f3;
+  box-shadow: 0 4px 24px rgba(30, 30, 60, 0.18);
+}
