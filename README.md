@@ -13,15 +13,6 @@
 
 </div>
 
----
-
-## 📸 Preview
-
-![POPs Preview](https://media.giphy.com/media/your-demo.gif)  
-> 💡 Veja o sistema em ação: [Demo Interativo](https://seu-link.com/demo)
-
----
-
 ## 📘 Sobre o Projeto
 
 **POPs (People Operations)** é uma plataforma de apoio à gestão ágil de times. Permite ao RH e líderes:
@@ -133,7 +124,3 @@ Desenvolvido com 💜 por Equipe People Operations
 📫 [email@empresa.com](mailto:email@empresa.com) | 🌐 [peopleoperations.dev](https://peopleoperations.dev)
 
 ---
-
-## 🥚 Easter Egg
-
-Se chegou até aqui, digite `pop.init()` no console da dashboard e veja a mágica acontecer 😉
