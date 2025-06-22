@@ -2,12 +2,12 @@
    Variáveis globais e reset
    ========================= */
 :root {
-  --purple: #7c3aed;
-  --blue: #3b82f6;
-  --border-radius: 0.5rem;
-  --gap: 1rem;
-  --transition: 0.3s;
-  font-size: 16px;
+  --purple: #7c3aed; /* Roxo principal */
+  --blue: #3b82f6; /* Azul secundário */
+  --border-radius: 0.5rem; /* Raio padrão dos cantos */
+  --gap: 1rem; /* Espaçamento padrão */
+  --transition: 0.3s; /* Duração de transições */
+  font-size: 16px; /* Tamanho base da fonte */
 }
 
 /* Reset básico para todos os elementos */
@@ -21,8 +21,6 @@
    Estilos gerais
    ========================= */
 body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
   height: 100vh;
 }
 
@@ -130,6 +128,7 @@ form {
   overflow: hidden; /* garante que o canvas não vaze */
 }
 
+/* Canvas de estrelas animadas */
 #stars-bg {
   position: absolute;
   top: 0;
@@ -177,6 +176,9 @@ form {
   right: 0px;
 }
 
+/* =========================
+   Botão de mostrar/ocultar senha
+   ========================= */
 .toggle-password {
   position: absolute;
   top: 50%;
@@ -207,6 +209,9 @@ form {
   }
 }
 
+/* =========================
+   Tema escuro (dark mode)
+   ========================= */
 body.dark .left-panel {
   background: #232336;
   color: #f3f3f3;

@@ -1,15 +1,15 @@
-# Compiled output
+# Ignora pastas de build e temporárias
 /dist
 /tmp
 /out-tsc
 /bazel-out
 
-# Node
+# Ignora dependências e arquivos de log do npm/yarn
 /node_modules
 npm-debug.log
 yarn-error.log
 
-# IDEs and editors
+# Ignora arquivos e pastas de IDEs e editores
 .idea/
 .project
 .classpath
@@ -18,16 +18,18 @@ yarn-error.log
 .settings/
 *.sublime-workspace
 
-# Visual Studio Code
+# Ignora configurações do VS Code, exceto arquivos de configuração compartilhados
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Ignora histórico do VS Code
 .history/*
 
-# Miscellaneous
-/.angular/cache
+# Ignora caches e arquivos temporários de frameworks e ferramentas
+/angular/cache
 .sass-cache/
 /connect.lock
 /coverage
@@ -35,6 +37,6 @@ yarn-error.log
 testem.log
 /typings
 
-# System files
+# Ignora arquivos de sistema
 .DS_Store
 Thumbs.db

@@ -1,3 +1,7 @@
+// ----------------------
+// LÓGICA DO FORMULÁRIO DE LOGIN
+// ----------------------
+
 // Adiciona um listener para o evento de envio do formulário de login
 document.getElementById("login-form").addEventListener("submit", (e) => {
   // Impede o comportamento padrão do formulário (recarregar a página)
@@ -20,23 +24,29 @@ document.getElementById("login-form").addEventListener("submit", (e) => {
 
   // Exibe mensagem de sucesso (apenas para demonstração)
   alert("Login realizado com sucesso!");
+  // Redireciona para o dashboard após login fictício
   window.location.href = "../pages/dashboard/dashboard.html";
 });
 
-// Alternar visibilidade da senha
+// ----------------------
+// ALTERNÂNCIA DE VISIBILIDADE DA SENHA
+// ----------------------
+
+// Seletores dos elementos relacionados à senha
 const passwordInput = document.getElementById("password");
 const togglePassword = document.getElementById("toggle-password");
 const eyeClosed = document.getElementById("eye-closed");
 const eyeOpen = document.getElementById("eye-open");
 
 if (togglePassword) {
+  // Clique no ícone alterna entre mostrar e ocultar senha
   togglePassword.addEventListener("click", () => {
     const isPassword = passwordInput.type === "password";
     passwordInput.type = isPassword ? "text" : "password";
     eyeClosed.style.display = isPassword ? "none" : "inline";
     eyeOpen.style.display = isPassword ? "inline" : "none";
   });
-  // Acessibilidade: permite usar Enter/Espaço
+  // Acessibilidade: permite alternar com Enter ou Espaço
   togglePassword.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       togglePassword.click();
@@ -45,14 +55,20 @@ if (togglePassword) {
   });
 }
 
-// Estrelas animadas no fundo do painel direito
+// ----------------------
+// ANIMAÇÃO DE ESTRELAS NO FUNDO DO PAINEL DIREITO
+// ----------------------
+
+/**
+ * Inicia a animação de estrelas no canvas de fundo
+ */
 function startStarsBg() {
   const canvas = document.getElementById("stars-bg");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
 
+  // Ajusta o tamanho do canvas conforme o painel
   function resize() {
-    // Ajusta para o tamanho do painel
     const parent = canvas.parentElement;
     canvas.width = parent.offsetWidth;
     canvas.height = parent.offsetHeight;
@@ -67,12 +83,13 @@ function startStarsBg() {
     stars.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      r: Math.random() * 1.2 + 0.5,
-      speed: Math.random() * 0.3 + 0.1,
-      alpha: Math.random() * 0.5 + 0.5,
+      r: Math.random() * 1.2 + 0.5, // Raio da estrela
+      speed: Math.random() * 0.3 + 0.1, // Velocidade de subida
+      alpha: Math.random() * 0.5 + 0.5, // Transparência
     });
   }
 
+  // Função de animação das estrelas
   function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (const star of stars) {
@@ -88,6 +105,7 @@ function startStarsBg() {
 
       // Movimento suave para cima
       star.y -= star.speed;
+      // Se a estrela sair do topo, volta para baixo em posição aleatória
       if (star.y < 0) {
         star.y = canvas.height + star.r;
         star.x = Math.random() * canvas.width;
@@ -98,4 +116,5 @@ function startStarsBg() {
   animate();
 }
 
+// Inicia a animação das estrelas ao carregar a página
 window.addEventListener("DOMContentLoaded", startStarsBg);
