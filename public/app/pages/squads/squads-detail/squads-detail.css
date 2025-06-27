@@ -1,0 +1,161 @@
+/* Container */
+.container {
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+}
+
+.summary {
+  flex-shrink: 0;
+  width: 280px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.summary .back-btn {
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  font-size: 0.875rem;
+  margin-bottom: 12px;
+}
+
+.summary h2 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+}
+
+.summary .projects-count {
+  display: inline-block;
+  background: #e0f2ff;
+  color: #0366d6;
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  margin-bottom: 12px;
+}
+
+.summary .description {
+  font-size: 0.875rem;
+  color: #444;
+  margin-bottom: 12px;
+}
+
+.summary .info {
+  font-size: 0.875rem;
+  color: #555;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.summary .skills .skill {
+  display: inline-block;
+  background: #eef6ff;
+  border-radius: 12px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+/* Main content */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  /* remova este margin-left:
+     margin-left: calc(280px + 24px);
+  */
+}
+.stats-container {
+  display: flex;
+  gap: 16px;
+}
+.card {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+.card h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #555;
+}
+.card .value {
+  font-size: 1.5rem;
+  margin: 8px 0;
+  font-weight: bold;
+}
+.card small {
+  color: #888;
+}
+/* Financial overview */
+.financial-overview {
+  display: flex;
+  gap: 16px;
+}
+.financial-overview .card {
+  flex: 1;
+}
+/* Team members */
+.team-members {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+.team-members h4 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+.members-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+.member-card {
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 0.875rem;
+}
+.member-card .title {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.member-card .role {
+  background: #e0eaff;
+  border-radius: 12px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  margin-right: 4px;
+}
+/* Projects list */
+.projects-list {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+.projects-list header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.projects-list .project-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-top: 1px solid #f0f0f0;
+}
+.projects-list .project-item:first-child {
+  border-top: none;
+}
