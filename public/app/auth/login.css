@@ -22,6 +22,12 @@
    ========================= */
 body {
   height: 100vh;
+  background-color: #fff !important;
+}
+
+body.dark {
+  background: #181824 !important;
+  color: #f3f3f3;
 }
 
 /* =========================

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>POPs Squads</title>
+    <link rel="stylesheet" href="squads-form.css" />
+
+    <link rel="stylesheet" href="../../../../assets/css/style.css" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../../../../assets/svg/logo.svg"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <header>
+      <img
+        src="../../../../assets/svg/logo.svg"
+        alt="Logo POPs"
+        class="logo-header"
+        style="height: 32px; vertical-align: middle; margin-right: 8px"
+      />
+      <nav>
+        <a href="../../dashboard/dashboard.html">
+          <img
+            src="../../../../assets/svg/graphic.svg"
+            alt="Dashboard "
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Dashboard</a
+        >
+        <a class="active" href="../squads.html">
+          <img
+            src="../../../../assets/svg/squads.svg"
+            alt="Squads"
+            width="20"
+            height="20"
+            class="logo-header"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Squads
+        </a>
+        <a href="../../projects/projects.html">
+          <img
+            src="../../../../assets/svg/projects.svg"
+            alt="Projetos"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Projetos
+        </a>
+        <a href="../../collaborators/collaborators.html">
+          <img
+            src="../../../../assets/svg/colaborator.svg"
+            alt="Colaboradores"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Colaboradores
+        </a>
+        <a href="../../jobs-skills/jobs-skills.html">
+          <img
+            src="../../../../assets/svg/engines.svg"
+            alt="Cargos e Skills"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Cargos e Skills
+        </a>
+        <a href="../../area/area.html">
+          <img
+            src="../../../../assets/svg/area.svg"
+            alt="Área"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Área
+        </a>
+      </nav>
+      <div class="profile-menu">
+        <button
+          id="theme-toggle"
+          class="theme-toggle-btn"
+          title="Alternar tema"
+        >
+          <span id="theme-icon">🌞</span>
+        </button>
+        <div class="avatar">K</div>
+        <span class="chevron" aria-hidden="true">
+          <svg
+            width="20"
+            height="10"
+            viewBox="0 0 21 9.5"
+            fill="none"
+            stroke="#555"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="2 2 10.5 7.5 19 2" />
+          </svg>
+        </span>
+        <div id="dropdown" class="dropdown hidden">
+          <a
+            href="../../collaborators/collaborators-detail/collaborators-detail.html"
+            >Perfil</a
+          >
+          <a href="../../inbox/inbox.html">Caixa de entrada</a>
+          <a href="../../auth/login.html">Sair</a>
+        </div>
+      </div>
+    </header>
+    <!-- Formulário de cadastro -->
+    <main class="create-squad-page">
+      <a href="../squads.html" class="back-link"
+        ><img
+          src="../../../../assets/svg/left-arrow.svg"
+          alt="Voltar"
+          style="
+            vertical-align: middle;
+            margin-right: 4px;
+            width: 30px;
+            height: 30px;
+          "
+        />
+        Voltar para squads</a
+      >
+      <div class="form-container">
+        <h2>Criar um novo squad</h2>
+
+        <form class="form-squad">
+          <label>Nome da equipe *</label>
+          <input type="text" placeholder="e.g., Mobile Desenvolvimento" />
+
+          <div class="row">
+            <div class="col">
+              <label>Projeto *</label>
+              <select>
+                <option>Selecione um projeto</option>
+              </select>
+            </div>
+            <div class="col">
+              <label>Área *</label>
+              <select>
+                <option>Selecione uma área</option>
+              </select>
+            </div>
+          </div>
+
+          <label>Descrição</label>
+          <textarea
+            placeholder="Descreva o que o squad fará e suas responsabilidades..."
+          ></textarea>
+
+          <label>Aprovador *</label>
+          <select>
+            <option>Selecione a pessoa que vai revisar</option>
+          </select>
+
+          <div class="team-section">
+            <h3>Equipe</h3>
+            <p>
+              Adicione pessoas
+              <img
+                src="../../../../assets/svg/add.svg"
+                alt="Adicione pessoas"
+                style="
+                  vertical-align: middle;
+                  margin-right: 4px;
+                  margin-bottom: 4px;
+                  width: 20px;
+                  height: 20px;
+                "
+              />
+            </p>
+          </div>
+
+          <div class="team-list"></div>
+
+          <div class="form-actions">
+            <button class="cancel btn">Cancelar</button>
+            <button type="submit" class="save btn">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </main>
+    <!-- Overlay -->
+    <div class="modal-overlay hidden" id="modalOverlay"></div>
+
+    <!-- Modal de adicionar colaborador -->
+    <div class="modal hidden" id="addMemberModal">
+      <div class="modal-header">
+        <h2>Adicionar colaborador na equipe</h2>
+        <button class="close-btn" id="closeModal">×</button>
+      </div>
+      <form class="form-modal" id="addMemberForm">
+        <label for="memberName">Nome</label>
+        <select id="memberName">
+          <option>Nome da pessoa</option>
+          <!-- outras opções -->
+        </select>
+
+        <label for="allocatedHours">Horas alocadas</label>
+        <select id="allocatedHours">
+          <option>00</option>
+          <!-- 01–24 -->
+        </select>
+
+        <label for="memberRoles">Função/funções</label>
+        <select id="memberRoles">
+          <option>Selecione aqui</option>
+          <option>Product Owner</option>
+          <option>Techlead</option>
+          <option>QA</option>
+          <option>UX Designer</option>
+          <option>Desenvolvedor Sênior</option>
+          <option>Tester</option>
+          <option>Analista</option>
+        </select>
+
+        <div class="tags-container" id="selectedRoles"></div>
+
+        <div class="form-actions">
+          <button type="button" class="btn cancel" id="cancelAdd">
+            Cancelar
+          </button>
+          <button type="submit" class="btn save-modal">Adicionar</button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>
+<script src="../../../../assets/js/app.js"></script>
+<script src="squads-form.js"></script>

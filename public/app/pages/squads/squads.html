@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>POPs Squads</title>
+    <link rel="stylesheet" href="squads.css" />
+    <link rel="stylesheet" href="../../../assets/css/style.css" />
+    <link rel="icon" type="image/svg+xml" href="../../../assets/svg/logo.svg" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <img
+        src="../../../assets/svg/logo.svg"
+        alt="Logo POPs"
+        class="logo-header"
+        style="height: 32px; vertical-align: middle; margin-right: 8px"
+      />
+      <nav>
+        <a href="../dashboard/dashboard.html">
+          <img
+            src="../../../assets/svg/graphic.svg"
+            alt="Dashboard "
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Dashboard</a
+        >
+        <a class="active" href="squads.html">
+          <img
+            src="../../../assets/svg/squads.svg"
+            alt="Squads"
+            width="20"
+            height="20"
+            class="logo-header"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Squads
+        </a>
+        <a href="../projects/projects.html">
+          <img
+            src="../../../assets/svg/projects.svg"
+            alt="Projetos"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Projetos
+        </a>
+        <a href="../collaborators/collaborators.html">
+          <img
+            src="../../../assets/svg/colaborator.svg"
+            alt="Colaboradores"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Colaboradores
+        </a>
+        <a href="../jobs-skills/jobs-skills.html">
+          <img
+            src="../../../assets/svg/engines.svg"
+            alt="Cargos e Skills"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Cargos e Skills
+        </a>
+        <a href="../area/area.html">
+          <img
+            src="../../../assets/svg/area.svg"
+            alt="Área"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Área
+        </a>
+      </nav>
+      <div class="profile-menu">
+        <button
+          id="theme-toggle"
+          class="theme-toggle-btn"
+          title="Alternar tema"
+        >
+          <span id="theme-icon">🌞</span>
+        </button>
+        <div class="avatar">K</div>
+        <span class="chevron" aria-hidden="true">
+          <svg
+            width="20"
+            height="10"
+            viewBox="0 0 21 9.5"
+            fill="none"
+            stroke="#555"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="2 2 10.5 7.5 19 2" />
+          </svg>
+        </span>
+        <div id="dropdown" class="dropdown hidden">
+          <a
+            href="../collaborators/collaborators-detail/collaborators-detail.html"
+            >Perfil</a
+          >
+          <a href="../inbox/inbox.html">Caixa de entrada</a>
+          <a href="../../auth/login.html">Sair</a>
+        </div>
+      </div>
+    </header>
+    <main class="squads-container">
+      <div class="squads-header">
+        <div>
+          <h2 class="gradient-title">Squads</h2>
+          <p class="subtitle">
+            Gerencie e monitore suas equipes e a alocação de carga de trabalho.
+          </p>
+        </div>
+        <button
+          class="create-squad btn"
+          onclick="window.location.href='squads-form/squads-form.html'"
+        >
+          + Criar squad
+        </button>
+      </div>
+
+      <div id="squad-list" class="squad-cards"></div>
+    </main>
+
+    <script src="squads.js"></script>
+    <script src="../../../assets/js/app.js"></script>
+  </body>
+</html>
