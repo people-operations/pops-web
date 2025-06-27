@@ -4,71 +4,41 @@
 
 body {
   margin: 0;
-  background-color: #fff;
-  color: #333;
+  background-color: #f5f5f5;
 }
-
-header {
-  background-color: #fff;
-  padding: 16px 32px;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  align-items: center;
-}
-
-header img {
-  height: 24px;
-  margin-right: 12px;
-}
-
-nav {
-  display: flex;
-  gap: 24px;
-  margin-left: 32px;
-}
-
-nav a {
-  text-decoration: none;
-  color: #888;
-  font-weight: 500;
-  border-bottom: 2px solid transparent;
-  padding-bottom: 4px;
-}
-
-nav a.active {
-  color: #f0a;
-  border-color: #f0a;
-}
-
-main {
+card main {
   padding: 32px;
 }
 
-h1 {
-  color: #e91e63;
-  font-size: 24px;
+header {
+  height: 88px;
 }
 
-.subtitle {
-  color: #777;
-  margin-bottom: 32px;
+.p-32 {
+  padding: 32px;
 }
 
 .cards {
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
+  margin-bottom: 24px;
 }
 
 .card {
   flex: 1;
   min-width: 220px;
+  height: 180px;
   background: #f8f8f8;
   border-radius: 12px;
   padding: 24px;
-  color: #333;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   position: relative;
+}
+
+.card-content {
+  margin-top: -6px;
+  padding: 0 !important;
 }
 
 .card .icon {
@@ -78,14 +48,26 @@ h1 {
 
 .card h2 {
   margin: 0;
-  font-size: 14px;
-  color: #666;
+  font-size: 16px; /* era 14px */
+  font-weight: 500; /* adicionado */
 }
 
 .card .value {
-  font-size: 28px;
-  font-weight: bold;
+  font-size: 20px; /* era 28px */
+  font-weight: 700; /* já estava bold, reforça */
   color: #111;
+  margin-top: 4px;
+}
+
+.card .subtitle {
+  font-size: 12px; /* era padrão (herdado) */
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+nav a {
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .tag {
@@ -101,14 +83,328 @@ h1 {
 
 /* Cores específicas de cada card */
 .card.azul {
-  background-color: #c3efff;
+  background-color: #40ddfe61;
 }
 .card.roxo {
-  background-color: #dcc8ff;
-}
-.card.verde {
-  background-color: #cce8d8;
+  background-color: #7512f961;
 }
 .card.rosa {
-  background-color: #ffc9ec;
+  background-color: #fa12e261;
+}
+.card.vermelho {
+  background-color: #d32f2e61;
+}
+.card.verde {
+  background-color: #2f7d3261;
+}
+.tag.vermelho,
+.tag.vermelho-escuro {
+  background-color: #d32f2e;
+  color: #fff;
+}
+.tag.verde,
+.tag.verde-escuro {
+  background-color: #2f7d32;
+  color: #fff;
+}
+
+.content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.chart-card,
+.alert-card {
+  flex: 1;
+  min-width: 300px;
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.chart-card img {
+  width: 100%;
+  margin: 16px 0;
+}
+
+.insight {
+  font-size: 14px;
+}
+
+.alert-card ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.alert-card li {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.alert-card .danger {
+  color: #e53935;
+  font-weight: bold;
+}
+
+.alert-card .action {
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.boxes {
+  display: flex;
+  gap: 24px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.box {
+  flex: 1;
+  min-width: 300px;
+  border-radius: 12px;
+  padding: 20px;
+  color: #111;
+}
+
+.box.azul {
+  background-color: #e6f2ff;
+}
+
+.box.verde {
+  background-color: #e4f7f0;
+}
+
+.box span.pink {
+  color: #fa12e2;
+  font-weight: bold;
+}
+
+.dropdown {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  z-index: 999;
+}
+
+.dropdown a {
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #111;
+  font-size: 14px;
+}
+
+.dropdown a:hover {
+  background-color: #f3f3f3;
+}
+
+.hidden {
+  display: none;
+}
+.chevron {
+  cursor: pointer;
+}
+
+.icon img {
+  width: 46px;
+  height: 46px;
+}
+
+.chart-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #111;
+}
+
+.insight {
+  font-size: 16px;
+  font-weight: 400;
+  margin-top: 12px;
+}
+
+.insight strong {
+  font-style: italic;
+  font-weight: 700;
+  color: #fa12e2;
+}
+/* ALERT-CARD (layout conforme o primeiro anexo) */
+.alert-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.alert-list {
+  flex: 1 1 auto; /* Faz a lista crescer e empurra a ação para baixo */
+}
+
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.alert-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+.alert-count {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Lista de squads */
+.alert-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* espaçamento entre cards */
+}
+.alert-list li {
+  padding: 0; /* o próprio .alert-squad já tem padding */
+  border-bottom: none; /* remove linha divisória */
+}
+
+/* Cada cartão de squad */
+.alert-squad {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 44px;
+  /* borda grosa à esquerda */
+  border-left: 6px solid #d32f2f;
+
+  /* gradiente do vermelho claro para transparente */
+  background-color: #d32e2e25;
+
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.alert-info {
+  display: flex;
+  flex-direction: column;
+}
+/* Bloco de informações (nome + área) */
+.alert-info strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+.alert-info span {
+  font-size: 10px;
+  font-weight: 400;
+}
+
+/* Bloco de percentual */
+.alert-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+.alert-percentage {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #d32f2e;
+}
+.alert-right span {
+  font-size: 10px;
+  font-weight: 400;
+}
+
+/* Ação necessária abaixo da lista */
+.alert-action {
+  margin-top: 20px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #111;
+}
+.pink-action {
+  color: #fa12e2;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.sub-card-azul {
+  background-color: #40ddfe61;
+}
+
+/* Versão dark dos cards principais do dashboard */
+body.dark .chart-card,
+body.dark .alert-card {
+  background: #232336;
+  color: #f3f3f3;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+body.dark .chart-card h3,
+body.dark .alert-card h3,
+body.dark .alert-header h3 {
+  color: #f3f3f3;
+}
+
+body.dark .insight,
+body.dark .alert-action {
+  color: #f3f3f3;
+}
+
+body.dark .alert-card ul,
+body.dark .alert-list {
+  color: #f3f3f3;
+}
+
+body.dark .alert-squad {
+  background-color: #d32e2e18; /* vermelho claro com transparência para dark */
+  border-left: 6px solid #fa12e2;
+}
+
+body.dark .alert-info strong,
+body.dark .alert-info span,
+body.dark .alert-right span,
+body.dark .alert-percentage {
+  color: #f3f3f3;
+}
+
+body.dark .alert-percentage {
+  color: #fa12e2;
+}
+
+body.dark .alert-card .danger {
+  color: #fa12e2;
+}
+
+body.dark .alert-card li {
+  border-bottom: 1px solid #333;
+}
+
+body.dark .box,
+body.dark .sub-card-azul {
+  background: #232336;
+  color: #f3f3f3;
+}
+
+body.dark .box span.pink,
+body.dark .pink-action {
+  color: #fa12e2;
+}
+
+body.dark .card .value {
+  color: #f3f3f3;
 }

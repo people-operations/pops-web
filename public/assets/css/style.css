@@ -9,9 +9,18 @@
 
 body {
   font-family: "Poppins", sans-serif;
-  color: #333;
-  background-color: #fff;
+  background-color: #f5f5f5;
   line-height: 1.6;
+}
+
+nav a {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+header {
+  height: 88px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08); /* ← sombra suave abaixo */
 }
 
 /* =========================
@@ -110,6 +119,93 @@ body {
   margin-bottom: 15px;
 }
 
+header {
+  background-color: #f5f5f5;
+  padding: 16px 32px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+}
+
+header img {
+  height: 24px;
+  margin-right: 12px;
+}
+
+nav {
+  display: flex;
+  gap: 24px;
+  margin-left: 32px;
+}
+
+nav a {
+  text-decoration: none;
+  color: #000000;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 4px;
+  display: flex;
+}
+
+nav a.active {
+  color: #fa12e2;
+  border-color: #fa12e2;
+}
+
+.profile-menu {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  position: relative;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  background-color: #40ddfe;
+  color: black;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  position: relative;
+}
+
+.dropdown {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  z-index: 999;
+}
+
+.dropdown a {
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #111;
+  font-size: 14px;
+}
+
+.dropdown a:hover {
+  background-color: #f3f3f3;
+}
+
+.hidden {
+  display: none;
+}
+.chevron {
+  cursor: pointer;
+}
+
 /* Breadcrumbs */
 .breadcrumb,
 .breadcrumbs {
@@ -160,7 +256,6 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: "Poppins", sans-serif;
   font-weight: bold;
   letter-spacing: 1px;
   z-index: 1;
@@ -470,7 +565,6 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   padding: 20px;
-  animation: fadeIn 0.3s ease-out;
 }
 
 .modal.small {
@@ -489,8 +583,8 @@ body {
 }
 
 .modal-header {
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 18px;
+  font-weight: 600;
   margin-bottom: 10px;
   color: #333;
 }
@@ -630,7 +724,6 @@ body {
 }
 
 .intro-section h1 {
-  font-family: "Poppins", sans-serif;
   font-size: 48px;
   color: #3498db;
   margin-bottom: 20px;
@@ -638,7 +731,6 @@ body {
 }
 
 .intro-section p {
-  font-family: "Roboto", sans-serif;
   font-size: 18px;
   margin-bottom: 40px;
 }
@@ -649,11 +741,11 @@ body {
 }
 
 .animated-title {
-  font-family: "Poppins", sans-serif;
   font-size: 48px;
   background: linear-gradient(90deg, #ffffff, #8b7efd);
   background-size: 300%;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: gradient-animation 10s infinite, fade-in 1s ease-in-out;
   margin-bottom: 20px;
@@ -683,7 +775,6 @@ body {
 }
 
 .animated-text {
-  font-family: "Roboto", sans-serif;
   font-size: 18px;
   color: #fff;
   opacity: 0;
@@ -711,7 +802,6 @@ body {
   border-radius: 5px;
   margin-top: 20px;
   width: 80%;
-  font-family: "Courier New", Courier, monospace;
   position: relative;
 }
 
@@ -783,6 +873,12 @@ body {
 
 .card-content {
   padding: 15px;
+}
+
+.subtitle {
+  margin-bottom: 32px;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .card-title {
@@ -1068,19 +1164,6 @@ body {
   transition: all 0.3s ease-in-out;
   position: relative;
   cursor: pointer;
-}
-
-.alert-success {
-  background-color: #2ecc71;
-}
-.alert-error {
-  background-color: #e74c3c;
-}
-.alert-warning {
-  background-color: #f39c12;
-}
-.alert-info {
-  background-color: #3498db;
 }
 
 .alert:hover {
@@ -1592,4 +1675,77 @@ body.dark .help-text a {
 body.dark .form-group.floating label {
   background: #232336;
   color: #fff;
+}
+
+nav a.active img {
+  filter: invert(18%) sepia(97%) saturate(7496%) hue-rotate(289deg)
+    brightness(98%) contrast(106%);
+}
+
+body.dark header {
+  background-color: #232336;
+  border-bottom: 1px solid #333;
+}
+
+body.dark nav a {
+  color: #f3f3f3;
+}
+
+body.dark nav a.active {
+  color: #fa12e2;
+  border-color: #fa12e2;
+}
+
+body.dark .dropdown {
+  background-color: #232336;
+  color: #f3f3f3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+body.dark .dropdown a {
+  color: #f3f3f3;
+}
+
+body.dark .dropdown a:hover {
+  background-color: #29294a;
+  color: #fa12e2;
+}
+
+body.dark .avatar {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+/* Ajuste de cor dos ícones SVG nos cards e menu no modo dark */
+body.dark nav a img,
+body.dark .profile-menu img,
+body.dark .logo-header {
+  filter: invert(1) hue-rotate(180deg) brightness(1.2) contrast(1.1);
+}
+
+/* Ajuste de cor dos ícones SVG nos cards de squads no modo dark */
+body.dark .squad-card img[src$="squad-area.svg"],
+body.dark .squad-card img[src$="members.svg"] {
+  filter: invert(1) hue-rotate(180deg) brightness(1.2) contrast(1.1);
+}
+
+.theme-toggle-btn {
+  margin-right: 8px;
+  margin-top: 8px;
+}
+
+.gradient-title {
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(
+    to right,
+    #fa12e2,
+    #fed700,
+    #fed700,
+    #fed700,
+    #fed700
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

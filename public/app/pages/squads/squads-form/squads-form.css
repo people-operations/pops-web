@@ -1,0 +1,424 @@
+.create-squad-page {
+  padding: 32px;
+  margin: auto;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  text-decoration: none;
+  font-size: 14px;
+  color: black;
+  font-weight: 400;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.form-squad label {
+  font-weight: 400;
+  display: block;
+  margin-top: 16px;
+}
+
+.form-squad input,
+.form-squad select,
+.form-squad textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-top: 4px;
+  font-size: 14px;
+  background: transparent;
+}
+
+.form-squad textarea::placeholder {
+  font-family: "Poppins", sans-serif;
+}
+
+.form-container {
+  max-width: none !important;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+}
+
+.col {
+  flex: 1;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.team-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  justify-items: start;
+  margin-top: 16px;
+}
+
+@media (max-width: 1100px) {
+  .team-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .team-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.member-card {
+  width: 360px;
+  min-width: 30vw;
+  max-width: 30vw;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: fit-content;
+  height: 189px;
+  background: white;
+}
+
+.member-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.member-actions button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.member-actions button:hover {
+  box-shadow: 0 2px 12px 0 rgba(80, 80, 80, 0.12);
+  transform: scale(1.08);
+}
+
+.tags span {
+  background: #007bff;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-right: 6px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  justify-content: space-between;
+  margin-top: 24px;
+  gap: 12px;
+}
+
+.cancel {
+  background: none;
+  border: #7d1bff 2px solid !important;
+  color: #7d1bff;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 40px;
+  width: 123px;
+  font-size: 20px !important;
+  font-weight: 500 !important;
+  padding: 0 !important;
+  letter-spacing: 0 !important;
+  font-family: "Poppins", sans-serif;
+}
+
+.cancel:hover {
+  color: #fff !important;
+}
+
+.save {
+  background-color: #7d1bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 40px;
+  width: 95px;
+  font-size: 20px !important;
+  font-weight: 500 !important;
+  padding: 0 !important;
+  letter-spacing: 0 !important;
+  font-family: "Poppins", sans-serif;
+}
+
+.save-modal {
+  background-color: #7d1bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 40px;
+  width: 127;
+  font-size: 20px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  font-family: "Poppins", sans-serif;
+}
+
+.member-header strong {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.custom-p {
+  font-size: 14px !important;
+  font-weight: 400;
+  margin-bottom: 4px;
+}
+
+.custom-margin {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.team-section {
+  display: flex;
+  justify-content: space-between;
+}
+
+.team-section p {
+  margin-top: 24px;
+  align-self: center;
+  cursor: pointer;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.team-section p:hover {
+  color: #7d1bff;
+  text-decoration: underline;
+}
+
+.team-section p img {
+  transition: filter 0.2s;
+}
+
+.team-section p:hover img {
+  filter: invert(27%) sepia(87%) saturate(7476%) hue-rotate(259deg)
+    brightness(90%) contrast(101%) !important;
+}
+
+body.dark .team-section p:hover,
+body.dark .team-section p:hover img {
+  color: #7d1bff;
+  /* Para texto */
+  filter: invert(27%) sepia(87%) saturate(7476%) hue-rotate(259deg)
+    brightness(90%) contrast(101%) !important;
+  /* Para imagem */
+}
+
+body.dark .team-section p img {
+  transition: filter 0.2s;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Overlay escuro */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+/* Container do modal */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  width: 782px !important;
+  max-width: 90%;
+  min-height: 400px !important;
+  height: fit-content !important;
+  z-index: 101;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header com título e botão de fechar */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* Formulário interno */
+.modal label {
+  display: block;
+  margin-top: 18px;
+  font-weight: 400;
+}
+.modal select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: transparent;
+}
+
+/* Botões de ação */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.form-modal {
+  height: 88%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.form-modal .form-actions {
+  margin-top: auto;
+}
+
+/* pílulas de role */
+#selectedRoles span {
+  display: inline-flex;
+  align-items: center;
+  background: #007bff;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin: 4px 4px 0 0;
+}
+/* botão “×” */
+#selectedRoles span button {
+  background: transparent;
+  border: none;
+  color: white;
+  font-weight: bold;
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+.tags-container {
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
+
+body.dark .modal {
+  background: #23232b;
+  color: #f5f5f5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+body.dark .modal-header h2 {
+  color: #f5f5f5;
+}
+body.dark .close-btn {
+  color: #f5f5f5;
+}
+body.dark .modal label,
+body.dark .modal select {
+  color: #f5f5f5;
+  background: #23232b;
+  border-color: #444;
+}
+body.dark .form-squad input,
+body.dark .form-squad select,
+body.dark .form-squad textarea {
+  background: #23232b;
+  color: #f5f5f5;
+  border-color: #444;
+}
+body.dark .form-squad textarea::placeholder {
+  color: #aaa;
+}
+body.dark .member-card {
+  background: #23232b;
+  color: #f5f5f5;
+  border-color: #444;
+}
+body.dark .tags span,
+body.dark #selectedRoles span {
+  background: #7d1bff;
+  color: #fff;
+}
+body.dark .form-actions .cancel {
+  color: #7d1bff;
+  border-color: #7d1bff !important;
+  background: none;
+}
+body.dark .form-actions .save,
+body.dark .save-modal {
+  background-color: #7d1bff;
+  color: #fff;
+}
+body.dark .form-container {
+  background: #181820;
+  color: #f5f5f5;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+}
+body.dark .back-link {
+  color: #f5f5f5;
+}
+body.dark .back-link img,
+body.dark .team-section p img {
+  filter: invert(1) brightness(1.2) contrast(1.1) !important;
+}
+body.dark .member-actions img {
+  filter: none !important;
+}
+body.dark .form-actions .cancel:hover {
+  color: #fff !important;
+  background: #7d1bff22;
+}

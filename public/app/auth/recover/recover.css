@@ -25,7 +25,6 @@ html {
 .recover-bg {
   background: linear-gradient(120deg, #7512f9, #60a5fa, #7512f9, #60a5fa);
   background-size: 300% 300%;
-  animation: gradientMove 8s ease-in-out infinite;
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -204,7 +203,6 @@ html {
 body.dark .recover-bg {
   background: linear-gradient(120deg, #2a0859, #1e3a5c, #2a0859, #1e3a5c);
   background-size: 300% 300%;
-  animation: gradientMove 8s ease-in-out infinite;
   color: #fff;
 }
 body.dark .toggle-password {
