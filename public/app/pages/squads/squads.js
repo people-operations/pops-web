@@ -113,7 +113,7 @@ function renderSquads() {
         </div>
         <div class="squad-footer">
           <p class="by-month"><strong>Por mês:</strong> ${squad.preco}</p>
-          <button class="details-btn">
+          <button class="details-btn" onclick="window.location.href='squads-detail/squads-detail.html'">
         Mais detalhes</button>
         </div>
       </div>

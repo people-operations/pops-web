@@ -2,39 +2,226 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>POPs Squads</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>POPs Squads Detail</title>
     <link rel="stylesheet" href="squads-detail.css" />
     <link rel="stylesheet" href="../../../../assets/css/style.css" />
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="../../../../assets/svg/logo.svg"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
     <header>
-      
+      <img
+        src="../../../../assets/svg/logo.svg"
+        alt="Logo POPs"
+        class="logo-header"
+        style="height: 32px; vertical-align: middle; margin-right: 8px"
+      />
       <nav>
-        <a href="../../dashboard/dashboard.html">Dashboard</a>
-        <a class="active" href="../squads.html">Squads</a>
-        <a href="../../projects.html">Projetos</a>
-        <a href="../../collaborators/collaborators.html">Colaboradores</a>
-        <a href="../../jobs-skills/jobs-skills.html">Cargos e Skills</a>
-        <a href="../../area/area.html">Área</a>
+        <a href="../../dashboard/dashboard.html">
+          <img
+            src="../../../../assets/svg/graphic.svg"
+            alt="Dashboard "
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Dashboard</a
+        >
+        <a class="active" href="../squads.html">
+          <img
+            src="../../../../assets/svg/squads.svg"
+            alt="Squads"
+            width="20"
+            height="20"
+            class="logo-header"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Squads
+        </a>
+        <a href="../../projects/projects.html">
+          <img
+            src="../../../../assets/svg/projects.svg"
+            alt="Projetos"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Projetos
+        </a>
+        <a href="../../collaborators/collaborators.html">
+          <img
+            src="../../../../assets/svg/colaborator.svg"
+            alt="Colaboradores"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Colaboradores
+        </a>
+        <a href="../../jobs-skills/jobs-skills.html">
+          <img
+            src="../../../../assets/svg/engines.svg"
+            alt="Cargos e Skills"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Cargos e Skills
+        </a>
+        <a href="../../area/area.html">
+          <img
+            src="../../../../assets/svg/area.svg"
+            alt="Área"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          Área
+        </a>
       </nav>
       <div class="profile-menu">
+        <button
+          id="theme-toggle"
+          class="theme-toggle-btn"
+          title="Alternar tema"
+        >
+          <span id="theme-icon">🌞</span>
+        </button>
         <div class="avatar">K</div>
-        <span class="chevron">&#x25BC;</span>
+        <span class="chevron" aria-hidden="true">
+          <svg
+            width="20"
+            height="10"
+            viewBox="0 0 21 9.5"
+            fill="none"
+            stroke="#555"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="2 2 10.5 7.5 19 2" />
+          </svg>
+        </span>
         <div id="dropdown" class="dropdown hidden">
           <a
             href="../../collaborators/collaborators-detail/collaborators-detail.html"
             >Perfil</a
           >
-          <a href="../inbox/inbox.html">Caixa de entrada</a>
-          <a href="../../../auth/login.html">Sair</a>
+          <a href="../../inbox/inbox.html">Caixa de entrada</a>
+          <a href="../../auth/login.html">Sair</a>
         </div>
       </div>
     </header>
+    <main class="container">
+      <!-- Sidebar -->
+      <!-- Sidebar summary -->
+      <div class="summary">
+        <button class="back-btn">← Voltar para squads</button>
+        <h2>Backend Team Alpha</h2>
+        <div class="projects-count">10 projetos ativos</div>
+        <p class="description">
+          Equipe principal de desenvolvimento backend com foco em arquitetura de
+          APIs e microsserviços
+        </p>
+        <div class="info">
+          <span><strong>Área:</strong> Desenvolvimento</span>
+          <span><strong>Membros:</strong> 5</span>
+        </div>
+        <div class="skills">
+          <span class="skill">Python</span>
+          <span class="skill">Node.js</span>
+          <span class="skill">Kotlin</span>
+        </div>
+      </div>
+      <!-- Main content -->
+      <section class="content">
+        <!-- Top stats -->
+        <div class="stats-container">
+          <div class="card">
+            <h3>Índice de sobrecarga</h3>
+            <div class="value">95%</div>
+            <small>Baseado em geral do equipe</small>
+          </div>
+          <div class="card">
+            <h3>Total de horas alocadas</h3>
+            <div class="value">190h</div>
+            <small>de 200h disponível</small>
+          </div>
+          <div class="card">
+            <h3>Índice de satisfação</h3>
+            <div class="value">4.5 / 5.0</div>
+            <small>Do geral da equipe</small>
+          </div>
+        </div>
+        <!-- Financial overview -->
+        <div class="financial-overview">
+          <div class="card">
+            <h3>Visão Geral Financeira</h3>
+            <p>Investimento Mensal</p>
+            <div class="value">R$37.500</div>
+            <small>Com base nos salários da equipe</small>
+          </div>
+          <div class="card">
+            <h3>Orçamento Total do Projeto</h3>
+            <div class="value">R$58.000</div>
+            <small>Todos os projetos ativos</small>
+          </div>
+        </div>
+        <!-- Team members -->
+        <div class="team-members">
+          <h4>Equipe</h4>
+          <div class="members-list">
+            <div class="member-card">
+              <div class="title">Mateus Fantin</div>
+              <div>
+                <span class="role">Techlead</span
+                ><span class="role">Desenvolvedor Sênior Back-end</span>
+              </div>
+              <p>Horas alocadas: 0h</p>
+              <p>Horas disponíveis: 0h</p>
+            </div>
+            <div class="member-card">
+              <div class="title">Ana Souza</div>
+              <div><span class="role">Desenvolvedor Júnior</span></div>
+              <p>Horas alocadas: 20h</p>
+              <p>Horas disponíveis: 180h</p>
+            </div>
+            <div class="member-card">
+              <div class="title">Carlos Lima</div>
+              <div><span class="role">DevOps</span></div>
+              <p>Horas alocadas: 15h</p>
+              <p>Horas disponíveis: 185h</p>
+            </div>
+          </div>
+        </div>
+        <!-- Projects list -->
+        <div class="projects-list">
+          <header>
+            <h4>Projetos</h4>
+            <select>
+              <option>Todos os status</option>
+              <option>Em andamento</option>
+              <option>Concluído</option>
+            </select>
+          </header>
+          <div class="project-item">
+            <div>E‑commerce Platform</div>
+            <div>Terminar: 10/06/2025</div>
+            <div><span>Em andamento</span></div>
+          </div>
+          <div class="project-item">
+            <div>CMS Rewrite</div>
+            <div>Terminar: 15/07/2025</div>
+            <div><span>Em andamento</span></div>
+          </div>
+          <div class="project-item">
+            <div>API Gateway Upgrade</div>
+            <div>Terminar: 01/08/2025</div>
+            <div><span>Planejado</span></div>
+          </div>
+        </div>
+      </section>
+    </main>
   </body>
 </html>
+<script src="squads-detail.js"></script>
+<script src="../../../../assets/js/app.js"></script>
