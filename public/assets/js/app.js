@@ -134,3 +134,20 @@ window.addEventListener("click", function (e) {
     dropdown.classList.add("hidden");
   }
 });
+
+// Esconde o loader e mostra o conteúdo principal após as traduções
+document.addEventListener("DOMContentLoaded", () => {
+  const tryShowContent = () => {
+    if (
+      window.i18n &&
+      window.i18n.messages &&
+      Object.keys(window.i18n.messages).length > 0
+    ) {
+      document.getElementById("loader").classList.add("hidden");
+      document.getElementById("main-content").classList.remove("hidden");
+    } else {
+      setTimeout(tryShowContent, 50);
+    }
+  };
+  tryShowContent();
+});

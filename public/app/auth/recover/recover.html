@@ -3,15 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Recuperar Senha</title>
+    <title data-i18n="recover.page_title">Recuperar Senha</title>
     <!-- Estilos específicos da tela de recuperação -->
     <link rel="stylesheet" href="recover.css" />
     <!-- Estilos globais do projeto -->
     <link rel="stylesheet" href="../../../assets/css/style.css" />
+    <!-- Fonte Poppins do Google Fonts -->
     <link
       href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
       rel="stylesheet"
     />
+    <!-- Ícone da aba do navegador -->
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../../../assets/svg/logo-icon.svg"
+    />
+
     <!-- Ícone da aba do navegador -->
     <link rel="icon" type="image/svg+xml" href="../../../assets/svg/logo.svg" />
   </head>
@@ -22,21 +30,25 @@
 
       <!-- Passo 1: Solicitar e-mail para recuperação -->
       <div class="recover-form" id="step-email">
-        <h2>Recuperar Senha</h2>
-        <label for="recover-email">Digite seu e-mail</label>
+        <h2 data-i18n="recover.title"></h2>
+        <label for="recover-email" data-i18n="recover.email_label"></label>
         <input
           type="email"
           id="recover-email"
           placeholder="example@email.com"
           required
         />
-        <button id="send-token-btn" class="btn">Enviar código</button>
+        <button
+          id="send-token-btn"
+          class="btn"
+          data-i18n="recover.send_code"
+        ></button>
       </div>
 
       <!-- Passo 2: Digitar código recebido por e-mail -->
       <div class="recover-form" id="step-token" style="display: none">
-        <h2>Verifique seu e-mail</h2>
-        <p>Enviamos um código de 5 dígitos para seu e-mail.</p>
+        <h2 data-i18n="recover.verify_email_title"></h2>
+        <p data-i18n="recover.code_sent"></p>
         <div class="token-inputs">
           <!-- Inputs para cada dígito do código -->
           <input
@@ -82,17 +94,23 @@
           id="resend-token-btn"
           style="display: none; margin-bottom: 1rem"
           class="btn"
-        >
-          Reenviar código
-        </button>
+          data-i18n="recover.resend_code"
+        ></button>
         <!-- Mensagem de erro para código inválido -->
-        <div id="token-error" class="error"></div>
+        <div
+          id="token-error"
+          class="error"
+          data-i18n="recover.code_error"
+        ></div>
       </div>
 
       <!-- Passo 3: Redefinir senha -->
       <div class="recover-form" id="step-password" style="display: none">
-        <h2>Redefinir Senha</h2>
-        <label for="new-password">Nova senha</label>
+        <h2 data-i18n="recover.reset_title"></h2>
+        <label
+          for="new-password"
+          data-i18n="recover.new_password_label"
+        ></label>
         <div class="password-group" style="position: relative">
           <input type="password" id="new-password" required />
           <!-- Botão para mostrar/ocultar senha -->
@@ -144,7 +162,10 @@
             </svg>
           </span>
         </div>
-        <label for="confirm-password">Confirmar senha</label>
+        <label
+          for="confirm-password"
+          data-i18n="recover.confirm_password_label"
+        ></label>
         <div class="password-group" style="position: relative">
           <input type="password" id="confirm-password" required />
           <!-- Botão para mostrar/ocultar senha -->
@@ -189,15 +210,27 @@
             </svg>
           </span>
         </div>
-        <button id="save-password-btn" class="btn">Salvar nova senha</button>
+        <button
+          id="save-password-btn"
+          class="btn"
+          data-i18n="recover.save_new_password"
+        ></button>
         <!-- Mensagem de erro para senha inválida -->
-        <div id="password-error" class="error"></div>
+        <div
+          id="password-error"
+          class="error"
+          data-i18n="recover.password_error"
+        ></div>
       </div>
 
       <!-- Passo 4: Sucesso na redefinição -->
       <div class="recover-form" id="step-success" style="display: none">
-        <h2>Senha redefinida!</h2>
-        <button id="go-login-btn" class="btn">Voltar para login</button>
+        <h2 data-i18n="recover.success_title"></h2>
+        <button
+          id="go-login-btn"
+          class="btn"
+          data-i18n="recover.back_to_login"
+        ></button>
       </div>
     </div>
     <!-- Scripts da tela de recuperação -->
@@ -205,5 +238,6 @@
     <!-- Lógica da recuperação de senha -->
     <script src="../../../assets/js/app.js"></script>
     <!-- Tema (dark/light) -->
+    <script src="../../../assets/js/i18nService.js" defer></script>
   </body>
 </html>

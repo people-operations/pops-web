@@ -1,38 +1,27 @@
+/* =====================
+   1. GLOBAIS E CONTAINERS
+   ===================== */
 .squads-container {
   padding: 32px;
 }
 
+/* =====================
+   2. LAYOUTS GERAIS
+   ===================== */
 .squads-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
-.squads-header h2 {
-  color: #e91e63;
-  margin: 0;
-}
-
-.create-squad {
-  background-color: #7d1bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  height: 32px;
-  width: 133px;
-  font-size: 16px !important;
-  font-weight: 500 !important;
-  padding: 0 !important;
-  letter-spacing: 0 !important;
-  font-family: "Poppins", sans-serif;
-}
-
 .squad-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 20px;
 }
+
+/* =====================
+   3. COMPONENTES PRINCIPAIS
+   ===================== */
 .squad-card {
   background: #ffffff;
   border-radius: 4px;
@@ -47,27 +36,65 @@
   max-width: 440px;
   min-width: 0;
 }
-
 .squad-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
-
 .squad-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .squad-card .squad-header h3 {
   border-left: 4px solid #7d1bff; /* ou a cor que for o seu “purple accent” */
   padding-left: 8px; /* espaço entre a borda e o texto */
   margin: 0; /* já que você redefine margin noutros lugares */
 }
+.squad-card h3 {
+  font-weight: 600;
+  font-size: 20px;
+  margin: 0;
+  line-height: 1.2;
+}
+.squad-description,
+.squad-card p strong,
+.squad-card p {
+  font-weight: 400;
+  font-size: 14px;
+  margin: 4px 0;
+}
 
+.squad-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+  justify-content: space-between;
+}
+.squad-footer p {
+  margin: 0;
+}
+
+/* =====================
+   4. ELEMENTOS INTERNOS E COMPONENTES MENORES
+   ===================== */
+.create-squad {
+  background-color: #7d1bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 32px;
+  width: 133px;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding: 0 !important;
+  letter-spacing: 0 !important;
+  font-family: "Poppins", sans-serif;
+}
 .tag-green {
   display: flex;
-  align-items: initial;
+  align-items: center;
   justify-content: center;
   min-width: 118px;
   height: 23px;
@@ -76,23 +103,9 @@
   font-weight: 500;
   font-size: 12px;
   border-radius: 60px;
+  padding: 12px;
+  white-space: nowrap;
 }
-
-.squad-card h3 {
-  font-weight: 600;
-  font-size: 20px;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.squad-description,
-.squad-card p strong,
-.squad-card p {
-  font-weight: 400;
-  font-size: 14px;
-  margin: 4px 0;
-}
-/* Tech-stack tags */
 .tech-stack {
   margin: 8px 0;
 }
@@ -111,15 +124,12 @@
   width: max-content;
   padding: 12px;
 }
-
 .hours > span {
   display: block;
   font-weight: 400;
   font-size: 14px;
   margin-bottom: 6px;
 }
-
-/* Barra de progresso */
 .progress-bar {
   width: 100%;
   height: 38px;
@@ -131,16 +141,12 @@
   height: 100%;
   background-image: linear-gradient(to right, #42a5f5, #90caf9);
 }
-
-/* Valor de horas */
 .hours-value {
   font-family: "Poppins", sans-serif;
   font-weight: 400;
   font-size: 14px;
   margin-top: 0;
 }
-
-/* Botão “Mais detalhe” */
 .details-btn {
   display: inline-flex;
   align-items: center;
@@ -157,29 +163,15 @@
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
 }
-
 .details-btn:hover {
   background-color: #7d1bff;
   color: white;
   transform: scale(1.05);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
-
 .details-btn:hover::after {
   left: 100%;
 }
-
-.squad-footer {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 8px;
-  justify-content: space-between;
-}
-.squad-footer p {
-  margin: 0;
-}
-
 .hours-row {
   display: flex;
   justify-content: space-between;
@@ -190,11 +182,13 @@
   font-weight: 400;
   font-size: 14px;
 }
-
 .by-month {
   margin-top: 12px !important;
 }
 
+/* =====================
+   5. MEDIA QUERIES
+   ===================== */
 @media (max-width: 1200px) {
   .squad-cards {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -224,7 +218,9 @@
   }
 }
 
-/* Dark mode styles */
+/* =====================
+   6. DARK MODE
+   ===================== */
 body.dark .squad-card {
   background: #23232b;
   color: #f3f3f3;

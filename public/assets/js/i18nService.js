@@ -9,7 +9,7 @@ class I18nService {
    * @param {string} locale - Código do idioma (ex: "pt-br")
    */
   async init(locale = "pt-br") {
-    const res = await fetch(`../../assets/i18n/${locale}.json`);
+    const res = await fetch(`/assets/i18n/${locale}.json`);
     if (!res.ok) throw new Error("Falha ao carregar traduções");
     this.messages = await res.json();
   }
@@ -34,7 +34,7 @@ class I18nService {
     // Aplica tradução ao texto dos elementos
     document.querySelectorAll("[data-i18n]").forEach((el) => {
       const msg = this.t(el.dataset.i18n);
-      if (msg) el.textContent = msg;
+      if (msg !== undefined && msg !== null) el.innerHTML = msg;
     });
     // Aplica tradução ao placeholder dos elementos
     document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
@@ -50,8 +50,12 @@ window.i18n = new I18nService();
 // Inicializa o serviço de i18n ao carregar a página
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await i18n.init("pt-br"); // Carrega traduções em português-brasileiro
+    await i18n.init("pt-br"); // Carrega traduções na língua especificada
     i18n.apply(); // Aplica as traduções na página
+    if (typeof renderSquads === "function") {
+      renderSquads(); // Garante squads traduzidos
+      i18n.apply(); // Aplica novamente para elementos dinâmicos
+    }
   } catch (err) {
     console.error(err); // Exibe erro caso falhe ao carregar traduções
   }
