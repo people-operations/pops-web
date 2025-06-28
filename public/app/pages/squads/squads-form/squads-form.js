@@ -44,16 +44,16 @@ function renderMembros() {
           </button>
         </div>
       </div>
-      <p class="custom-p">Funções:</p>
+      <p class="custom-p">${i18n.t("squads_form.functions")}</p>
       <div class="tags">
-        ${membro.funcoes.map((f) => `<span>${f}</span>`).join("")}
+        ${membro.funcoes.map((f) => `<span>${f}</span>`).join(" ")}
       </div>
-      <p class="custom-p custom-margin">Horas alocadas: ${
-        membro.horasAlocadas
-      }</p>
-      <p class="custom-p custom-margin">Horas disponíveis: ${
-        membro.horasDisponiveis
-      }</p>
+      <p class="custom-p custom-margin">${i18n.t(
+        "squads_form.allocated_hours"
+      )}: ${membro.horasAlocadas}</p>
+      <p class="custom-p custom-margin">${i18n.t(
+        "squads_form.available_hours"
+      )} ${membro.horasDisponiveis}</p>
     `;
     teamList.appendChild(card);
   });
@@ -80,7 +80,25 @@ function renderMembros() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", renderMembros);
+// Inicializa o serviço de i18n e só renderiza membros após carregar traduções
+function waitForI18nAndRender() {
+  if (
+    window.i18n &&
+    typeof i18n.t === "function" &&
+    i18n.messages &&
+    Object.keys(i18n.messages).length > 0
+  ) {
+    renderMembros();
+  } else {
+    setTimeout(waitForI18nAndRender, 50);
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", waitForI18nAndRender);
+} else {
+  waitForI18nAndRender();
+}
 
 // referências
 const openBtn = document.querySelector(".team-section p");
@@ -92,10 +110,11 @@ const modalTitle = modal.querySelector(".modal-header h2");
 
 // função para mostrar modal
 function showModal(isEdit = false) {
+  const modalTitle = document.getElementById("modalTitle");
   if (isEdit) {
-    modalTitle.textContent = "Editar colaborador";
+    modalTitle.textContent = i18n.t("squads_form.edit_member");
   } else {
-    modalTitle.textContent = "Adicionar colaborador na equipe";
+    modalTitle.textContent = i18n.t("squads_form.add_member");
   }
   modal.classList.add("modal-open");
   modal.classList.remove("hidden");
@@ -115,13 +134,18 @@ openBtn.addEventListener("click", (e) => {
   showModal(false);
 });
 
-// fechar ao clicar no X ou no overlay ou em cancelar
-[closeBtn, overlay, cancelBtn].forEach((el) =>
+// fechar ao clicar no X ou no overlay
+[closeBtn, overlay].forEach((el) =>
   el.addEventListener("click", (e) => {
     e.preventDefault();
     hideModal();
   })
 );
+// cancelar do modal só fecha o modal
+cancelBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  hideModal();
+});
 
 // (opcional) tratar submissão do form
 document.getElementById("addMemberForm").addEventListener("submit", (e) => {
@@ -186,3 +210,10 @@ document.querySelector(".form-squad").addEventListener("submit", function (e) {
   e.preventDefault();
   window.location.href = "../squads.html";
 });
+const mainCancelBtn = document.querySelector(".form-squad .cancel-btn");
+if (mainCancelBtn) {
+  mainCancelBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.location.href = "../squads.html";
+  });
+}

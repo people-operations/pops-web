@@ -2,10 +2,10 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>POPs Dashboard</title>
+    <title data-i18n="dashboard.page_title">POPs Dashboard</title>
     <link rel="stylesheet" href="dashboard.css" />
     <link rel="stylesheet" href="../../../assets/css/style.css" />
-    <link rel="icon" type="image/svg+xml" href="../../../assets/svg/logo.svg" />
+    <link rel="icon" type="image/svg+xml" href="../../../assets/svg/logo-icon.svg" />
     <link
       href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
       rel="stylesheet"
@@ -13,292 +13,325 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
-    <header>
-      <img
-        src="../../../assets/svg/logo.svg"
-        alt="Logo POPs"
-        class="logo-header"
-        style="height: 32px; vertical-align: middle; margin-right: 8px"
-      />
-      <nav>
-        <a class="active" href="dashboard.html">
-          <img
-            src="../../../assets/svg/graphic.svg"
-            alt="Dashboard"
-            width="20"
-            height="20"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Dashboard</a
-        >
-        <a href="../squads/squads.html">
-          <img
-            src="../../../assets/svg/squads.svg"
-            alt="Squads"
-            width="20"
-            height="20"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Squads
-        </a>
-        <a href="../projects/projects.html">
-          <img
-            src="../../../assets/svg/projects.svg"
-            alt="Projetos"
-            width="20"
-            height="20"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Projetos
-        </a>
-        <a href="../collaborators/collaborators.html">
-          <img
-            src="../../../assets/svg/colaborator.svg"
-            alt="Colaboradores"
-            width="20"
-            height="20"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Colaboradores
-        </a>
-        <a href="../jobs-skills/jobs-skills.html">
-          <img
-            src="../../../assets/svg/engines.svg"
-            alt="Cargos e Skills"
-            width="20"
-            height="20"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Cargos e Skills
-        </a>
-        <a href="../area/area.html">
-          <img
-            src="../../../assets/svg/area.svg"
-            alt="Área"
-            width="20"
-            height="20"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Área
-        </a>
-      </nav>
-      <div class="profile-menu">
-        <button
-          id="theme-toggle"
-          class="theme-toggle-btn"
-          title="Alternar tema"
-        >
-          <span id="theme-icon">🌞</span>
-        </button>
-        <div class="avatar">K</div>
-        <span class="chevron" aria-hidden="true">
-          <svg
-            width="20"
-            height="10"
-            viewBox="0 0 21 9.5"
-            fill="none"
-            stroke="#555"
-            stroke-width="3"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+    <div
+      id="loader"
+      class="center"
+      style="
+        height: 100vh;
+        font-size: 1.5rem;
+        background-color: #fff;
+        color: #333;
+      "
+    ></div>
+    <div id="main-content" class="hidden">
+      <header>
+        <img
+          src="../../../assets/svg/logo.svg"
+          alt="Logo POPs"
+          class="logo-header"
+          style="height: 32px; vertical-align: middle; margin-right: 8px"
+        />
+        <nav>
+          <a class="active" href="dashboard.html">
+            <img
+              src="../../../assets/svg/graphic.svg"
+              alt="Dashboard"
+              width="20"
+              height="20"
+              style="vertical-align: middle; margin-right: 6px" />
+            <span data-i18n="navbar.dashboard"></span
+          ></a>
+          <a href="../squads/squads.html">
+            <img
+              src="../../../assets/svg/squads.svg"
+              alt="Squads"
+              width="20"
+              height="20"
+              style="vertical-align: middle; margin-right: 6px"
+            />
+            <span data-i18n="navbar.squads"></span>
+          </a>
+          <a href="../projects/projects.html">
+            <img
+              src="../../../assets/svg/projects.svg"
+              alt="Projetos"
+              width="20"
+              height="20"
+              style="vertical-align: middle; margin-right: 6px"
+            />
+            <span data-i18n="navbar.projects"></span>
+          </a>
+          <a href="../collaborators/collaborators.html">
+            <img
+              src="../../../assets/svg/colaborator.svg"
+              alt="Colaboradores"
+              width="20"
+              height="20"
+              style="vertical-align: middle; margin-right: 6px"
+            />
+            <span data-i18n="navbar.collaborators"></span>
+          </a>
+          <a href="../jobs-skills/jobs-skills.html">
+            <img
+              src="../../../assets/svg/engines.svg"
+              alt="Cargos e Skills"
+              width="20"
+              height="20"
+              style="vertical-align: middle; margin-right: 6px"
+            />
+            <span data-i18n="navbar.jobs_skills"></span>
+          </a>
+          <a href="../area/area.html">
+            <img
+              src="../../../assets/svg/area.svg"
+              alt="Área"
+              width="20"
+              height="20"
+              style="vertical-align: middle; margin-right: 6px"
+            />
+            <span data-i18n="navbar.area"></span>
+          </a>
+        </nav>
+        <div class="profile-menu">
+          <button
+            id="theme-toggle"
+            class="theme-toggle-btn"
+            title="Alternar tema"
           >
-            <polyline points="2 2 10.5 7.5 19 2" />
-          </svg>
-        </span>
-        <div id="dropdown" class="dropdown hidden">
-          <a
-            href="../collaborators/collaborators-detail/collaborators-detail.html"
-            >Perfil</a
-          >
-          <a href="../inbox/inbox.html">Caixa de entrada</a>
-          <a href="../../auth/login.html">Sair</a>
+            <span id="theme-icon">🌞</span>
+          </button>
+          <div class="avatar">K</div>
+          <span class="chevron" aria-hidden="true">
+            <svg
+              width="20"
+              height="10"
+              viewBox="0 0 21 9.5"
+              fill="none"
+              stroke="#555"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="2 2 10.5 7.5 19 2" />
+            </svg>
+          </span>
+          <div id="dropdown" class="dropdown hidden">
+            <a
+              href="../collaborators/collaborators-detail/collaborators-detail.html"
+              ><span data-i18n="navbar.profile"></span
+            ></a>
+            <a href="../inbox/inbox.html"
+              ><span data-i18n="navbar.inbox"></span
+            ></a>
+            <a href="../../auth/login.html"
+              ><span data-i18n="navbar.logout"></span
+            ></a>
+          </div>
         </div>
-      </div>
-    </header>
-    <main>
-      <div class="p-32">
-        <h1 class="gradient-title">POPs Dashboard</h1>
-        <div class="subtitle">
-          Gestão inteligente de equipes e insights de performance
-        </div>
+      </header>
+      <main>
+        <div class="p-32">
+          <h1 class="gradient-title" data-i18n="dashboard.main_title"></h1>
+          <div class="subtitle" data-i18n="dashboard.subtitle"></div>
 
-        <div class="cards">
-          <div class="card azul">
-            <div class="card-content">
-              <div class="icon">
-                <img src="../../../assets/svg/file-icon.svg" alt="Projetos" />
+          <div class="cards">
+            <div class="card azul">
+              <div class="card-content">
+                <div class="icon">
+                  <img src="../../../assets/svg/file-icon.svg" alt="Projetos" />
+                </div>
+                <h2 data-i18n="dashboard.total_projects"></h2>
+                <div class="value">12</div>
+                <div
+                  class="subtitle"
+                  data-i18n="dashboard.active_projects"
+                ></div>
               </div>
-              <h2>TOTAL DE PROJETOS</h2>
+            </div>
+            <div class="card roxo">
+              <div class="card-content">
+                <div class="icon">
+                  <img src="../../../assets/svg/people-icon.svg" alt="Squads" />
+                </div>
+                <h2 data-i18n="dashboard.total_squads"></h2>
+                <div class="value">12</div>
+                <div class="subtitle" data-i18n="dashboard.active_squads"></div>
+              </div>
+            </div>
+            <div class="card rosa">
+              <div class="card-content">
+                <div class="icon">
+                  <img src="../../../assets/svg/time-icon.svg" alt="Horas" />
+                </div>
+                <h2 data-i18n="dashboard.total_hours"></h2>
+                <div class="value">2.506h</div>
+                <div
+                  class="subtitle"
+                  data-i18n="dashboard.allocated_hours"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cards">
+            <div class="card vermelho">
+              <div class="card-content">
+                <div class="icon">
+                  <img
+                    src="../../../assets/svg/money-icon.svg"
+                    alt="Desvio de Custo"
+                  />
+                </div>
+                <h2 data-i18n="dashboard.cost_deviation"></h2>
+              </div>
+              <div class="value">80%</div>
+              <div
+                class="subtitle"
+                data-i18n="dashboard.budget_variation"
+              ></div>
+              <div class="tag vermelho">71%</div>
+            </div>
+            <div class="card verde">
+              <div class="card-content">
+                <div class="icon">
+                  <img
+                    src="../../../assets/svg/energy-icon.svg"
+                    alt="Índice de Ociosidade"
+                  />
+                </div>
+                <h2 data-i18n="dashboard.idle_index"></h2>
+              </div>
+              <div class="value">2%</div>
+              <div
+                class="subtitle"
+                data-i18n="dashboard.underutilized_capacity"
+              ></div>
+              <div class="tag verde">-2%</div>
+            </div>
+            <div class="card vermelho">
+              <div class="card-content">
+                <div class="icon">
+                  <img
+                    src="../../../assets/svg/warning-icon.svg"
+                    alt="Taxa de Sobrecarga"
+                  />
+                </div>
+                <h2 data-i18n="dashboard.overload_rate"></h2>
+              </div>
               <div class="value">12</div>
-              <div class="subtitle">Projetos ativos</div>
+              <div
+                class="subtitle"
+                data-i18n="dashboard.active_capacities"
+              ></div>
+              <div class="tag vermelho">+2%</div>
             </div>
-          </div>
-          <div class="card roxo">
-            <div class="card-content">
-              <div class="icon">
-                <img src="../../../assets/svg/people-icon.svg" alt="Squads" />
+            <div class="card verde">
+              <div class="card-content">
+                <div class="icon">
+                  <img
+                    src="../../../assets/svg/heart-icon.svg"
+                    alt="Satisfação"
+                  />
+                </div>
+                <h2 data-i18n="dashboard.satisfaction"></h2>
+                <div class="value">4.5/5.0</div>
+                <div
+                  class="subtitle"
+                  data-i18n="dashboard.evaluated_capacities"
+                ></div>
+                <div class="tag verde">+2%</div>
               </div>
-              <h2>TOTAL DE SQUADS</h2>
-              <div class="value">12</div>
-              <div class="subtitle">Squads ativos</div>
             </div>
           </div>
-          <div class="card rosa">
-            <div class="card-content">
-              <div class="icon">
-                <img src="../../../assets/svg/time-icon.svg" alt="Horas" />
+          <section class="content">
+            <div class="chart-card">
+              <h3 data-i18n="dashboard.workload_distribution"></h3>
+              <canvas id="workloadChart" height="180"></canvas>
+              <p class="insight" data-i18n="dashboard.insight"></p>
+            </div>
+
+            <div class="alert-card">
+              <div class="alert-header">
+                <h3 data-i18n="dashboard.critical_squads_alert"></h3>
+                <span
+                  class="alert-count"
+                  data-i18n="dashboard.teams_count"
+                ></span>
               </div>
-              <h2>TOTAL DE HORAS</h2>
-              <div class="value">2.506h</div>
-              <div class="subtitle">Alocadas nesta semana</div>
+
+              <ul class="alert-list">
+                <li>
+                  <div class="alert-squad">
+                    <div class="alert-info">
+                      <strong>Backend Team Alpha</strong>
+                      <span
+                        ><span data-i18n="dashboard.area_label"></span
+                        >Desenvolvimento</span
+                      >
+                    </div>
+                    <div class="alert-right">
+                      <strong class="alert-percentage">97%</strong>
+                      <span data-i18n="dashboard.overload_rate_label"></span>
+                    </div>
+                  </div>
+                </li>
+                <li>
+                  <div class="alert-squad">
+                    <div class="alert-info">
+                      <strong>Backend Team Alpha</strong>
+                      <span
+                        ><span data-i18n="dashboard.area_label"></span
+                        >Desenvolvimento</span
+                      >
+                    </div>
+                    <div class="alert-right">
+                      <strong class="alert-percentage">97%</strong>
+                      <span data-i18n="dashboard.overload_rate_label"></span>
+                    </div>
+                  </div>
+                </li>
+                <li>
+                  <div class="alert-squad">
+                    <div class="alert-info">
+                      <strong>Backend Team Alpha</strong>
+                      <span
+                        ><span data-i18n="dashboard.area_label"></span
+                        >Desenvolvimento</span
+                      >
+                    </div>
+                    <div class="alert-right">
+                      <strong class="alert-percentage">97%</strong>
+                      <span data-i18n="dashboard.overload_rate_label"></span>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+
+              <p class="alert-action">
+                <strong
+                  class="pink-action"
+                  data-i18n="dashboard.alert_action"
+                ></strong>
+                <span data-i18n="dashboard.alert_action_text"></span>
+              </p>
             </div>
-          </div>
+          </section>
+
+          <section class="boxes">
+            <div class="box sub-card-azul">
+              <strong data-i18n="dashboard.optimization_opportunity"></strong>
+              <p data-i18n="dashboard.optimization_text"></p>
+            </div>
+            <div class="box sub-card-azul">
+              <strong data-i18n="dashboard.performance_trend"></strong>
+              <p data-i18n="dashboard.performance_text"></p>
+            </div>
+          </section>
         </div>
-
-        <div class="cards">
-          <div class="card vermelho">
-            <div class="card-content">
-              <div class="icon">
-                <img
-                  src="../../../assets/svg/money-icon.svg"
-                  alt="Desvio de Custo"
-                />
-              </div>
-              <h2>DESVIO DE CUSTO</h2>
-            </div>
-            <div class="value">80%</div>
-            <div class="subtitle">Variação orçamentária</div>
-            <div class="tag vermelho">71%</div>
-          </div>
-          <div class="card verde">
-            <div class="card-content">
-              <div class="icon">
-                <img
-                  src="../../../assets/svg/energy-icon.svg"
-                  alt="Índice de Ociosidade"
-                />
-              </div>
-              <h2>ÍNDICE DE OCIOSIDADE</h2>
-            </div>
-            <div class="value">2%</div>
-            <div class="subtitle">Capacidade subutilizada</div>
-            <div class="tag verde">-2%</div>
-          </div>
-          <div class="card vermelho">
-            <div class="card-content">
-              <div class="icon">
-                <img
-                  src="../../../assets/svg/warning-icon.svg"
-                  alt="Taxa de Sobrecarga"
-                />
-              </div>
-              <h2>TAXA DE SOBRECARGA</h2>
-            </div>
-            <div class="value">12</div>
-            <div class="subtitle">Capacidades ativas</div>
-            <div class="tag vermelho">+2%</div>
-          </div>
-          <div class="card verde">
-            <div class="card-content">
-              <div class="icon">
-                <img
-                  src="../../../assets/svg/heart-icon.svg"
-                  alt="Satisfação"
-                />
-              </div>
-              <h2>SATISFAÇÃO</h2>
-              <div class="value">4.5/5.0</div>
-              <div class="subtitle">Capacidades avaliadas</div>
-              <div class="tag verde">+2%</div>
-            </div>
-          </div>
-        </div>
-        <section class="content">
-          <div class="chart-card">
-            <h3>Distribuição de Carga de Trabalho por Área</h3>
-            <canvas id="workloadChart" height="180"></canvas>
-            <p class="insight">
-              <strong>Insight:</strong> A equipe de DevOps apresenta sobrecarga
-              crítica. Considere redistribuir tarefas ou alocar mais recursos.
-            </p>
-          </div>
-
-          <div class="alert-card">
-            <div class="alert-header">
-              <h3>Alerta de Squads Críticos</h3>
-              <span class="alert-count">3 Equipes</span>
-            </div>
-
-            <ul class="alert-list">
-              <li>
-                <div class="alert-squad">
-                  <div class="alert-info">
-                    <strong>Backend Team Alpha</strong>
-                    <span>Área: Desenvolvimento</span>
-                  </div>
-                  <div class="alert-right">
-                    <strong class="alert-percentage">97%</strong>
-                    <span>Taxa de Sobrecarga</span>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <div class="alert-squad">
-                  <div class="alert-info">
-                    <strong>Backend Team Alpha</strong>
-                    <span>Área: Desenvolvimento</span>
-                  </div>
-                  <div class="alert-right">
-                    <strong class="alert-percentage">97%</strong>
-                    <span>Taxa de Sobrecarga</span>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <div class="alert-squad">
-                  <div class="alert-info">
-                    <strong>Backend Team Alpha</strong>
-                    <span>Área: Desenvolvimento</span>
-                  </div>
-                  <div class="alert-right">
-                    <strong class="alert-percentage">97%</strong>
-                    <span>Taxa de Sobrecarga</span>
-                  </div>
-                </div>
-              </li>
-            </ul>
-
-            <p class="alert-action">
-              <strong class="pink-action">Ação Necessária:</strong>
-              Essas equipes precisam de atenção imediata para evitar sobrecarga
-              e risco de burnout.
-            </p>
-          </div>
-        </section>
-
-        <section class="boxes">
-          <div class="box sub-card-azul">
-            <strong>Oportunidade de Otimização</strong>
-            <p>
-              A equipe de
-              <span class="pink">QA apresenta 95% de capacidade ociosa</span>,
-              enquanto <span class="pink">Desenvolvimento</span> está
-              sobrecarregado. Considere reequilibrar a carga para melhorar
-              alocação de recursos.
-            </p>
-          </div>
-          <div class="box sub-card-azul">
-            <strong>Tendência de Desempenho</strong>
-            <p>
-              A satisfação geral aumentou <span class="pink">1%</span> nesta
-              semana. A nova estratégia de distribuição de tarefas está trazendo
-              <span class="pink">resultados positivos</span>.
-            </p>
-          </div>
-        </section>
-      </div>
-    </main>
+      </main>
+    </div>
   </body>
 </html>
 <script src="dashboard.js"></script>
 <script src="../../../assets/js/app.js"></script>
+<script src="../../../assets/js/i18nService.js"></script>

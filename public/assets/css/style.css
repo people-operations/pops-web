@@ -1749,3 +1749,68 @@ body.dark .squad-card img[src$="members.svg"] {
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+.d-flex {
+  display: flex;
+}
+
+/* Estilo para o select de status igual ao input flutuante do login */
+.status-filter {
+  position: relative;
+  margin-top: 8px;
+}
+.status-filter label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  background: #fff;
+  color: #111;
+  font-size: 1rem;
+  padding: 0 4px;
+  pointer-events: none;
+  transition: 0.2s;
+  z-index: 2;
+}
+.status-filter select {
+  width: 100%;
+  padding: 16px 12px 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background: #fff;
+  color: #333;
+  transition: border-color 0.2s;
+  outline: none;
+  margin-top: 0;
+  position: relative;
+  z-index: 1;
+}
+.status-filter select:focus {
+  border-color: var(--purple, #7c3aed);
+}
+.status-filter select:focus + label,
+.status-filter select:not([value=""]):not(:invalid) + label {
+  top: 6px;
+  left: 8px;
+  font-size: 0.85rem;
+  background: #fff;
+  padding: 0 4px;
+}
+body.dark .status-filter label {
+  background: #232336;
+  color: #bbb;
+}
+body.dark .status-filter select {
+  background: #232336;
+  color: #f3f3f3;
+  border-color: #444;
+}
+body.dark .status-filter select:focus {
+  border-color: #3b82f6;
+}
+body.dark .status-filter select:focus + label,
+body.dark .status-filter select:not([value=""]):not(:invalid) + label {
+  color: #3b82f6;
+  background: #232336;
+}

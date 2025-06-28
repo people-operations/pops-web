@@ -78,31 +78,50 @@ const squads = [
   },
 ];
 
+// Função utilitária para interpolar variáveis em traduções
+function interpolate(str, vars) {
+  return str.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`);
+}
+
 function renderSquads() {
   const container = document.getElementById("squad-list");
+  container.innerHTML = "";
+  const i18n = window.i18n;
   squads.forEach((squad) => {
     const porcentagem = (squad.horasAlocadas / squad.horasTotais) * 100;
-
     container.innerHTML += `
       <div class="squad-card">
         <div class="squad-header">
           <h3>${squad.nome}</h3>
-          <span class="tag-green">${squad.projetosAtivos} projetos ativos</span>
+          <span class="tag-green">${interpolate(
+            i18n.t("squads.active_projects"),
+            { count: squad.projetosAtivos }
+          )}</span>
         </div>
         <p class="squad-description">${squad.descricao}</p>
-        <p><img src="/assets/svg/squad-area.svg" alt="Área" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;"><strong>Área:</strong> ${
-          squad.area
-        }</p>
-        <p><img src="/assets/svg/members.svg" alt="Membros" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;"><strong>Membros:</strong> ${
-          squad.membros
-        }</p>
-        <p><strong>Capacidade do squad:</strong></p>
+        <p>
+          <img src="/assets/svg/squad-area.svg" alt="Área" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
+          <strong data-i18n="squads.area">${i18n.t("squads.area")}</strong> ${
+      squad.area
+    }
+        </p>
+        <p>
+          <img src="/assets/svg/members.svg" alt="Membros" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
+          <strong data-i18n="squads.members">${i18n.t(
+            "squads.members"
+          )}</strong> ${squad.membros}
+        </p>
+        <p><strong data-i18n="squads.capacity">${i18n.t(
+          "squads.capacity"
+        )}</strong></p>
         <div class="tech-stack">
           ${squad.tecnologias.map((tech) => `<span>${tech}</span>`).join("")}
         </div>
         <div class="hours">
           <div class="hours-row">
-            <span>Horas alocadas</span>
+            <span data-i18n="squads.allocated_hours">${i18n.t(
+              "squads.allocated_hours"
+            )}</span>
             <span class="hours-value">${squad.horasAlocadas}h / ${
       squad.horasTotais
     }h</span>
@@ -112,13 +131,12 @@ function renderSquads() {
           </div>
         </div>
         <div class="squad-footer">
-          <p class="by-month"><strong>Por mês:</strong> ${squad.preco}</p>
-          <button class="details-btn" onclick="window.location.href='squads-detail/squads-detail.html'">
-        Mais detalhes</button>
+          <p class="by-month"><strong data-i18n="squads.per_month">${i18n.t(
+            "squads.per_month"
+          )}</strong> ${squad.preco}</p>
+          <button class="details-btn" data-i18n="squads.details" onclick="window.location.href='squads-detail/squads-detail.html'"></button>
         </div>
       </div>
     `;
   });
 }
-
-renderSquads();

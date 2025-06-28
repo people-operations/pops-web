@@ -14,11 +14,20 @@ function generateToken() {
   return String(Math.floor(10000 + Math.random() * 90000));
 }
 
+// Função utilitária para tradução
+function t(key) {
+  if (window.i18n && typeof window.i18n.t === "function") {
+    return window.i18n.t(key);
+  }
+  // fallback: retorna a chave
+  return key;
+}
+
 // Simula o envio do token por e-mail (substitua por chamada real de API)
 function sendTokenToEmail(email, token) {
   // Aqui você faria uma chamada para o backend enviar o e-mail
-  alert(`(Simulação) Código enviado para ${email}: ${token}`);
-  console.log(`Código enviado para ${email}: ${token}`);
+  alert(`(Simulação) ${t("recover.code_sent")} (${email}: ${token})`);
+  console.log(`${t("recover.code_sent")} ${email}: ${token}`);
 }
 
 // =========================
@@ -35,7 +44,7 @@ function startTimer() {
     timerEl.textContent = `00:${timeLeft.toString().padStart(2, "0")}`;
     if (timeLeft <= 0) {
       clearInterval(timerInterval);
-      timerEl.textContent = "Expirado";
+      timerEl.textContent = t("recover.code_error"); // Expirado
       resendBtn.style.display = "block";
     }
   }, 1000);
@@ -116,11 +125,13 @@ document.querySelectorAll(".token-digit").forEach((input, idx, arr) => {
 // =========================
 function validarTokenAutomatico(code) {
   if (code !== generatedToken) {
-    document.getElementById("token-error").textContent = "Código incorreto.";
+    document.getElementById("token-error").textContent =
+      t("recover.code_error");
     return;
   }
   if (timeLeft <= 0) {
-    document.getElementById("token-error").textContent = "Código expirado.";
+    document.getElementById("token-error").textContent =
+      t("recover.code_error");
     return;
   }
   clearInterval(timerInterval);
@@ -157,18 +168,21 @@ document.getElementById("save-password-btn").onclick = function () {
   const pass = document.getElementById("new-password").value;
   const conf = document.getElementById("confirm-password").value;
   if (!pass || !conf) {
-    document.getElementById("password-error").textContent =
-      "Preencha ambos os campos.";
+    document.getElementById("password-error").textContent = t(
+      "recover.password_error"
+    );
     return;
   }
   if (pass.length < 6) {
-    document.getElementById("password-error").textContent =
-      "A senha deve ter pelo menos 6 caracteres.";
+    document.getElementById("password-error").textContent = t(
+      "recover.password_error"
+    );
     return;
   }
   if (pass !== conf) {
-    document.getElementById("password-error").textContent =
-      "As senhas não coincidem.";
+    document.getElementById("password-error").textContent = t(
+      "recover.password_error"
+    );
     return;
   }
   // Aqui você faria a chamada para salvar a nova senha no backend

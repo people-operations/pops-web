@@ -11,6 +11,11 @@
       href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../../../assets/svg/logo-icon.svg"
+    />
   </head>
   <body>
     <header>
@@ -27,10 +32,9 @@
             alt="Dashboard "
             width="20"
             height="20"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Dashboard</a
-        >
+            style="vertical-align: middle; margin-right: 6px" />
+          <span data-i18n="navbar.dashboard"></span
+        ></a>
         <a class="active" href="squads.html">
           <img
             src="../../../assets/svg/squads.svg"
@@ -40,7 +44,7 @@
             class="logo-header"
             style="vertical-align: middle; margin-right: 6px"
           />
-          Squads
+          <span data-i18n="navbar.squads"></span>
         </a>
         <a href="../projects/projects.html">
           <img
@@ -50,7 +54,7 @@
             height="20"
             style="vertical-align: middle; margin-right: 6px"
           />
-          Projetos
+          <span data-i18n="navbar.projects"></span>
         </a>
         <a href="../collaborators/collaborators.html">
           <img
@@ -60,7 +64,7 @@
             height="20"
             style="vertical-align: middle; margin-right: 6px"
           />
-          Colaboradores
+          <span data-i18n="navbar.collaborators"></span>
         </a>
         <a href="../jobs-skills/jobs-skills.html">
           <img
@@ -70,7 +74,7 @@
             height="20"
             style="vertical-align: middle; margin-right: 6px"
           />
-          Cargos e Skills
+          <span data-i18n="navbar.jobs_skills"></span>
         </a>
         <a href="../area/area.html">
           <img
@@ -80,7 +84,7 @@
             height="20"
             style="vertical-align: middle; margin-right: 6px"
           />
-          Área
+          <span data-i18n="navbar.area"></span>
         </a>
       </nav>
       <div class="profile-menu">
@@ -119,17 +123,14 @@
     <main class="squads-container">
       <div class="squads-header">
         <div>
-          <h2 class="gradient-title">Squads</h2>
-          <p class="subtitle">
-            Gerencie e monitore suas equipes e a alocação de carga de trabalho.
-          </p>
+          <h2 class="gradient-title" data-i18n="squads.main_title"></h2>
+          <p class="subtitle" data-i18n="squads.subtitle"></p>
         </div>
         <button
           class="create-squad btn"
           onclick="window.location.href='squads-form/squads-form.html'"
-        >
-          + Criar squad
-        </button>
+          data-i18n="squads.create"
+        ></button>
       </div>
 
       <div id="squad-list" class="squad-cards"></div>
@@ -137,5 +138,6 @@
 
     <script src="squads.js"></script>
     <script src="../../../assets/js/app.js"></script>
+    <script src="../../../assets/js/i18nService.js" defer></script>
   </body>
 </html>

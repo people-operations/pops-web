@@ -1,27 +1,55 @@
+/* =====================
+   1. GLOBAIS E CONTAINERS PRINCIPAIS
+   ===================== */
 .create-squad-page {
   padding: 32px;
   margin: auto;
 }
+.form-container {
+  max-width: none !important;
+}
 
-.back-link {
-  display: inline-block;
-  margin-bottom: 16px;
-  text-decoration: none;
-  font-size: 14px;
-  color: black;
+/* =====================
+   2. LAYOUTS GERAIS
+   ===================== */
+.row {
+  display: flex;
+  gap: 16px;
+}
+.col {
+  flex: 1;
+}
+
+/* =====================
+   3. TÍTULOS E TIPOGRAFIA
+   ===================== */
+h2 {
+  font-size: 24px;
+  font-weight: 500;
+}
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 16px;
+}
+.custom-p {
+  font-size: 14px !important;
   font-weight: 400;
+  margin-bottom: 4px;
+}
+.custom-margin {
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
-.back-link:hover {
-  text-decoration: underline;
-}
-
+/* =====================
+   4. FORMULÁRIOS E CAMPOS
+   ===================== */
 .form-squad label {
   font-weight: 400;
   display: block;
   margin-top: 16px;
 }
-
 .form-squad input,
 .form-squad select,
 .form-squad textarea {
@@ -33,39 +61,27 @@
   font-size: 14px;
   background: transparent;
 }
-
 .form-squad textarea::placeholder {
   font-family: "Poppins", sans-serif;
 }
-
-.form-container {
-  max-width: none !important;
-}
-
-.row {
-  display: flex;
-  gap: 16px;
-}
-
-.col {
-  flex: 1;
-}
-
-h2 {
-  font-size: 24px;
-  font-weight: 500;
-}
-
-h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-top: 16px;
-}
-
 textarea {
   resize: vertical;
 }
 
+/* =====================
+   5. COMPONENTES (CARDS, MODAIS, BOTÕES, LISTAS)
+   ===================== */
+.back-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  text-decoration: none;
+  font-size: 14px;
+  color: black;
+  font-weight: 400;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
 .team-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -73,19 +89,6 @@ textarea {
   justify-items: start;
   margin-top: 16px;
 }
-
-@media (max-width: 1100px) {
-  .team-list {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 700px) {
-  .team-list {
-    grid-template-columns: 1fr;
-  }
-}
-
 .member-card {
   width: 360px;
   min-width: 30vw;
@@ -98,13 +101,15 @@ textarea {
   height: 189px;
   background: white;
 }
-
 .member-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
+.member-header strong {
+  font-size: 20px;
+  font-weight: 600;
+}
 .member-actions button {
   background: none;
   border: none;
@@ -113,12 +118,10 @@ textarea {
   border-radius: 6px;
   transition: box-shadow 0.2s, transform 0.2s;
 }
-
 .member-actions button:hover {
   box-shadow: 0 2px 12px 0 rgba(80, 80, 80, 0.12);
   transform: scale(1.08);
 }
-
 .tags span {
   background: #007bff;
   color: white;
@@ -128,7 +131,6 @@ textarea {
   border-radius: 12px;
   margin-right: 6px;
 }
-
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -136,7 +138,6 @@ textarea {
   margin-top: 24px;
   gap: 12px;
 }
-
 .cancel {
   background: none;
   border: #7d1bff 2px solid !important;
@@ -151,11 +152,10 @@ textarea {
   letter-spacing: 0 !important;
   font-family: "Poppins", sans-serif;
 }
-
 .cancel:hover {
   color: #fff !important;
+  background: #7d1bff !important;
 }
-
 .save {
   background-color: #7d1bff;
   color: white;
@@ -170,7 +170,6 @@ textarea {
   letter-spacing: 0 !important;
   font-family: "Poppins", sans-serif;
 }
-
 .save-modal {
   background-color: #7d1bff;
   color: white;
@@ -184,28 +183,10 @@ textarea {
   letter-spacing: 0 !important;
   font-family: "Poppins", sans-serif;
 }
-
-.member-header strong {
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.custom-p {
-  font-size: 14px !important;
-  font-weight: 400;
-  margin-bottom: 4px;
-}
-
-.custom-margin {
-  margin-top: 8px;
-  margin-bottom: 8px;
-}
-
 .team-section {
   display: flex;
   justify-content: space-between;
 }
-
 .team-section p {
   margin-top: 24px;
   align-self: center;
@@ -215,38 +196,43 @@ textarea {
   align-items: center;
   gap: 4px;
 }
-
 .team-section p:hover {
   color: #7d1bff;
   text-decoration: underline;
 }
-
 .team-section p img {
   transition: filter 0.2s;
 }
-
 .team-section p:hover img {
   filter: invert(27%) sepia(87%) saturate(7476%) hue-rotate(259deg)
     brightness(90%) contrast(101%) !important;
 }
-
-body.dark .team-section p:hover,
-body.dark .team-section p:hover img {
-  color: #7d1bff;
-  /* Para texto */
-  filter: invert(27%) sepia(87%) saturate(7476%) hue-rotate(259deg)
-    brightness(90%) contrast(101%) !important;
-  /* Para imagem */
-}
-
-body.dark .team-section p img {
-  transition: filter 0.2s;
-}
-
 .hidden {
   display: none !important;
 }
-
+.add-people-hover {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.add-people-hover p {
+  margin-top: 24px;
+  align-self: center;
+  transition: color 0.2s;
+}
+.add-people-hover:hover p {
+  color: #7d1bff;
+  text-decoration: underline;
+}
+.add-people-hover:hover img {
+  filter: invert(27%) sepia(87%) saturate(7476%) hue-rotate(259deg)
+    brightness(90%) contrast(101%) !important;
+}
+.tags-container {
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
 /* Overlay escuro */
 .modal-overlay {
   position: fixed;
@@ -257,7 +243,6 @@ body.dark .team-section p img {
   background: rgba(0, 0, 0, 0.5);
   z-index: 100;
 }
-
 /* Container do modal */
 .modal {
   position: fixed;
@@ -276,7 +261,6 @@ body.dark .team-section p img {
   display: flex;
   flex-direction: column;
 }
-
 /* Header com título e botão de fechar */
 .modal-header {
   display: flex;
@@ -293,7 +277,6 @@ body.dark .team-section p img {
   font-size: 24px;
   cursor: pointer;
 }
-
 /* Formulário interno */
 .modal label {
   display: block;
@@ -308,26 +291,15 @@ body.dark .team-section p img {
   border-radius: 4px;
   background: transparent;
 }
-
-/* Botões de ação */
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 24px;
-}
-
 .form-modal {
   height: 88%;
   display: flex;
   flex-direction: column;
   flex: 1;
 }
-
 .form-modal .form-actions {
   margin-top: auto;
 }
-
 /* pílulas de role */
 #selectedRoles span {
   display: inline-flex;
@@ -350,11 +322,34 @@ body.dark .team-section p img {
   cursor: pointer;
 }
 
-.tags-container {
-  margin-top: 16px;
-  margin-bottom: 24px;
+/* =====================
+   6. MEDIA QUERIES
+   ===================== */
+@media (max-width: 1100px) {
+  .team-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .team-list {
+    grid-template-columns: 1fr;
+  }
 }
 
+/* =====================
+   7. DARK MODE
+   ===================== */
+body.dark .team-section p:hover,
+body.dark .team-section p:hover img {
+  color: #7d1bff;
+  /* Para texto */
+  filter: invert(27%) sepia(87%) saturate(7476%) hue-rotate(259deg)
+    brightness(90%) contrast(101%) !important;
+  /* Para imagem */
+}
+body.dark .team-section p img {
+  transition: filter 0.2s;
+}
 body.dark .modal {
   background: #23232b;
   color: #f5f5f5;
@@ -411,7 +406,7 @@ body.dark .form-container {
 body.dark .back-link {
   color: #f5f5f5;
 }
-body.dark .back-link img,
+body.dark .create-squad-page img,
 body.dark .team-section p img {
   filter: invert(1) brightness(1.2) contrast(1.1) !important;
 }
@@ -421,4 +416,10 @@ body.dark .member-actions img {
 body.dark .form-actions .cancel:hover {
   color: #fff !important;
   background: #7d1bff22;
+}
+body.dark .add-people-hover:hover,
+body.dark .add-people-hover:hover img {
+  color: #7d1bff;
+  filter: invert(27%) sepia(87%) saturate(7476%) hue-rotate(259deg)
+    brightness(90%) contrast(101%) !important;
 }
