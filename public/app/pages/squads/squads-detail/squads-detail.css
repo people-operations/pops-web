@@ -195,6 +195,7 @@
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   height: 94px;
   width: 100% !important;
+  margin-bottom: 16px;
 }
 .project-info {
   display: flex;

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>POPs Squads</title>
+    <title data-i18n="squads_detail.team_title">POPs Squads</title>
     <link rel="stylesheet" href="squads-detail.css" />
     <link rel="stylesheet" href="../../../../assets/css/style.css" />
     <link
@@ -17,344 +17,259 @@
     />
   </head>
   <body>
-    <header>
-      <img
-        src="../../../../assets/svg/logo.svg"
-        alt="Logo POPs"
-        class="logo-header"
-        style="height: 32px; vertical-align: middle; margin-right: 8px"
-      />
-      <nav>
-        <a href="../../dashboard/dashboard.html">
-          <img
-            src="../../../../assets/svg/graphic.svg"
-            alt="Dashboard "
-            width="20"
-            height="20"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Dashboard</a
-        >
-        <a class="active" href="../squads.html">
-          <img
-            src="../../../../assets/svg/squads.svg"
-            alt="Squads"
-            width="20"
-            height="20"
-            class="logo-header"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Squads
-        </a>
-        <a href="../../projects/projects.html">
-          <img
-            src="../../../../assets/svg/projects.svg"
-            alt="Projetos"
-            width="20"
-            height="20"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Projetos
-        </a>
-        <a href="../../collaborators/collaborators.html">
-          <img
-            src="../../../../assets/svg/colaborator.svg"
-            alt="Colaboradores"
-            width="20"
-            height="20"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Colaboradores
-        </a>
-        <a href="../../jobs-skills/jobs-skills.html">
-          <img
-            src="../../../../assets/svg/engines.svg"
-            alt="Cargos e Skills"
-            width="20"
-            height="20"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Cargos e Skills
-        </a>
-        <a href="../../area/area.html">
-          <img
-            src="../../../../assets/svg/area.svg"
-            alt="Área"
-            width="20"
-            height="20"
-            style="vertical-align: middle; margin-right: 6px"
-          />
-          Área
-        </a>
-      </nav>
-      <div class="profile-menu">
-        <button
-          id="theme-toggle"
-          class="theme-toggle-btn"
-          title="Alternar tema"
-        >
-          <span id="theme-icon">🌞</span>
-        </button>
-        <div class="avatar">K</div>
-        <span class="chevron" aria-hidden="true">
-          <svg
-            width="20"
-            height="10"
-            viewBox="0 0 21 9.5"
-            fill="none"
-            stroke="#555"
-            stroke-width="3"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="2 2 10.5 7.5 19 2" />
-          </svg>
-        </span>
-        <div id="dropdown" class="dropdown hidden">
-          <a
-            href="../../collaborators/collaborators-detail/collaborators-detail.html"
-            >Perfil</a
-          >
-          <a href="../../inbox/inbox.html">Caixa de entrada</a>
-          <a href="../../../auth/login.html">Sair</a>
-        </div>
-      </div>
-    </header>
-    <main class="container">
-      <!-- Sidebar -->
-      <!-- Sidebar summary -->
-      <div class="summary">
-        <div class="summary-header">
-          <h2>Backend Team Alpha</h2>
-          <div class="summary-actions">
+    <div
+      id="loader"
+      class="center"
+      style="height: 100vh; font-size: 1.5rem; background-color: #fff"
+    ></div>
+    <div id="main-content" class="hidden">
+      <header>
+        <img
+          src="../../../../assets/svg/logo.svg"
+          alt="Logo POPs"
+          class="logo-header"
+          style="height: 32px; vertical-align: middle; margin-right: 8px"
+          onclick="window.location.href='../../dashboard/dashboard.html'"
+        />
+        <nav>
+          <a href="../../dashboard/dashboard.html">
             <img
-              src="../../../../assets/svg/edit-button.svg"
-              alt="Editar"
-              class="action-icon"
-              style="vertical-align: middle; width: 34px; height: 34px"
-            />
+              src="../../../../assets/svg/graphic.svg"
+              alt="Dashboard "
+              width="20"
+              height="20"
+              style="vertical-align: middle; margin-right: 6px" />
+            <span data-i18n="navbar.dashboard"></span
+          ></a>
+          <a class="active" href="../squads.html">
             <img
-              src="../../../../assets/svg/trash-button.svg"
-              alt="Remover"
-              class="action-icon"
-              style="vertical-align: middle; width: 34px; height: 34px"
+              src="../../../../assets/svg/squads.svg"
+              alt="Squads"
+              width="20"
+              height="20"
+              class="logo-header"
+              style="vertical-align: middle; margin-right: 6px"
             />
+            <span data-i18n="navbar.squads"></span>
+          </a>
+          <a href="../../projects/projects.html">
+            <img
+              src="../../../../assets/svg/projects.svg"
+              alt="Projetos"
+              width="20"
+              height="20"
+              style="vertical-align: middle; margin-right: 6px"
+            />
+            <span data-i18n="navbar.projects"></span>
+          </a>
+          <a href="../../collaborators/collaborators.html">
+            <img
+              src="../../../../assets/svg/colaborator.svg"
+              alt="Colaboradores"
+              width="20"
+              height="20"
+              style="vertical-align: middle; margin-right: 6px"
+            />
+            <span data-i18n="navbar.collaborators"></span>
+          </a>
+          <a href="../../jobs-skills/jobs-skills.html">
+            <img
+              src="../../../../assets/svg/engines.svg"
+              alt="Cargos e Skills"
+              width="20"
+              height="20"
+              style="vertical-align: middle; margin-right: 6px"
+            />
+            <span data-i18n="navbar.jobs_skills"></span>
+          </a>
+          <a href="../../area/area.html">
+            <img
+              src="../../../../assets/svg/area.svg"
+              alt="Área"
+              width="20"
+              height="20"
+              style="vertical-align: middle; margin-right: 6px"
+            />
+            <span data-i18n="navbar.area"></span>
+          </a>
+        </nav>
+        <div class="profile-menu">
+          <button
+            id="theme-toggle"
+            class="theme-toggle-btn"
+            title="Alternar tema"
+          >
+            <span id="theme-icon">🌞</span>
+          </button>
+          <div class="avatar">K</div>
+          <span class="chevron" aria-hidden="true">
+            <svg
+              width="20"
+              height="10"
+              viewBox="0 0 21 9.5"
+              fill="none"
+              stroke="#555"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="2 2 10.5 7.5 19 2" />
+            </svg>
+          </span>
+          <div id="dropdown" class="dropdown hidden">
+            <a
+              href="../../collaborators/collaborators-detail/collaborators-detail.html"
+              data-i18n="navbar.profile"
+            ></a>
+            <a href="../../inbox/inbox.html" data-i18n="navbar.inbox"></a>
+            <a href="../../../auth/login.html" data-i18n="navbar.logout"></a>
           </div>
         </div>
-
-        <div class="projects-count">10 projetos ativos</div>
-
-        <p class="description">
-          Equipe principal de desenvolvimento backend com foco em criação de
-          APIs e arquitetura de microsserviços
-        </p>
-
-        <p class="info-line">
-          <strong>Área:</strong> Desenvolvimento • <strong>Membros:</strong> 5
-        </p>
-
-        <p class="info-line"><strong>Skills da squad:</strong></p>
-        <div class="skills">
-          <span class="skill">Python</span>
-          <span class="skill">Java</span>
-          <span class="skill">Node.js</span>
-        </div>
-      </div>
-
-      <!-- Main content -->
-      <section class="content">
-        <!-- Top stats -->
-        <div class="stats-container">
-          <div class="card azul">
-            <h3>TOTAL DE HORAS ALOCADAS</h3>
-            <div class="value">190h</div>
-            <small>de 200h disponível</small>
-          </div>
-          <div class="card rosa">
-            <h3>ÍNDICE DE SOBRECARGA</h3>
-            <div class="value">95%</div>
-            <small>Baseado em geral do equipe</small>
-          </div>
-
-          <div class="card verde">
-            <h3>ÍNDICE DE SATISFAÇÃO</h3>
-            <div class="value">4.5 / 5.0</div>
-            <small>Do geral da equipe</small>
-          </div>
-        </div>
-        <!-- Financial overview -->
-        <div class="financial-overview">
-          <div class="card">
-            <h3>Visão Geral Financeira</h3>
-            <div class="financial-stats">
-              <div class="stat-item">
-                <p>Investimento Mensal</p>
-                <div class="value">R$37.500</div>
-                <small>Com base nos salários da equipe</small>
-              </div>
-              <div class="stat-item">
-                <p>Orçamento Total do Projeto</p>
-                <div class="value">R$58.000</div>
-                <small>Todos os projetos ativos</small>
-              </div>
+      </header>
+      <main class="container">
+        <!-- Sidebar summary -->
+        <div class="summary">
+          <div class="summary-header">
+            <h2 data-i18n="squads_detail.team_title"></h2>
+            <div class="summary-actions">
+              <img
+                src="../../../../assets/svg/edit-button.svg"
+                alt="Editar"
+                class="action-icon"
+                style="vertical-align: middle; width: 34px; height: 34px"
+                title=""
+                data-i18n="squads_detail.edit"
+              />
+              <img
+                src="../../../../assets/svg/trash-button.svg"
+                alt="Remover"
+                class="action-icon"
+                style="vertical-align: middle; width: 34px; height: 34px"
+                title=""
+                data-i18n="squads_detail.remove"
+              />
             </div>
+          </div>
+          <div
+            class="projects-count"
+            data-i18n="squads_detail.active_projects"
+          ></div>
+          <p class="description" data-i18n="squads_detail.description"></p>
+          <p class="info-line">
+            <strong data-i18n="squads_detail.area"></strong> Desenvolvimento •
+            <strong data-i18n="squads_detail.members"></strong> 5
+          </p>
+          <p class="info-line">
+            <strong data-i18n="squads_detail.skills"></strong>
+          </p>
+          <div class="skills">
+            <span class="skill">Python</span>
+            <span class="skill">Java</span>
+            <span class="skill">Node.js</span>
           </div>
         </div>
-        <!-- Team members -->
-        <div class="team-members">
-          <h4>Equipe</h4>
-          <div class="members-list">
-            <div class="member-card card">
-              <div class="member-header">
-                <strong>Mateus Fantin</strong>
-                <span class="status-badge">Status aqui</span>
-              </div>
-              <p class="custom-p custom-margin function">Funções:</p>
-              <div class="tags">
-                <span>Techlead</span>
-                <span>Desenvolvedor Sênior Back-end</span>
-              </div>
-              <p class="custom-p">Horas alocadas: 00hrs</p>
-              <p class="custom-p">Horas disponíveis: 00hrs</p>
+        <!-- Main content -->
+        <section class="content">
+          <!-- Top stats -->
+          <div class="stats-container">
+            <div class="card azul">
+              <h3 data-i18n="squads_detail.allocated_hours"></h3>
+              <div class="value" id="allocated-hours"></div>
+              <small id="allocated-hours-available"></small>
             </div>
-            <div class="member-card card">
-              <div class="member-header">
-                <strong>Ana Souza</strong>
-                <span class="status-badge">Status aqui</span>
-              </div>
-              <p class="custom-p custom-margin function">Funções:</p>
-              <div class="tags">
-                <span>Desenvolvedor Júnior</span>
-              </div>
-              <p class="custom-p">Horas alocadas: 20hrs</p>
-              <p class="custom-p">Horas disponíveis: 180hrs</p>
+            <div class="card rosa">
+              <h3 data-i18n="squads_detail.overload_index"></h3>
+              <div class="value" id="overload-index"></div>
+              <small data-i18n="squads_detail.overload_index_hint"></small>
             </div>
-            <div class="member-card card">
-              <div class="member-header">
-                <strong>Carlos Lima</strong>
-                <span class="status-badge">Status aqui</span>
-              </div>
-              <p class="custom-p custom-margin function">Funções:</p>
-              <div class="tags">
-                <span>DevOps</span>
-              </div>
-              <p class="custom-p">Horas alocadas: 15hrs</p>
-              <p class="custom-p">Horas disponíveis: 185hrs</p>
+            <div class="card verde">
+              <h3 data-i18n="squads_detail.satisfaction_index"></h3>
+              <div class="value" id="satisfaction-index"></div>
+              <small data-i18n="squads_detail.satisfaction_index_hint"></small>
             </div>
           </div>
+          <!-- Financial overview -->
+          <div class="financial-overview">
+            <div class="card">
+              <h3 data-i18n="squads_detail.financial_overview"></h3>
+              <div class="financial-stats">
+                <div class="stat-item">
+                  <p data-i18n="squads_detail.monthly_investment"></p>
+                  <div class="value" id="monthly-investment"></div>
+                  <small
+                    data-i18n="squads_detail.monthly_investment_hint"
+                  ></small>
+                </div>
+                <div class="stat-item">
+                  <p data-i18n="squads_detail.total_budget"></p>
+                  <div class="value" id="total-budget"></div>
+                  <small data-i18n="squads_detail.total_budget_hint"></small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Team members -->
+          <div class="team-members">
+            <h4 data-i18n="squads_detail.team"></h4>
+            <div class="members-list" id="members-list">
+              <!-- Os cards de membros serão renderizados via JS -->
+            </div>
+          </div>
+          <!-- Projects list -->
+          <div class="projects-list">
+            <header class="projects-header">
+              <h4 data-i18n="squads_detail.projects"></h4>
+              <div class="status-filter">
+                <select id="status-select" required>
+                  <option value="" disabled selected hidden></option>
+                  <option data-i18n="squads_detail.all"></option>
+                  <option data-i18n="squads_detail.in_progress"></option>
+                  <option data-i18n="squads_detail.planned"></option>
+                  <option data-i18n="squads_detail.completed"></option>
+                </select>
+                <label
+                  for="status-select"
+                  data-i18n="squads_detail.status"
+                ></label>
+              </div>
+            </header>
+            <div id="projects-cards">
+              <!-- Os cards de projetos serão renderizados via JS -->
+            </div>
+          </div>
+        </section>
+      </main>
+      <div class="modal-overlay hidden" id="deleteModalOverlay"></div>
+      <div class="modal hidden" id="delete-modal">
+        <div class="modal-header">
+          <h2 data-i18n="squads_detail.delete_title"></h2>
+          <button
+            class="close-btn"
+            id="closeDeleteModal"
+            data-i18n="squads_detail.close"
+          ></button>
         </div>
-        <!-- Projects list -->
-        <div class="projects-list">
-          <header class="projects-header">
-            <h4>Projetos</h4>
-            <div class="status-filter">
-              <select id="status-select" required>
-                <option value="" disabled selected hidden></option>
-                <option>Todos</option>
-                <option>Em andamento</option>
-                <option>Planejado</option>
-                <option>Concluído</option>
-              </select>
-              <label for="status-select">Status</label>
-            </div>
-          </header>
-
-          <div class="project-card card">
-            <div class="project-info">
-              <div class="project-title">
-                <strong class="project-title">E‑commerce Platform</strong>
-                <span class="project-status">Em andamento</span>
-              </div>
-              <div class="dates">
-                <span
-                  ><img
-                    src="../../../../assets/svg/calendar.svg"
-                    style="height: 32px; vertical-align: middle"
-                  />
-                  Começou: 01/06/2024</span
-                >
-                <span
-                  ><img
-                    src="../../../../assets/svg/calendar.svg"
-                    style="height: 32px; vertical-align: middle"
-                  />
-                  Terminar: 10/06/2025</span
-                >
-              </div>
-            </div>
-          </div>
-
-          <div class="project-card card">
-            <div class="project-info">
-              <div class="project-title">
-                <strong class="project-title">CMS Rewrite</strong>
-                <span class="project-status">Em andamento</span>
-              </div>
-              <div class="dates">
-                <span
-                  ><img
-                    src="../../../../assets/svg/calendar.svg"
-                    style="height: 32px; vertical-align: middle"
-                  />
-                  Começou: 15/01/2025</span
-                >
-                <span
-                  ><img
-                    src="../../../../assets/svg/calendar.svg"
-                    style="height: 32px; vertical-align: middle"
-                  />
-                  Terminar: 15/07/2025</span
-                >
-              </div>
-            </div>
-          </div>
-
-          <div class="project-card card">
-            <div class="project-info">
-              <div class="project-title">
-                <strong class="project-title">API Gateway Upgrade</strong>
-                <span class="project-status">Planejado</span>
-              </div>
-              <div class="dates">
-                <span
-                  ><img
-                    src="../../../../assets/svg/calendar.svg"
-                    style="height: 32px; vertical-align: middle"
-                  />
-                  Começou: 01/06/2025</span
-                >
-                <span
-                  ><img
-                    src="../../../../assets/svg/calendar.svg"
-                    style="height: 32px; vertical-align: middle"
-                  />
-                  Terminar: 01/08/2025</span
-                >
-              </div>
-            </div>
-          </div>
+        <div style="margin-top: 24px">
+          <p data-i18n="squads_detail.delete_warning"></p>
         </div>
-      </section>
-    </main>
-    <div class="modal-overlay hidden" id="deleteModalOverlay"></div>
-    <div class="modal hidden" id="delete-modal">
-      <div class="modal-header">
-        <h2>Deseja apagar essa squad?</h2>
-        <button class="close-btn" id="closeDeleteModal">×</button>
-      </div>
-      <div style="margin-top: 24px">
-        <p>Esta ação não poderá ser desfeita.</p>
-      </div>
-      <div class="form-actions">
-        <button type="button" class="btn cancel" id="cancel-delete">
-          Cancelar
-        </button>
-        <button type="button" class="btn save-modal" id="confirm-delete">
-          Apagar
-        </button>
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn cancel"
+            id="cancel-delete"
+            data-i18n="squads_detail.cancel"
+          ></button>
+          <button
+            type="button"
+            class="btn save-modal"
+            id="confirm-delete"
+            data-i18n="squads_detail.delete"
+          ></button>
+        </div>
       </div>
     </div>
+    <script src="squads-detail.js"></script>
+    <script src="../../../../assets/js/app.js"></script>
+    <script src="../../../../assets/js/i18nService.js"></script>
   </body>
-  <script src="squads-detail.js"></script>
-  <script src="../../../../assets/js/app.js"></script>
 </html>

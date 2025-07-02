@@ -5,6 +5,11 @@
     <title>POPs Dashboard</title>
     <link rel="stylesheet" href="dashboard.css" />
     <link rel="stylesheet" href="../../../assets/css/style.css" />
+    <link rel="stylesheet" href="area.css" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="icon" type="image/svg+xml" href="../../../assets/svg/logo.svg" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
@@ -15,28 +20,235 @@
         alt="Logo POPs"
         class="logo-header"
         style="height: 32px; vertical-align: middle; margin-right: 8px"
+        onclick="window.location.href='../dashboard/dashboard.html'"
       />
-      
       <nav>
-        <a href="../dashboard/dashboard.html">Dashboard</a>
-        <a href="../squads/squads.html">Squads</a>
-        <a href="../projects/projects.html">Projetos</a>
-        <a href="../collaborators/collaborators.html">Colaboradores</a>
-        <a href="../jobs-skills/jobs-skills.html">Cargos e Skills</a>
-        <a class="active" href="area.html">Área</a>
+        <a href="../dashboard/dashboard.html">
+          <img
+            src="../../../assets/svg/graphic.svg"
+            alt="Dashboard"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px" />
+          <span data-i18n="navbar.dashboard"></span
+        ></a>
+        <a href="../squads/squads.html">
+          <img
+            src="../../../assets/svg/squads.svg"
+            alt="Squads"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.squads"></span>
+        </a>
+        <a href="../projects/projects.html">
+          <img
+            src="../../../assets/svg/projects.svg"
+            alt="Projetos"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.projects"></span>
+        </a>
+        <a href="../collaborators/collaborators.html">
+          <img
+            src="../../../assets/svg/colaborator.svg"
+            alt="Colaboradores"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.collaborators"></span>
+        </a>
+        <a href="../jobs-skills/jobs-skills.html">
+          <img
+            src="../../../assets/svg/engines.svg"
+            alt="Cargos e Skills"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.jobs_skills"></span>
+        </a>
+        <a class="active" href="area.html">
+          <img
+            src="../../../assets/svg/area.svg"
+            alt="Área"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.area"></span>
+        </a>
       </nav>
       <div class="profile-menu">
+        <button
+          id="theme-toggle"
+          class="theme-toggle-btn"
+          title="Alternar tema"
+        >
+          <span id="theme-icon">🌞</span>
+        </button>
         <div class="avatar">K</div>
-        <span class="chevron">&#x25BC;</span>
+        <span class="chevron" aria-hidden="true">
+          <svg
+            width="20"
+            height="10"
+            viewBox="0 0 21 9.5"
+            fill="none"
+            stroke="#555"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="2 2 10.5 7.5 19 2" />
+          </svg>
+        </span>
         <div id="dropdown" class="dropdown hidden">
           <a
             href="../collaborators/collaborators-detail/collaborators-detail.html"
-            >Perfil</a
-          >
-          <a href="../inbox/inbox.html">Caixa de entrada</a>
-          <a href="../../auth/login.html">Sair</a>
+            ><span data-i18n="navbar.profile"></span
+          ></a>
+          <a href="../inbox/inbox.html"
+            ><span data-i18n="navbar.inbox"></span
+          ></a>
+          <a href="../../auth/login.html"
+            ><span data-i18n="navbar.logout"></span
+          ></a>
         </div>
       </div>
     </header>
+    <main class="container">
+      <div class="d-flex justify-between">
+        <div>
+          <h1>Área</h1>
+          <p>Gerenciar áreas organizacionais e departamentos</p>
+        </div>
+        <button class="primary btn">+ Adicionar área</button>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nome da área</th>
+            <th>Descrição</th>
+            <th>QTD de squads</th>
+            <th>QTD de Pessoas</th>
+            <th>Sobrecarga Média</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Nome aqui</td>
+            <td>Cargo</td>
+            <td>00</td>
+            <td>00</td>
+            <td>13%</td>
+            <td>
+              <button class="icon-btn">✏️</button>
+              <button class="icon-btn">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Nome aqui</td>
+            <td>Cargo</td>
+            <td>00</td>
+            <td>00</td>
+            <td>13%</td>
+            <td>
+              <button class="icon-btn">✏️</button>
+              <button class="icon-btn">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Nome aqui</td>
+            <td>Cargo</td>
+            <td>00</td>
+            <td>00</td>
+            <td>13%</td>
+            <td>
+              <button class="icon-btn">✏️</button>
+              <button class="icon-btn">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+    <div id="modal-cargo" class="modal hidden">
+      <div class="modal-content">
+        <span class="close" onclick="fecharModal('modal-cargo')">&times;</span>
+        <h3>Adicionar área</h3>
+        <form id="form-cargo">
+          <label for="nome">Nome da área</label>
+          <input
+            type="text"
+            id="nome"
+            name="nome"
+            placeholder="Nome aqui"
+            required
+          />
+
+          <label for="descricao">Descrição</label>
+          <textarea
+            id="descricao"
+            name="descricao"
+            placeholder="Descrição aqui"
+          ></textarea>
+
+          <!-- Campos de exemplo, podem ser removidos se não forem usados -->
+          <label for="senioridade" style="display: none">Senioridade</label>
+          <select id="senioridade" name="senioridade" style="display: none">
+            <option value="">Selecione aqui</option>
+            <option value="jr">Júnior</option>
+            <option value="pl">Pleno</option>
+            <option value="sr">Sênior</option>
+          </select>
+
+          <label for="taxa" style="display: none">Taxa Horária</label>
+          <select id="taxa" name="taxa" style="display: none">
+            <option value="00">00</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+          </select>
+
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn secondary"
+              onclick="fecharModal('modal-cargo')"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn primary">Criar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div id="modal-excluir" class="modal hidden">
+      <div class="modal-content">
+        <span class="close" onclick="fecharModal('modal-excluir')"
+          >&times;</span
+        >
+        <h3>Confirmar exclusão</h3>
+        <p>Tem certeza que deseja excluir este item?</p>
+        <div class="modal-actions">
+          <button class="btn secondary" onclick="fecharModal('modal-excluir')">
+            Cancelar
+          </button>
+          <button class="btn danger" onclick="confirmarExclusao()">
+            Excluir
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
+
+<script src="area.js"></script>
+<script src="../../../assets/js/i18nService.js"></script>
+<script src="../../../assets/js/app.js"></script>
