@@ -1,0 +1,83 @@
+.container {
+  padding: 24px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  margin: 0 4px;
+  cursor: pointer;
+}
+
+.btn {
+  height: 40px !important;
+  display: flex;
+  align-self: end;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.modal {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: white;
+  padding: 24px;
+  width: 360px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+}
+
+.modal-content .close {
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.modal-content label {
+  display: block;
+  margin-top: 12px;
+}
+
+.modal-content input,
+.modal-content textarea,
+.modal-content select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.hidden {
+  display: none;
+}
+
+.btn.danger {
+  background-color: #e53935;
+  color: white;
+}
