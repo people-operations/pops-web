@@ -121,6 +121,5 @@ Distribuído sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 ## 💡 Contato
 
 Desenvolvido com 💜 por Equipe People Operations
-📫 [email@empresa.com](mailto:email@empresa.com) | 🌐 [peopleoperations.dev](https://peopleoperations.dev)
 
 ---
