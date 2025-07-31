@@ -1,0 +1,285 @@
+/* 1. LAYOUT PRINCIPAL */
+.container {
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+}
+.summary {
+  flex-shrink: 0;
+  width: 300px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 2. SUMMARY HEADER */
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.avatar-large img {
+  width: 100%;
+  border-radius: 50%;
+  display: block;
+}
+.summary-actions .action-icon {
+  width: 24px;
+  height: 24px;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.summary-actions .action-icon:hover {
+  transform: scale(1.1);
+}
+.collab-name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.role-area {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 12px;
+}
+.info-line {
+  font-size: 14px;
+  margin: 4px 0;
+}
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.skill {
+  background: #e0f2ff;
+  color: #0366d6;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+/* 3. DADOS PESSOAIS & ENDEREÇO */
+.data-block {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.data-block label {
+  font-size: 14px;
+}
+.data-block input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: transparent;
+}
+.certifications .cert-item {
+  display: flex;
+  justify-content: space-between;
+  background: #f3e5ff;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+.cert-period {
+  font-size: 12px;
+  color: #555;
+}
+
+/* 4. SECTIONS */
+.section {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.section-header h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.add-btn {
+  background: none;
+  border: 2px solid #7d1bff;
+  color: #7d1bff;
+  font-size: 20px;
+  line-height: 0;
+}
+.request-feedback {
+  background-color: #7d1bff;
+  color: #fff;
+  border: none;
+}
+
+/* 5. SQUADS LIST */
+.cards-list.squads-list {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+}
+.card {
+  flex: 1;
+  min-width: 180px;
+  border-radius: 8px;
+  padding: 12px;
+}
+.card.light-blue {
+  background-color: #e0f7fa;
+}
+.card.pink {
+  background-color: #fce4ec;
+}
+.card.purple {
+  background-color: #ede7f6;
+}
+.card h5 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.card p {
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+/* 6. TRILHA PROFISSIONAL */
+.track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.track-item {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+}
+.track-item.current {
+  border-color: #7d1bff;
+}
+.track-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.track-header h5 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.track-header .action-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+.small-skills .skill {
+  background: rgba(0, 123, 255, 0.1);
+  color: #007bff;
+  padding: 4px 6px;
+  font-size: 12px;
+}
+
+/* 7. FEEDBACKS */
+.feedback-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.feedback-card {
+  display: flex;
+  gap: 12px;
+  background: #e3f2fd;
+  border-radius: 8px;
+  padding: 12px;
+}
+.fb-avatar {
+  width: 40px;
+  height: 40px;
+  background: #7d1bff;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.fb-info strong {
+  display: block;
+  font-size: 14px;
+}
+.fb-info span {
+  font-size: 12px;
+  color: #555;
+}
+.fb-info p {
+  font-size: 13px;
+  margin: 4px 0 0;
+}
+
+/* 8. RESPONSIVIDADE */
+@media (max-width: 1100px) {
+  .container {
+    flex-direction: column;
+  }
+  .cards-list.squads-list {
+    overflow-x: scroll;
+  }
+}
+
+/* 9. DARK MODE */
+body.dark .summary,
+body.dark .section {
+  background: #23232b;
+  border-color: #444;
+  color: #f5f5f5;
+}
+body.dark .data-block input {
+  background: #23232b;
+  color: #f5f5f5;
+  border-color: #444;
+}
+body.dark .certifications .cert-item {
+  background: #2d2c3a;
+}
+body.dark .skill {
+  background: #2d3a4a;
+  color: #7dcfff;
+}
+body.dark .card.light-blue {
+  background-color: #1a2a3a !important;
+}
+body.dark .card.pink {
+  background-color: #3a1a2a !important;
+}
+body.dark .card.purple {
+  background-color: #1a3a2a !important;
+}
+body.dark .request-feedback {
+  background-color: #7d1bff;
+}

@@ -74,6 +74,14 @@ form {
   margin-bottom: var(--gap);
 }
 
+.form-group.floating label {
+  top: -0.6rem !important;
+}
+
+.theme-toggle-btn {
+  margin-top: 0 !important;
+}
+
 /* Botão de envio */
 .btn {
   width: 100%;

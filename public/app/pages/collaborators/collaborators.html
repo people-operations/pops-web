@@ -5,7 +5,11 @@
     <title>POPs Colaboradores</title>
     <link rel="stylesheet" href="collaborators.css" />
     <link rel="stylesheet" href="../../../assets/css/style.css" />
-    <link rel="icon" type="image/svg+xml" href="../../../assets/svg/logo.svg" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../../../assets/svg/logo-icon.svg"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
@@ -15,28 +19,252 @@
         alt="Logo POPs"
         class="logo-header"
         style="height: 32px; vertical-align: middle; margin-right: 8px"
+        onclick="window.location.href='../dashboard/dashboard.html'"
       />
-      
       <nav>
-        <a href="../dashboard/dashboard.html">Dashboard</a>
-        <a href="../squads/squads.html">Squads</a>
-        <a href="../projects/projects.html">Projetos</a>
-        <a class="active" href="collaborators.html">Colaboradores</a>
-        <a href="../jobs-skills/jobs-skills.html">Cargos e Skills</a>
-        <a href="../area/area.html">Área</a>
+        <a href="../dashboard/dashboard.html">
+          <img
+            src="../../../assets/svg/graphic.svg"
+            alt="Dashboard "
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px" />
+          <span data-i18n="navbar.dashboard"></span
+        ></a>
+        <a href="../squads/squads.html">
+          <img
+            src="../../../assets/svg/squads.svg"
+            alt="Squads"
+            width="20"
+            height="20"
+            class="logo-header"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.squads"></span>
+        </a>
+        <a href="../projects/projects.html">
+          <img
+            src="../../../assets/svg/projects.svg"
+            alt="Projetos"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.projects"></span>
+        </a>
+        <a class="active" href="collaborators.html">
+          <img
+            src="../../../assets/svg/colaborator.svg"
+            alt="Colaboradores"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.collaborators"></span>
+        </a>
       </nav>
       <div class="profile-menu">
+        <button
+          id="theme-toggle"
+          class="theme-toggle-btn"
+          title="Alternar tema"
+        >
+          <span id="theme-icon">🌞</span>
+        </button>
         <div class="avatar">K</div>
-        <span class="chevron">&#x25BC;</span>
+        <span class="chevron" aria-hidden="true">
+          <svg
+            width="20"
+            height="10"
+            viewBox="0 0 21 9.5"
+            fill="none"
+            stroke="#555"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="2 2 10.5 7.5 19 2" />
+          </svg>
+        </span>
         <div id="dropdown" class="dropdown hidden">
           <a
             href="../collaborators/collaborators-detail/collaborators-detail.html"
-            >Perfil</a
-          >
-          <a href="../inbox/inbox.html">Caixa de entrada</a>
-          <a href="../../auth/login.html">Sair</a>
+            ><span data-i18n="navbar.profile"></span
+          ></a>
+          <a href="../inbox/inbox.html"
+            ><span data-i18n="navbar.inbox"></span
+          ></a>
+          <a href="../configurations/general/general.html"
+            ><span data-i18n="navbar.settings"></span
+          ></a>
+          <a href="../../auth/login.html"
+            ><span data-i18n="navbar.logout"></span
+          ></a>
         </div>
       </div>
     </header>
+    <main class="container collaborators-page">
+      <!-- Cabeçalho da página -->
+      <div class="page-header">
+        <h2 data-i18n="collaborators.page_title">Colaboradores</h2>
+        <p class="page-description" data-i18n="collaborators.page_description">
+          Monitore a carga de trabalho individual e as taxas de sobrecarga em
+          toda a organização.
+        </p>
+        <div class="actions">
+          <button class="btn primary" data-i18n="collaborators.add_new">
+            + Adicionar novo colaborador
+          </button>
+          <button class="btn outline" data-i18n="collaborators.export">
+            Exportar dados
+          </button>
+          <button class="btn outline" data-i18n="collaborators.report">
+            Gerar relatório
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de busca -->
+      <div class="search-bar">
+        <input
+          type="text"
+          placeholder="Pesquise um colaborador..."
+          data-i18n-placeholder="collaborators.search_placeholder"
+        />
+        <button class="btn outline" data-i18n="collaborators.search">
+          Pesquisar
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filters">
+        <select data-i18n="collaborators.filter.area">
+          <option data-i18n="collaborators.filter.all_areas">
+            Todas as áreas
+          </option>
+        </select>
+        <select data-i18n="collaborators.filter.role">
+          <option data-i18n="collaborators.filter.all_roles">
+            Todos os cargos
+          </option>
+        </select>
+        <select data-i18n="collaborators.filter.project">
+          <option data-i18n="collaborators.filter.all_projects">
+            Todos os projetos
+          </option>
+        </select>
+        <select data-i18n="collaborators.filter.squad">
+          <option data-i18n="collaborators.filter.all_squads">
+            Todas os squads
+          </option>
+        </select>
+        <button class="btn primary" data-i18n="collaborators.apply_filters">
+          Aplicar filtros
+        </button>
+        <button class="btn outline" data-i18n="collaborators.clear_filters">
+          Limpar filtros
+        </button>
+      </div>
+
+      <!-- Tabela de colaboradores -->
+      <div class="table-container">
+        <h3 data-i18n="collaborators.overview">
+          Visão Geral de Pessoas (5 resultados)
+        </h3>
+        <table class="collaborators-table">
+          <thead>
+            <tr>
+              <th data-i18n="collaborators.table.name">Nome</th>
+              <th data-i18n="collaborators.table.role">Cargo</th>
+              <th data-i18n="collaborators.table.squad">Squad</th>
+              <th data-i18n="collaborators.table.allocated">Porc. alocadas</th>
+              <th data-i18n="collaborators.table.available">
+                Porc. disponíveis
+              </th>
+              <th data-i18n="collaborators.table.status">Status</th>
+              <th data-i18n="collaborators.table.feedback">Ação de feedback</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Exemplo de linha -->
+            <tr>
+              <td>Nome aqui</td>
+              <td>Cargo</td>
+              <td>
+                <div class="avatars-group">
+                  <div class="avatar-sm">K</div>
+                  <div class="avatar-sm">K</div>
+                  <div class="avatar-sm">KK</div>
+                </div>
+              </td>
+              <td>00</td>
+              <td>00</td>
+              <td>
+                <span
+                  class="status-badge active"
+                  data-i18n="collaborators.status.active"
+                >
+                  Ativo
+                </span>
+              </td>
+              <td>
+                <button
+                  class="btn primary small"
+                  data-i18n="collaborators.action.add"
+                >
+                  Adicionar
+                </button>
+                <button
+                  class="btn outline small"
+                  data-i18n="collaborators.action.request"
+                >
+                  Pedir
+                </button>
+              </td>
+            </tr>
+            <!-- repita conforme necessário -->
+            <tr>
+              <td>Nome aqui</td>
+              <td>Cargo</td>
+              <td>
+                <div class="avatars-group">
+                  <div class="avatar-sm">K</div>
+                  <div class="avatar-sm">K</div>
+                  <div class="avatar-sm">KK</div>
+                </div>
+              </td>
+              <td>00</td>
+              <td>00</td>
+              <td><span class="status-badge active">Ativo</span></td>
+              <td>
+                <button class="btn primary small">Adicionar</button>
+                <button class="btn outline small">Pedir</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Nome aqui</td>
+              <td>Cargo</td>
+              <td>
+                <div class="avatars-group">
+                  <div class="avatar-sm">K</div>
+                  <div class="avatar-sm">K</div>
+                  <div class="avatar-sm">KK</div>
+                </div>
+              </td>
+              <td>00</td>
+              <td>00</td>
+              <td><span class="status-badge active">Ativo</span></td>
+              <td>
+                <button class="btn primary small">Adicionar</button>
+                <button class="btn outline small">Pedir</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+    <script src="projects-detail.js"></script>
+    <script src="../../../assets/js/app.js"></script>
+    <script src="../../../assets/js/i18nService.js" defer></script>
   </body>
 </html>

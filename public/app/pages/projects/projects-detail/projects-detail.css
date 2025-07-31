@@ -1,0 +1,185 @@
+/* 1. CONTAINERS E LAYOUTS PRINCIPAIS */
+.container {
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+}
+.summary {
+  flex-shrink: 0;
+  width: 30%;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 70%;
+}
+
+/* 2. SUMMARY */
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.project-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  border-left: 4px solid #7d1bff;
+  padding-left: 8px;
+}
+.summary-actions .action-icon {
+  width: 24px;
+  height: 24px;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.summary-actions .action-icon:hover {
+  transform: scale(1.1);
+}
+.status-badge {
+  display: inline-block;
+  background-color: #2f7d32;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+.description {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+.info-line {
+  font-size: 16px;
+  margin: 4px 0;
+}
+.skills .skill {
+  display: inline-block;
+  background: #e0f2ff;
+  color: #0366d6;
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 12px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+
+/* 3. VISÃO GERAL FINANCEIRA */
+.financial-overview {
+  display: flex;
+  gap: 16px;
+}
+.finance-card {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  height: 127px;
+}
+.finance-card h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.finance-card .value {
+  margin: 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.finance-card small {
+  font-size: 14px;
+  color: #666;
+}
+
+/* 4. EQUIPES */
+.teams-section h4 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.teams-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+.team-card {
+  border-radius: 12px;
+  padding: 16px;
+  color: #333;
+}
+.team-card h5 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+}
+.team-info {
+  font-size: 14px;
+  margin: 4px 0;
+}
+.team-skills .skill {
+  background: rgba(0, 123, 255, 0.1);
+  color: #007bff;
+}
+
+/* cores específicas */
+.team-card.pink {
+  background-color: #d32f2e3b;
+}
+.team-card.cyan {
+  background-color: #40ddfe61;
+}
+.team-card.purple {
+  background-color: #7d1bff33;
+}
+
+/* 5. RESPONSIVIDADE */
+@media (max-width: 1100px) {
+  .container {
+    flex-direction: column;
+  }
+  .summary,
+  .content {
+    width: 100%;
+  }
+}
+
+/* 6. DARK MODE */
+body.dark .summary,
+body.dark .finance-card,
+body.dark .teams-section,
+body.dark .team-card {
+  background: #23232b;
+  color: #f5f5f5;
+  border-color: #444;
+}
+body.dark .project-title {
+  border-left-color: #a259ff;
+}
+body.dark .status-badge {
+  background-color: #388e3c;
+}
+body.dark .skills .skill {
+  background: #2d3a4a;
+  color: #7dcfff;
+}
+body.dark .info-line,
+body.dark .description {
+  color: #d1d1e0;
+}
+body.dark .finance-card small {
+  color: #aaa;
+}
+body.dark .team-skills .skill {
+  background: rgba(123, 104, 238, 0.1);
+}

@@ -150,7 +150,7 @@ cancelBtn.addEventListener("click", (e) => {
 // (opcional) tratar submissão do form
 document.getElementById("addMemberForm").addEventListener("submit", (e) => {
   e.preventDefault();
-  // aqui você pega os valores e adiciona em `membros`, faz renderMembros(), etc.
+  //  você pega os valores e adiciona em `membros`, faz renderMembros(), etc.
   hideModal();
 });
 

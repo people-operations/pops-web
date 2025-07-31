@@ -5,7 +5,11 @@
     <title>POPs Squads</title>
     <link rel="stylesheet" href="squads.css" />
     <link rel="stylesheet" href="../../../assets/css/style.css" />
-    <link rel="icon" type="image/svg+xml" href="../../../assets/svg/logo.svg" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../../../assets/svg/logo-icon.svg"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link
       href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
@@ -73,26 +77,6 @@
             />
             <span data-i18n="navbar.collaborators"></span>
           </a>
-          <a href="../jobs-skills/jobs-skills.html">
-            <img
-              src="../../../assets/svg/engines.svg"
-              alt="Cargos e Skills"
-              width="20"
-              height="20"
-              style="vertical-align: middle; margin-right: 6px"
-            />
-            <span data-i18n="navbar.jobs_skills"></span>
-          </a>
-          <a href="../area/area.html">
-            <img
-              src="../../../assets/svg/area.svg"
-              alt="Área"
-              width="20"
-              height="20"
-              style="vertical-align: middle; margin-right: 6px"
-            />
-            <span data-i18n="navbar.area"></span>
-          </a>
         </nav>
         <div class="profile-menu">
           <button
@@ -120,10 +104,17 @@
           <div id="dropdown" class="dropdown hidden">
             <a
               href="../collaborators/collaborators-detail/collaborators-detail.html"
-              >Perfil</a
-            >
-            <a href="../inbox/inbox.html">Caixa de entrada</a>
-            <a href="../../auth/login.html">Sair</a>
+              ><span data-i18n="navbar.profile"></span
+            ></a>
+            <a href="../inbox/inbox.html"
+              ><span data-i18n="navbar.inbox"></span
+            ></a>
+            <a href="../configurations/general/general.html"
+              ><span data-i18n="navbar.settings"></span
+            ></a>
+            <a href="../../auth/login.html"
+              ><span data-i18n="navbar.logout"></span
+            ></a>
           </div>
         </div>
       </header>
