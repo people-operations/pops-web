@@ -91,7 +91,7 @@ window.pop = {
 
     // Efeito "digitando" da mensagem
     const fullText =
-      "🎉 Parabéns! Você encontrou o segredo oculto...\n\n😅 Mas não tem nada aqui.\n\nOu será que tem?";
+      "🎉 Parabéns! Você encontrou o segredo oculto...\n\n😅 Mas não tem nada .\n\nOu será que tem?";
     let i = 0;
     const speed = 40;
     function typeWriter() {

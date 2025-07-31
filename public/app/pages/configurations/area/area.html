@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>POPs Cargos e Skills</title>
+    <link rel="stylesheet" href="../../../../assets/css/style.css" />
+    <link rel="stylesheet" href="area.css" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../../../../assets/svg/logo-icon.svg"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <img
+        src="../../../../assets/svg/logo.svg"
+        alt="Logo POPs"
+        class="logo-header"
+        style="height: 32px; vertical-align: middle; margin-right: 8px"
+        onclick="window.location.href='../dashboard/dashboard.html'"
+      />
+      <nav>
+        <a href="../../dashboard/dashboard.html">
+          <img
+            src="../../../../assets/svg/graphic.svg"
+            alt="Dashboard"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px" />
+          <span data-i18n="navbar.dashboard"></span
+        ></a>
+        <a href="../../squads/squads.html">
+          <img
+            src="../../../../assets/svg/squads.svg"
+            alt="Squads"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.squads"></span>
+        </a>
+        <a href="../../projects/projects.html">
+          <img
+            src="../../../../assets/svg/projects.svg"
+            alt="Projetos"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.projects"></span>
+        </a>
+        <a href="../../collaborators/collaborators.html">
+          <img
+            src="../../../../assets/svg/colaborator.svg"
+            alt="Colaboradores"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.collaborators"></span>
+        </a>
+      </nav>
+      <div class="profile-menu">
+        <button
+          id="theme-toggle"
+          class="theme-toggle-btn"
+          title="Alternar tema"
+        >
+          <span id="theme-icon">🌞</span>
+        </button>
+        <div class="avatar">K</div>
+        <span class="chevron" aria-hidden="true">
+          <svg
+            width="20"
+            height="10"
+            viewBox="0 0 21 9.5"
+            fill="none"
+            stroke="#555"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="2 2 10.5 7.5 19 2" />
+          </svg>
+        </span>
+        <div id="dropdown" class="dropdown hidden">
+          <a
+            href="../collaborators/collaborators-detail/collaborators-detail.html"
+            ><span data-i18n="navbar.profile"></span
+          ></a>
+          <a href="../inbox/inbox.html"
+            ><span data-i18n="navbar.inbox"></span
+          ></a>
+          <a href="../../../auth/login.html"
+            ><span data-i18n="navbar.logout"></span
+          ></a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container config-page">
+      <h1 class="gradient-title">Áreas</h1>
+      <p class="subtitle">
+        Gerencie as áreas da sua organização conforme sua necessidade.
+      </p>
+
+      <div class="config-container">
+        <aside class="config-sidebar">
+          <ul>
+            <a href="../general/general.html"
+              ><li><span class="aside-span">Geral</span></li></a
+            >
+            <a href="../area/area.html"
+              ><li class="active"><span class="aside-span">Áreas</span></li></a
+            >
+            <a href="../position/position.html"
+              ><li><span class="aside-span">Cargos</span></li></a
+            >
+            <a href="../seniority/seniority.html"
+              ><li><span class="aside-span">Senioridades</span></li></a
+            >
+            <a href="../skills/skills.html"
+              ><li><span class="aside-span">Skills</span></li></a
+            >
+          </ul>
+        </aside>
+
+        <section class="config-content">
+          <h2>Lista de Áreas</h2>
+          <p class="mb-16">
+            Adicione, edite ou remova áreas conforme a estrutura da sua
+            organização.
+          </p>
+          <div
+            class="d-flex justify-between align-center"
+            style="margin-bottom: 1rem"
+          >
+            <div></div>
+            <button class="btn btn-purple">+ Nova área</button>
+          </div>
+
+          <table class="skills-table">
+            <thead>
+              <tr>
+                <th>Nome da Área ⬇</th>
+                <th>Descrição ⬇</th>
+                <th>Qtd. de Projetos</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Desenvolvimento</td>
+                <td>Responsável por criar e manter sistemas e aplicações.</td>
+                <td>12</td>
+                <td class="action-btns">
+                  <button class="edit-btn" title="Editar">✏️</button>
+                  <button class="delete-btn" title="Excluir">🗑️</button>
+                </td>
+              </tr>
+              <tr>
+                <td>Recursos Humanos</td>
+                <td>Gestão de pessoas e processos internos.</td>
+                <td>5</td>
+                <td class="action-btns">
+                  <button class="edit-btn" title="Editar">✏️</button>
+                  <button class="delete-btn" title="Excluir">🗑️</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
+<script src="../../../../assets/js/i18nService.js"></script>
+<script src="../../../../assets/js/app.js"></script>
+<script src="area.js"></script>

@@ -209,9 +209,6 @@ nav a {
 .hidden {
   display: none;
 }
-.chevron {
-  cursor: pointer;
-}
 
 .icon img {
   width: 46px;

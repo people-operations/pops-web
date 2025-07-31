@@ -11,6 +11,14 @@ body {
   font-family: "Poppins", sans-serif;
   line-height: 1.6;
 }
+a {
+  color: #111;
+  text-decoration: none;
+}
+a:hover {
+  color: #fa12e2;
+  text-decoration: none;
+}
 
 /* =========================
    UTILITÁRIOS GLOBAIS
@@ -400,6 +408,7 @@ nav a.active {
 .hidden {
   display: none;
 }
+
 .chevron {
   cursor: pointer;
 }
@@ -546,6 +555,25 @@ nav a.active {
   height: 16px;
 }
 
+.btn-purple {
+  background-color: #7d1bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 32px;
+  width: 133px;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding: 0 !important;
+  letter-spacing: 0 !important;
+  font-family: "Poppins", sans-serif;
+}
+
+.btn-purple:hover {
+  background-color: #7b1fa2;
+}
+
 /* Botões com hover impressionante */
 .btn::after {
   content: "";
@@ -652,14 +680,14 @@ nav a.active {
 
 .form-group.floating label {
   position: absolute;
-  top: -0.6rem;
+  top: -0.1rem;
   left: 0.75rem;
   background: #fff;
   padding: 0 0.25rem;
   font-size: 0.85rem;
   color: #555;
   pointer-events: none;
-  transition: all var(--transition, 0.3s);
+  border-radius: 50px;
 }
 
 .label {
@@ -1711,6 +1739,126 @@ nav a.active {
   }
 }
 
+.config-page {
+  padding: 2rem;
+  font-family: "Poppins", sans-serif;
+}
+
+.config-container {
+  display: flex;
+  gap: 2rem;
+}
+
+.config-sidebar {
+  width: 200px;
+  border-right: 1px solid #eee;
+  background-color: #40defe05;
+}
+
+.config-sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.config-sidebar li {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  color: #fa12e2;
+  border-left: 3px solid transparent;
+}
+
+.config-sidebar li.active {
+  font-weight: bold;
+  background: #fce4ec;
+  border-left: 3px solid #fa12e2;
+}
+
+.config-sidebar li:hover {
+  background: #fce4ec77;
+}
+
+.config-content {
+  flex: 1;
+  background: #40ddfe0f;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.config-content h2 {
+  margin-bottom: 0.25rem;
+}
+
+.config-item {
+  margin-top: 1.5rem;
+}
+
+.config-item label {
+  font-weight: 500;
+  display: block;
+}
+
+.config-item span {
+  font-size: 13px;
+  color: #555;
+}
+
+.config-item select {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  width: 200px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: transparent;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  margin-top: 0.5rem;
+}
+
+.switch input {
+  display: none;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  background-color: #ccc;
+  transition: 0.4s;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4caf50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.aside-span {
+  color: #000;
+}
+
 /* =========================
    TIMELINE
 ========================= */
@@ -1839,6 +1987,8 @@ nav a.active {
   color: #fbbf24;
   display: flex;
   align-items: center;
+  margin-right: 8px;
+  margin-top: 8px;
 }
 .theme-toggle-btn:hover {
   transform: scale(1.15);
@@ -1871,8 +2021,9 @@ body.dark .help-text a {
   color: #3b82f6;
 }
 body.dark .form-group.floating label {
-  background: #232336;
+  background: #232336 !important;
   color: #fff;
+  border-radius: 50px;
 }
 
 nav a.active img {
@@ -1927,9 +2078,74 @@ body.dark .squad-card img[src$="members.svg"] {
   filter: invert(1) hue-rotate(180deg) brightness(1.2) contrast(1.1);
 }
 
-.theme-toggle-btn {
-  margin-right: 8px;
-  margin-top: 8px;
+body.dark .skills-table {
+  background-color: #23243a;
+  box-shadow: 0 2px 12px rgba(60, 0, 90, 0.18);
+  border-radius: 10px;
+}
+body.dark .skills-table thead {
+  background-color: #3b83f649;
+  border-bottom: 2px solid #7b1fa2;
+}
+body.dark .skills-table th {
+  color: #fff;
+  border-bottom: 1px solid #3a2950;
+  font-weight: 600;
+}
+body.dark .skills-table td {
+  color: #fff;
+  border-bottom: 1px solid #2d2540;
+}
+body.dark .skills-table tbody tr:hover {
+  background-color: #2d2540;
+  filter: brightness(1.12);
+  box-shadow: 0 2px 8px rgba(123, 31, 162, 0.08);
+}
+
+body.dark .highlight {
+  color: #fed700 !important;
+}
+body.dark .edit-btn,
+body.dark .delete-btn {
+  color: #fed700;
+}
+body.dark .config-item span {
+  color: #ffffff9d;
+}
+body.dark .slider {
+  background-color: #7491c057;
+}
+body.dark input:checked + .slider {
+  background-color: #4caf50;
+}
+body.dark .config-item select {
+  color: #fff;
+}
+
+body.dark .config-sidebar {
+  background: #23243a;
+  border-right: 1px solid #3a2950;
+}
+body.dark .config-sidebar li {
+  color: #fff;
+  background: transparent;
+  border-left: 3px solid transparent;
+}
+body.dark .config-sidebar li.active {
+  background: #3a2950;
+  border-left: 3px solid #fa12e2;
+  color: #fed700;
+}
+body.dark .config-sidebar li:hover {
+  background: #2d2540;
+  color: #fed700;
+}
+body.dark .aside-span {
+  color: #fff;
+}
+
+body.dark .chevron svg {
+  stroke: #fff !important;
 }
 
 .gradient-title {

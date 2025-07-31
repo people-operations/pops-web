@@ -1,0 +1,42 @@
+.btn-purple {
+  width: 170px !important;
+}
+
+.highlight {
+  margin-top: 1rem;
+  font-size: 18px !important;
+}
+
+.skills-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px #ccc;
+}
+
+.skills-table thead {
+  background-color: #7b1fa269;
+}
+
+.skills-table th,
+.skills-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.skills-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+
+
+.edit-btn,
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}

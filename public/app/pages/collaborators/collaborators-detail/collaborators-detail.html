@@ -8,7 +8,7 @@
     <link
       rel="icon"
       type="image/svg+xml"
-      href="../../../../assets/svg/logo.svg"
+      href="../../../../assets/svg/logo-icon.svg"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
@@ -19,28 +19,327 @@
         alt="Logo POPs"
         class="logo-header"
         style="height: 32px; vertical-align: middle; margin-right: 8px"
+        onclick="window.location.href='../../dashboard/dashboard.html'"
       />
-      
       <nav>
-        <a href="../../dashboard/dashboard.html">Dashboard</a>
-        <a href="../../squads/squads.html">Squads</a>
-        <a href="../../projects/projects.html">Projetos</a>
-        <a class="active" href="../collaborators.html">Colaboradores</a>
-        <a href="../../jobs-skills/jobs-skills.html">Cargos e Skills</a>
-        <a href="../../area/area.html">Área</a>
+        <a href="../../dashboard/dashboard.html">
+          <img
+            src="../../../../assets/svg/graphic.svg"
+            alt="Dashboard "
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px" />
+          <span data-i18n="navbar.dashboard"></span
+        ></a>
+        <a href="../../squads/squads.html">
+          <img
+            src="../../../../assets/svg/squads.svg"
+            alt="Squads"
+            width="20"
+            height="20"
+            class="logo-header"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.squads"></span>
+        </a>
+        <a href="../../projects/projects.html">
+          <img
+            src="../../../../assets/svg/projects.svg"
+            alt="Projetos"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.projects"></span>
+        </a>
+        <a class="active" href="../collaborators.html">
+          <img
+            src="../../../../assets/svg/colaborator.svg"
+            alt="Colaboradores"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.collaborators"></span>
+        </a>
       </nav>
       <div class="profile-menu">
+        <button
+          id="theme-toggle"
+          class="theme-toggle-btn"
+          title="Alternar tema"
+        >
+          <span id="theme-icon">🌞</span>
+        </button>
         <div class="avatar">K</div>
-        <span class="chevron">&#x25BC;</span>
+        <span class="chevron" aria-hidden="true">
+          <svg
+            width="20"
+            height="10"
+            viewBox="0 0 21 9.5"
+            fill="none"
+            stroke="#555"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="2 2 10.5 7.5 19 2" />
+          </svg>
+        </span>
         <div id="dropdown" class="dropdown hidden">
           <a
             href="../../collaborators/collaborators-detail/collaborators-detail.html"
-            >Perfil</a
-          >
-          <a href="../inbox/inbox.html">Caixa de entrada</a>
-          <a href="../../../auth/login.html">Sair</a>
+            ><span data-i18n="navbar.profile"></span
+          ></a>
+          <a href="../../inbox/inbox.html"
+            ><span data-i18n="navbar.inbox"></span
+          ></a>
+          <a href="../../configurations/general/general.html"
+            ><span data-i18n="navbar.settings"></span
+          ></a>
+          <a href="../../../auth/login.html"
+            ><span data-i18n="navbar.logout"></span
+          ></a>
         </div>
       </div>
     </header>
+    <main class="container">
+      <!-- SIDEBAR SUMMARY -->
+      <aside class="summary">
+        <div class="summary-header">
+          <div class="avatar-large">
+            <img
+              src="../../../../assets/svg/avatar-placeholder.svg"
+              alt="Foto do colaborador"
+            />
+          </div>
+          <div class="summary-actions">
+            <img
+              src="../../../../assets/svg/edit-button.svg"
+              alt="Editar"
+              class="action-icon"
+              title="Editar"
+            />
+            <img
+              src="../../../../assets/svg/trash-button.svg"
+              alt="Remover"
+              class="action-icon"
+              title="Remover"
+            />
+          </div>
+        </div>
+
+        <h2 class="collab-name">Nome do Colaborador</h2>
+        <p class="role-area">Cargo | Área</p>
+
+        <p class="info-line">
+          <strong data-i18n="collaborators_detail.occupancy"
+            >Ocupação de carga horária:</strong
+          >
+          100%
+        </p>
+        <p class="info-line">
+          <strong data-i18n="collaborators_detail.performance"
+            >Desempenho:</strong
+          >
+          90%
+        </p>
+        <p class="info-line">
+          <strong data-i18n="collaborators_detail.satisfaction"
+            >Nota de satisfação:</strong
+          >
+          4.0 / 5.0
+        </p>
+
+        <div class="skills">
+          <span class="skill">Python</span>
+          <span class="skill">Java</span>
+          <span class="skill">Node.js</span>
+        </div>
+
+        <h3 data-i18n="collaborators_detail.personal_data">Dados Pessoais</h3>
+        <div class="data-block">
+          <label>Email</label>
+          <input type="email" placeholder="email@exemplo.com" />
+          <label>Telefone celular</label>
+          <input type="text" placeholder="(00) 00000-0000" />
+          <label>Data de nascimento</label>
+          <input type="text" placeholder="00/00/0000" />
+          <label>CPF</label>
+          <input type="text" placeholder="000.000.000-00" />
+          <label>CNPJ</label>
+          <input type="text" placeholder="000.000.000-00" />
+          <label>LinkedIn</label>
+          <input type="url" placeholder="Link do perfil" />
+        </div>
+
+        <h3 data-i18n="collaborators_detail.address">Endereço</h3>
+        <div class="data-block">
+          <label>CEP</label>
+          <input type="text" placeholder="00000-000" />
+          <label>Bairro</label>
+          <input type="text" placeholder="Digite no campo" />
+          <label>Logradouro</label>
+          <input type="text" placeholder="Digite no campo" />
+          <label>Número</label>
+          <input type="text" placeholder="Digite no campo" />
+          <label>Complemento</label>
+          <input type="text" placeholder="Digite no campo" />
+          <label>Cidade</label>
+          <input type="text" placeholder="Digite no campo" />
+          <label>Estado</label>
+          <input type="text" placeholder="Digite no campo" />
+        </div>
+
+        <h3 data-i18n="collaborators_detail.education">
+          Educação e certificações
+        </h3>
+        <div class="certifications">
+          <div class="cert-item">
+            <span>Curso aqui</span>
+            <span class="cert-period">2000–2025</span>
+          </div>
+          <!-- repita conforme necessário -->
+        </div>
+      </aside>
+
+      <!-- CONTENT PANELS -->
+      <section class="content">
+        <!-- Squads Atuando -->
+        <div class="section squads-section">
+          <div class="section-header">
+            <h4 data-i18n="collaborators_detail.current_squads">
+              Squads atuando
+            </h4>
+          </div>
+          <div class="cards-list squads-list">
+            <div class="card light-blue">
+              <h5>Nome squad</h5>
+              <p><strong>Ocupação:</strong> 20%</p>
+              <p><strong>Cargo:</strong> aqui</p>
+            </div>
+            <div class="card pink">
+              <h5>Nome squad</h5>
+              <p><strong>Ocupação:</strong> 20%</p>
+              <p><strong>Cargo:</strong> aqui</p>
+            </div>
+            <div class="card purple">
+              <h5>Nome squad</h5>
+              <p><strong>Ocupação:</strong> 20%</p>
+              <p><strong>Cargo:</strong> aqui</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trilha Profissional -->
+        <div class="section track-section">
+          <div class="section-header">
+            <h4 data-i18n="collaborators_detail.professional_track">
+              Trilha profissional
+            </h4>
+            <button class="btn add-btn">+</button>
+          </div>
+          <div class="track-list">
+            <!-- Cargo Atual -->
+            <div class="track-item current">
+              <div class="track-header">
+                <h5 data-i18n="collaborators_detail.current_role">
+                  Cargo atual
+                </h5>
+                <button class="action-icon edit" title="Editar cargo atual">
+                  <img
+                    src="../../../../assets/svg/edit-button.svg"
+                    alt="Editar"
+                  />
+                </button>
+              </div>
+              <p>
+                <strong data-i18n="collaborators_detail.time"
+                  >Tempo de ocupação:</strong
+                >
+                x anos e x meses/dias
+              </p>
+              <p>
+                <strong data-i18n="collaborators_detail.manager"
+                  >Gestor:</strong
+                >
+                Nome do gestor
+              </p>
+              <p>
+                <strong data-i18n="collaborators_detail.salary"
+                  >Salário:</strong
+                >
+                R$ 0.000
+              </p>
+              <p>
+                <strong data-i18n="collaborators_detail.squads">Squads:</strong>
+              </p>
+              <div class="skills small-skills">
+                <span class="skill">Nome squad</span>
+                <span class="skill">Nome squad</span>
+              </div>
+            </div>
+
+            <!-- Cargos Anteriores -->
+            <div class="track-item">
+              <h5 data-i18n="collaborators_detail.previous_role">
+                Cargo anterior
+              </h5>
+              <p>
+                <strong data-i18n="collaborators_detail.time"
+                  >Tempo de ocupação:</strong
+                >
+                x anos e x meses/dias
+              </p>
+              <p>
+                <strong data-i18n="collaborators_detail.manager"
+                  >Gestor:</strong
+                >
+                Nome do gestor
+              </p>
+              <p>
+                <strong data-i18n="collaborators_detail.salary"
+                  >Salário:</strong
+                >
+                R$ 0.000
+              </p>
+              <p>
+                <strong data-i18n="collaborators_detail.squads">Squads:</strong>
+              </p>
+              <div class="skills small-skills">
+                <span class="skill">Nome squad</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedbacks -->
+        <div class="section feedback-section">
+          <div class="section-header">
+            <h4 data-i18n="collaborators_detail.feedbacks">Feedbacks</h4>
+            <button
+              class="btn request-feedback"
+              data-i18n="collaborators_detail.request_feedback"
+            >
+              Pedir feedback
+            </button>
+          </div>
+          <div class="feedback-list">
+            <div class="feedback-card">
+              <div class="fb-avatar avatar-sm">N</div>
+              <div class="fb-info">
+                <strong>Nome</strong>
+                <span>Cargo aqui</span>
+                <p>Feedback aqui</p>
+              </div>
+            </div>
+            <!-- repita por cada feedback -->
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="collaborators-detail.js"></script>
+    <script src="../../../../assets/js/app.js"></script>
+    <script src="../../../../assets/js/i18nService.js" defer></script>
   </body>
 </html>

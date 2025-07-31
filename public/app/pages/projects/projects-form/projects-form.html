@@ -8,33 +8,243 @@
     <link
       rel="icon"
       type="image/svg+xml"
-      href="../../../../assets/svg/logo.svg"
+      href="../../../../assets/svg/logo-icon.svg"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
     <header>
-      
+      <img
+        src="../../../../assets/svg/logo.svg"
+        alt="Logo POPs"
+        class="logo-header"
+        style="height: 32px; vertical-align: middle; margin-right: 8px"
+        onclick="window.location.href='../../dashboard/dashboard.html'"
+      />
       <nav>
-        <a href="../../dashboard/dashboard.html">Dashboard</a>
-        <a href="../squads/squads.html">Squads</a>
-        <a class="active" href="../projects.html">Projetos</a>
-        <a href="../../collaborators/collaborators.html">Colaboradores</a>
-        <a href="../../jobs-skills/jobs-skills.html">Cargos e Skills</a>
-        <a href="../../area/area.html">Área</a>
+        <a href="../../dashboard/dashboard.html">
+          <img
+            src="../../../../assets/svg/graphic.svg"
+            alt="Dashboard "
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px" />
+          <span data-i18n="navbar.dashboard"></span
+        ></a>
+        <a href="../../squads/squads.html">
+          <img
+            src="../../../../assets/svg/squads.svg"
+            alt="Squads"
+            width="20"
+            height="20"
+            class="logo-header"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.squads"></span>
+        </a>
+        <a class="active" href="../projects.html">
+          <img
+            src="../../../../assets/svg/projects.svg"
+            alt="Projetos"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.projects"></span>
+        </a>
+        <a href="../../collaborators/collaborators.html">
+          <img
+            src="../../../../assets/svg/colaborator.svg"
+            alt="Colaboradores"
+            width="20"
+            height="20"
+            style="vertical-align: middle; margin-right: 6px"
+          />
+          <span data-i18n="navbar.collaborators"></span>
+        </a>
       </nav>
       <div class="profile-menu">
+        <button
+          id="theme-toggle"
+          class="theme-toggle-btn"
+          title="Alternar tema"
+        >
+          <span id="theme-icon">🌞</span>
+        </button>
         <div class="avatar">K</div>
-        <span class="chevron">&#x25BC;</span>
+        <span class="chevron" aria-hidden="true">
+          <svg
+            width="20"
+            height="10"
+            viewBox="0 0 21 9.5"
+            fill="none"
+            stroke="#555"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="2 2 10.5 7.5 19 2" />
+          </svg>
+        </span>
         <div id="dropdown" class="dropdown hidden">
           <a
             href="../../collaborators/collaborators-detail/collaborators-detail.html"
-            >Perfil</a
-          >
-          <a href="../inbox/inbox.html">Caixa de entrada</a>
-          <a href="../../../auth/login.html">Sair</a>
+            ><span data-i18n="navbar.profile"></span
+          ></a>
+          <a href="../../inbox/inbox.html"
+            ><span data-i18n="navbar.inbox"></span
+          ></a>
+          <a href="../../configurations/general/general.html"
+            ><span data-i18n="navbar.settings"></span
+          ></a>
+          <a href="../../../auth/login.html"
+            ><span data-i18n="navbar.logout"></span
+          ></a>
         </div>
       </div>
     </header>
+    <!-- Conteúdo Principal -->
+    <main class="create-project-page">
+      <a href="../projects.html" class="back-link">
+        <img src="../../../../assets/svg/left-arrow.svg" alt="Voltar" />
+        <span data-i18n="projects_form.back">Voltar para projetos</span>
+      </a>
+      <div class="form-container">
+        <h2 data-i18n="projects_form.create_title">Criar um novo projeto</h2>
+        <form class="form-project">
+          <!-- Nome -->
+          <label data-i18n="projects_form.name">Nome do projeto *</label>
+          <input
+            type="text"
+            placeholder="e.g., Mobile Desenvolvimento"
+            data-i18n-placeholder="projects_form.name_placeholder"
+          />
+
+          <!-- Tipo / Status -->
+          <div class="row">
+            <div class="col">
+              <label data-i18n="projects_form.type">Tipo *</label>
+              <select>
+                <option data-i18n="projects_form.select_type">
+                  Selecione aqui
+                </option>
+              </select>
+            </div>
+            <div class="col">
+              <label data-i18n="projects_form.status">Status *</label>
+              <select>
+                <option data-i18n="projects_form.select_status">
+                  Selecione aqui
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Descrição -->
+          <label data-i18n="projects_form.description">Descrição</label>
+          <textarea
+            rows="4"
+            data-i18n-placeholder="projects_form.description_placeholder"
+          ></textarea>
+
+          <!-- Budget / Datas -->
+          <div class="row">
+            <div class="col">
+              <label data-i18n="projects_form.budget">Budget *</label>
+              <input type="text" placeholder="R$ 0000.00" />
+            </div>
+            <div class="col">
+              <label data-i18n="projects_form.start_date"
+                >Data de começo *</label
+              >
+              <input type="text" placeholder="00/00/00" />
+            </div>
+            <div class="col">
+              <label data-i18n="projects_form.end_date"
+                >Data de fim (Opcional)</label
+              >
+              <input type="text" placeholder="00/00/00" />
+            </div>
+          </div>
+
+          <!-- Área -->
+          <label data-i18n="projects_form.area">Área *</label>
+          <select>
+            <option data-i18n="projects_form.select_area">
+              Selecione uma área
+            </option>
+          </select>
+
+          <!-- Skills necessários -->
+          <h3 data-i18n="projects_form.skills_needed">Skills necessários</h3>
+          <div class="tags-container">
+            <!-- Exemplo de tag -->
+            <span class="tag">Node.js <button>×</button></span>
+            <span class="tag">Java <button>×</button></span>
+            <span class="tag">HTML <button>×</button></span>
+            <span class="tag">Typescript <button>×</button></span>
+            <button class="add-tag">+</button>
+          </div>
+
+          <!-- Equipes -->
+          <h3 data-i18n="projects_form.teams">Equipes</h3>
+          <div class="teams-table">
+            <table>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th data-i18n="projects_form.team_name">Nome do squad</th>
+                  <th data-i18n="projects_form.product_owner">Product Owner</th>
+                  <th data-i18n="projects_form.people_qty">Qtd de pessoas</th>
+                  <th data-i18n="projects_form.skills">Skills</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="checkbox" checked /></td>
+                  <td>Nome do squad</td>
+                  <td>Nome aqui</td>
+                  <td>00</td>
+                  <td>
+                    <span class="tag-small">Node.js</span>
+                    <span class="tag-small">Python</span>
+                    <span class="tag-small">Java</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>Nome do squad</td>
+                  <td>Nome aqui</td>
+                  <td>00</td>
+                  <td>
+                    <span class="tag-small">Node.js</span>
+                    <span class="tag-small">Python</span>
+                    <span class="tag-small">Java</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Botões -->
+          <div class="form-actions">
+            <button
+              type="button"
+              class="cancel"
+              data-i18n="projects_form.cancel"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="save" data-i18n="projects_form.save">
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <script src="projects-form.js"></script>
+    <script src="../../../../assets/js/app.js"></script>
+    <script src="../../../../assets/js/i18nService.js" defer></script>
   </body>
 </html>

@@ -1,0 +1,224 @@
+/* 1. GLOBAIS E CONTAINERS PRINCIPAIS */
+.create-project-page {
+  padding: 32px;
+  margin: auto;
+}
+.form-container {
+  max-width: none !important;
+  background: var(--bg-card);
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+/* 2. LAYOUTS GERAIS */
+.row {
+  display: flex;
+  gap: 16px;
+}
+.col {
+  flex: 1;
+}
+
+/* 3. TÍTULOS E TIPOGRAFIA */
+h2 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 24px 0 8px;
+}
+
+/* 4. FORMULÁRIOS E CAMPOS */
+.form-project label {
+  display: block;
+  margin-top: 16px;
+  font-weight: 400;
+}
+.form-project input,
+.form-project select,
+.form-project textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-top: 4px;
+  font-size: 14px;
+  background: transparent;
+}
+.form-project textarea {
+  resize: vertical;
+}
+
+/* 5. TAGS DE SKILLS */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  background: #007bff;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.tag button {
+  background: none;
+  border: none;
+  color: inherit;
+  margin-left: 4px;
+  cursor: pointer;
+}
+.add-tag {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  line-height: 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-self: center;
+  align-items: center;
+  padding-left: 1px;
+  padding-bottom: 3px;
+}
+
+/* 6. TABELA DE EQUIPES */
+.teams-table {
+  overflow-x: auto;
+  margin-top: 8px;
+}
+.teams-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.teams-table th,
+.teams-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+.tag-small {
+  display: inline-block;
+  background: #007bff;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-right: 4px;
+}
+
+/* 7. AÇÕES DO FORMULÁRIO */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+.cancel {
+  background: none;
+  border: 2px solid #7d1bff;
+  color: #7d1bff;
+  border-radius: 4px;
+  height: 40px;
+  padding: 0 16px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.cancel:hover {
+  background: #7d1bff;
+  color: #fff;
+}
+.save {
+  background-color: #7d1bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  height: 40px;
+  padding: 0 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* 8. BACK LINK */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  color: inherit;
+  margin-bottom: 16px;
+}
+.back-link img {
+  width: 24px;
+  height: 24px;
+}
+
+/* 9. RESPONSIVIDADE */
+@media (max-width: 1100px) {
+  .row {
+    flex-direction: column;
+  }
+}
+
+/* 10. DARK MODE */
+body.dark .form-container {
+  background: #181820;
+  color: #f5f5f5;
+}
+body.dark .form-project input,
+body.dark .form-project select,
+body.dark .form-project textarea {
+  background: #23232b;
+  color: #f5f5f5;
+  border-color: #444;
+}
+body.dark .tags-container .tag,
+body.dark .tag-small {
+  background: #7d1bff;
+  color: #fff;
+}
+body.dark .cancel {
+  border-color: #7d1bff;
+  color: #7d1bff;
+}
+body.dark .cancel:hover {
+  background: #7d1bff22;
+}
+body.dark .save {
+  background-color: #7d1bff;
+  color: #fff;
+}
+body.dark .add-tag {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  line-height: 0;
+  cursor: pointer;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-self: center;
+  align-items: center;
+  padding-left: 1px;
+  padding-bottom: 3px;
+}

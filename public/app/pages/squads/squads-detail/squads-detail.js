@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Confirma exclusão (aqui só fecha o modal, implemente a lógica real se necessário)
+  // Confirma exclusão ( só fecha o modal, implemente a lógica real se necessário)
   if (confirmDelete) {
     confirmDelete.addEventListener("click", function () {
       window.location.href = "../squads.html";
@@ -88,21 +88,21 @@ document.addEventListener("DOMContentLoaded", function () {
   const membros = [
     {
       nome: "Mateus Fantin",
-      status: "Status aqui",
+      status: "Status ",
       funcoes: ["Techlead", "Desenvolvedor Sênior Back-end"],
       horasAlocadas: "00hrs",
       horasDisponiveis: "00hrs",
     },
     {
       nome: "Ana Souza",
-      status: "Status aqui",
+      status: "Status ",
       funcoes: ["Desenvolvedor Júnior"],
       horasAlocadas: "20hrs",
       horasDisponiveis: "180hrs",
     },
     {
       nome: "Carlos Lima",
-      status: "Status aqui",
+      status: "Status ",
       funcoes: ["DevOps"],
       horasAlocadas: "15hrs",
       horasDisponiveis: "185hrs",
