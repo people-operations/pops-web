@@ -143,8 +143,10 @@ document.addEventListener("DOMContentLoaded", () => {
       window.i18n.messages &&
       Object.keys(window.i18n.messages).length > 0
     ) {
-      document.getElementById("loader").classList.add("hidden");
-      document.getElementById("main-content").classList.remove("hidden");
+      const loader = document.getElementById("loader");
+      if (loader) loader.classList.add("hidden");
+      const mainContent = document.getElementById("main-content");
+      if (mainContent) mainContent.classList.remove("hidden");
     } else {
       setTimeout(tryShowContent, 50);
     }

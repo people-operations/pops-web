@@ -180,13 +180,14 @@
     "main_title": "Projetos",
     "subtitle": "Gerencie e monitore seus projetos e a alocação de recursos.",
     "create": "+ Criar projeto",
-    "status": "{status}",
+    "status": "Em andamento",
     "area": "Área:",
     "members": "Membros:",
-    "capacity": "Capacidade do projeto:",
+    "budget": "Budget:",
+    "startedAt": "Começou:",
+    "skills_needed": "Skills necessários:",
     "allocated_hours": "Horas alocadas",
     "details": "Mais detalhes",
-    "per_month": "Por mês:",
     "tech_stack": "Stack de tecnologias"
   },
   "projects_form": {

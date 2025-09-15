@@ -46,8 +46,6 @@
   align-items: center;
 }
 .project-card .project-header h3 {
-  border-left: 4px solid #7d1bff;
-  padding-left: 8px;
   margin: 0;
 }
 .project-card h3 {
@@ -92,13 +90,13 @@
   letter-spacing: 0 !important;
   font-family: "Poppins", sans-serif;
 }
-.tag-blue {
+.tag-green {
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 118px;
   height: 23px;
-  background-color: #1976d2;
+  background-color: #2F7D32;
   color: #fff;
   font-weight: 500;
   font-size: 12px;

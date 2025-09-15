@@ -3,10 +3,9 @@ const projects = [
     nome: "Sistema de Gestão RH",
     descricao: "Plataforma para gestão de colaboradores e folha de pagamento.",
     area: "RH",
-    membros: 8,
+    budget: 8,
+    startedAt: "01/03/2024",
     tecnologias: ["Node.js", "React", "PostgreSQL"],
-    horasAlocadas: 180,
-    horasTotais: 200,
     preco: "R$ 60.000,00",
     status: "Em andamento",
   },
@@ -14,10 +13,9 @@ const projects = [
     nome: "App de Vendas Mobile",
     descricao: "Aplicativo para força de vendas com integração a ERP.",
     area: "Comercial",
-    membros: 5,
+    budget: 5,
+    startedAt: "01/03/2024",
     tecnologias: ["Flutter", "Firebase"],
-    horasAlocadas: 120,
-    horasTotais: 150,
     preco: "R$ 35.000,00",
     status: "Em andamento",
   },
@@ -25,10 +23,9 @@ const projects = [
     nome: "Portal do Cliente",
     descricao: "Portal web para autoatendimento e abertura de chamados.",
     area: "Suporte",
-    membros: 4,
+    budget: 4,
+    startedAt: "01/03/2024",
     tecnologias: ["Angular", "Java", "MySQL"],
-    horasAlocadas: 90,
-    horasTotais: 120,
     preco: "R$ 28.000,00",
     status: "Concluído",
   },
@@ -36,10 +33,9 @@ const projects = [
     nome: "BI Analytics",
     descricao: "Dashboard de indicadores e relatórios gerenciais.",
     area: "Dados",
-    membros: 3,
+    budget: 3,
+    startedAt: "01/03/2024",
     tecnologias: ["Power BI", "Python"],
-    horasAlocadas: 60,
-    horasTotais: 80,
     preco: "R$ 18.000,00",
     status: "Em andamento",
   },
@@ -47,10 +43,9 @@ const projects = [
     nome: "Infraestrutura Cloud",
     descricao: "Migração de servidores para nuvem AWS.",
     area: "Infraestrutura",
-    membros: 2,
+    budget: 2,
+    startedAt: "01/03/2024",
     tecnologias: ["AWS", "Terraform"],
-    horasAlocadas: 40,
-    horasTotais: 60,
     preco: "R$ 12.000,00",
     status: "Planejado",
   },
@@ -65,51 +60,41 @@ function renderProjects() {
   container.innerHTML = "";
   const i18n = window.i18n;
   projects.forEach((project) => {
-    const porcentagem = (project.horasAlocadas / project.horasTotais) * 100;
     container.innerHTML += `
       <div class="project-card">
         <div class="project-header">
           <h3>${project.nome}</h3>
-          <span class="tag-blue">${interpolate(i18n.t("projects.status"), {
-            status: project.status,
-          })}</span>
+          <span class="tag-green">${project.status}</span>
         </div>
         <p class="project-description">${project.descricao}</p>
         <p>
-          <img src="/assets/svg/area.svg" alt="Área" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
+          <img src="/assets/svg/members.svg" alt="Área" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
           <strong data-i18n="projects.area">${i18n.t(
             "projects.area"
           )}</strong> ${project.area}
         </p>
         <p>
-          <img src="/assets/svg/members.svg" alt="Membros" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
-          <strong data-i18n="projects.members">${i18n.t(
-            "projects.members"
-          )}</strong> ${project.membros}
+          <img src="/assets/svg/budget.svg" alt="budget" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
+          <strong data-i18n="projects.budget">${i18n.t(
+            "projects.budget"
+          )}</strong> ${project.budget}
         </p>
-        <p><strong data-i18n="projects.capacity">${i18n.t(
-          "projects.capacity"
+        <p>
+          <img src="/assets/svg/calendar.svg" alt="Início" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
+          <strong data-i18n="projects.startedAt">${i18n.t(
+            "projects.startedAt"
+          )}</strong> ${project.startedAt}
+        </p>
+        <p><strong data-i18n="projects.skills_needed">${i18n.t(
+          "projects.skills_needed"
         )}</strong></p>
         <div class="tech-stack">
           ${project.tecnologias.map((tech) => `<span>${tech}</span>`).join("")}
         </div>
         <div class="hours">
-          <div class="hours-row">
-            <span data-i18n="projects.allocated_hours">${i18n.t(
-              "projects.allocated_hours"
-            )}</span>
-            <span class="hours-value">${project.horasAlocadas}h / ${
-      project.horasTotais
-    }h</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress" style="width: ${porcentagem}%"></div>
-          </div>
         </div>
         <div class="project-footer">
-          <p class="by-month"><strong data-i18n="projects.per_month">${i18n.t(
-            "projects.per_month"
-          )}</strong> ${project.preco}</p>
+          <span class="satisfaction-icon">★ 4.5 de satisfação</span>
           <button class="details-btn" data-i18n="projects.details" onclick="window.location.href='projects-detail/projects-detail.html'"></button>
         </div>
       </div>
