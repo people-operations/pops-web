@@ -64,9 +64,7 @@ function renderProjects() {
       <div class="project-card">
         <div class="project-header">
           <h3>${project.nome}</h3>
-          <span class="tag-blue">${interpolate(i18n.t("projects.status"), {
-            status: project.status,
-          })}</span>
+          <span class="tag-green">${project.status}</span>
         </div>
         <p class="project-description">${project.descricao}</p>
         <p>
