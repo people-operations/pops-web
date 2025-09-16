@@ -3,38 +3,175 @@
   <head>
     <meta charset="UTF-8" />
     <title>POPs Caixa de Entrada</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="inbox.css" />
     <link rel="stylesheet" href="../../../assets/css/style.css" />
-    <link rel="icon" type="image/svg+xml" href="../../../assets/svg/logo-icon.svg" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../../../assets/svg/logo-icon.svg"
+    />
   </head>
   <body>
+    <!-- ====== Header ====== -->
     <header>
       <img
-        src="../../../assets/svg/logo-icon.svg"
+        src="../../../assets/svg/logo.svg"
         alt="Logo POPs"
         class="logo-header"
         style="height: 32px; vertical-align: middle; margin-right: 8px"
+        onclick="window.location.href='../dashboard/dashboard.html'"
       />
-
       <nav>
-        <a href="../dashboard/dashboard.html">Dashboard</a>
-        <a href="../squads/squads.html">Squads</a>
-        <a href="../projects/projects.html">Projetos</a>
-        <a href="../collaborators/collaborators.html">Colaboradores</a>
+        <a href="../dashboard/dashboard.html">
+          <img
+            src="../../../assets/svg/graphic.svg"
+            width="20"
+            height="20"
+            alt="Dashboard"
+          />
+          <span data-i18n="navbar.dashboard">Dashboard</span>
+        </a>
+        <a href="../squads/squads.html">
+          <img
+            src="../../../assets/svg/squads.svg"
+            width="20"
+            height="20"
+            alt="Squads"
+          />
+          <span data-i18n="navbar.squads">Squads</span>
+        </a>
+        <a href="../projects/projects.html">
+          <img
+            src="../../../assets/svg/projects.svg"
+            width="20"
+            height="20"
+            alt="Projetos"
+          />
+          <span data-i18n="navbar.projects">Projetos</span>
+        </a>
+        <a href="../collaborators/collaborators.html">
+          <img
+            src="../../../assets/svg/colaborator.svg"
+            width="20"
+            height="20"
+            alt="Colaboradores"
+          />
+          <span data-i18n="navbar.collaborators">Colaboradores</span>
+        </a>
       </nav>
       <div class="profile-menu">
+        <button
+          id="theme-toggle"
+          class="theme-toggle-btn"
+          title="Alternar tema"
+        >
+          <span id="theme-icon">🌞</span>
+        </button>
         <div class="avatar">K</div>
-        <span class="chevron">&#x25BC;</span>
+        <span class="chevron" aria-hidden="true">
+          <svg
+            width="20"
+            height="10"
+            viewBox="0 0 21 9.5"
+            fill="none"
+            stroke="#555"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="2 2 10.5 7.5 19 2" />
+          </svg>
+        </span>
         <div id="dropdown" class="dropdown hidden">
           <a
             href="../collaborators/collaborators-detail/collaborators-detail.html"
-            >Perfil</a
+            ><span data-i18n="navbar.profile">Perfil</span></a
           >
-          <a href="../inbox/inbox.html">Caixa de entrada</a>
-          <a href="../../auth/login.html">Sair</a>
+          <a href="../inbox/inbox.html"
+            ><span data-i18n="navbar.inbox">Caixa de Entrada</span></a
+          >
+          <a href="../configurations/general/general.html"
+            ><span data-i18n="navbar.settings">Configurações</span></a
+          >
+          <a href="../../auth/login.html"
+            ><span data-i18n="navbar.logout">Sair</span></a
+          >
         </div>
       </div>
     </header>
+
+    <!-- ====== Main ====== -->
+    <main class="container">
+      <div class="backline" id="go-back">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+        Voltar para página anterior
+      </div>
+
+      <h1>Caixa de entrada</h1>
+      <div class="subtitle">Verifique suas notificações</div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div
+          class="select"
+          id="year-select"
+          role="button"
+          aria-haspopup="listbox"
+          aria-expanded="false"
+        >
+          <span id="year-label">2025</span>
+          <svg
+            width="16"
+            height="10"
+            viewBox="0 0 21 9.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            style="opacity: 0.7"
+          >
+            <polyline points="2 2 10.5 7.5 19 2" />
+          </svg>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button
+            class="tab active"
+            data-tab="general"
+            role="tab"
+            aria-selected="true"
+          >
+            Notificação geral
+          </button>
+          <button class="tab" data-tab="feedback" role="tab">
+            Pedidos de feedback
+          </button>
+          <button class="tab" data-tab="approval" role="tab">
+            Pedidos de aprovação de squad
+          </button>
+        </div>
+        <div class="spacer"></div>
+      </div>
+
+      <!-- Card + Table -->
+      <section class="card">
+        <table>
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </section>
+    </main>
   </body>
 </html>
+<script src="inbox.js"></script>

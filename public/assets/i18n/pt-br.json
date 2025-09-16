@@ -285,13 +285,13 @@
     },
     "apply_filters": "Aplicar filtros",
     "clear_filters": "Limpar filtros",
-    "overview": "Visão Geral de Pessoas ({count} resultados)",
+    "overview": "Visão Geral de Pessoas (3 resultados)",
     "table": {
       "name": "Nome",
       "role": "Cargo",
       "squad": "Squad",
-      "allocated": "Porc. alocadas",
-      "available": "Porc. disponíveis",
+      "allocated": "% alocadas",
+      "available": "% disponíveis",
       "status": "Status",
       "feedback": "Ação de feedback"
     },

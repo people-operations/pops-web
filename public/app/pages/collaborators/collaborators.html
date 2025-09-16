@@ -10,6 +10,10 @@
       type="image/svg+xml"
       href="../../../assets/svg/logo-icon.svg"
     />
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
@@ -106,64 +110,79 @@
     <main class="container collaborators-page">
       <!-- Cabeçalho da página -->
       <div class="page-header">
-        <h2 data-i18n="collaborators.page_title">Colaboradores</h2>
-        <p class="page-description" data-i18n="collaborators.page_description">
-          Monitore a carga de trabalho individual e as taxas de sobrecarga em
-          toda a organização.
-        </p>
-        <div class="actions">
-          <button class="btn primary" data-i18n="collaborators.add_new">
-            + Adicionar novo colaborador
-          </button>
-          <button class="btn outline" data-i18n="collaborators.export">
-            Exportar dados
-          </button>
-          <button class="btn outline" data-i18n="collaborators.report">
-            Gerar relatório
-          </button>
+        <div class="collaborators-header">
+          <div>
+            <h2 class="gradient-title">Colaboradores</h2>
+            <p class="subtitle">
+              Monitore a carga de trabalho individual e as taxas de sobrecarga
+              em toda a organização.
+            </p>
+          </div>
+          <div class="actions">
+            <button
+              class="collaborator-btn btn"
+              onclick="window.location.href='collaborators-form/collaborators-form.html'"
+            >
+              Adicionar novo colaborador
+            </button>
+            <button
+              class="collaborator-btn btn outline"
+              data-i18n="collaborators.export"
+            >
+              Exportar dados
+            </button>
+            <button
+              class="collaborator-btn btn outline"
+              data-i18n="collaborators.report"
+            >
+              Gerar relatório
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Barra de busca -->
       <div class="search-bar">
-        <input
-          type="text"
-          placeholder="Pesquise um colaborador..."
-          data-i18n-placeholder="collaborators.search_placeholder"
-        />
-        <button class="btn outline" data-i18n="collaborators.search">
-          Pesquisar
-        </button>
+        <div class="search-input-wrapper">
+          <input
+            type="text"
+            placeholder="Pesquise um colaborador..."
+            data-i18n-placeholder="collaborators.search_placeholder"
+          />
+        </div>
+        <button class="collaborator-btn btn">Pesquisar</button>
       </div>
 
       <!-- Filtros -->
-      <div class="filters">
-        <select data-i18n="collaborators.filter.area">
-          <option data-i18n="collaborators.filter.all_areas">
-            Todas as áreas
-          </option>
-        </select>
-        <select data-i18n="collaborators.filter.role">
-          <option data-i18n="collaborators.filter.all_roles">
-            Todos os cargos
-          </option>
-        </select>
-        <select data-i18n="collaborators.filter.project">
-          <option data-i18n="collaborators.filter.all_projects">
-            Todos os projetos
-          </option>
-        </select>
-        <select data-i18n="collaborators.filter.squad">
-          <option data-i18n="collaborators.filter.all_squads">
-            Todas os squads
-          </option>
-        </select>
-        <button class="btn primary" data-i18n="collaborators.apply_filters">
-          Aplicar filtros
-        </button>
-        <button class="btn outline" data-i18n="collaborators.clear_filters">
-          Limpar filtros
-        </button>
+      <div class="filters justify-between">
+        <div>
+          <select>
+            <option>Todas as áreas</option>
+          </select>
+          <select>
+            <option>Todos os cargos</option>
+          </select>
+          <select>
+            <option>Todos os projetos</option>
+          </select>
+          <select>
+            <option>Todas os squads</option>
+          </select>
+        </div>
+        <div>
+          <button
+            class="collaborator-btn btn"
+            data-i18n="collaborators.apply_filters"
+          >
+            Aplicar filtros
+          </button>
+          <button
+            class="collaborator-btn btn outline"
+            data-i18n="collaborators.clear_filters"
+          >
+            Limpar filtros
+          </button>
+        </div>
       </div>
 
       <!-- Tabela de colaboradores -->
@@ -177,10 +196,8 @@
               <th data-i18n="collaborators.table.name">Nome</th>
               <th data-i18n="collaborators.table.role">Cargo</th>
               <th data-i18n="collaborators.table.squad">Squad</th>
-              <th data-i18n="collaborators.table.allocated">Porc. alocadas</th>
-              <th data-i18n="collaborators.table.available">
-                Porc. disponíveis
-              </th>
+              <th data-i18n="collaborators.table.allocated">% alocadas</th>
+              <th data-i18n="collaborators.table.available">% disponíveis</th>
               <th data-i18n="collaborators.table.status">Status</th>
               <th data-i18n="collaborators.table.feedback">Ação de feedback</th>
             </tr>
@@ -208,14 +225,9 @@
                 </span>
               </td>
               <td>
+                <button class="collaborator-btn small btn">Adicionar</button>
                 <button
-                  class="btn primary small"
-                  data-i18n="collaborators.action.add"
-                >
-                  Adicionar
-                </button>
-                <button
-                  class="btn outline small"
+                  class="collaborator-btn btn outline"
                   data-i18n="collaborators.action.request"
                 >
                   Pedir
@@ -237,8 +249,13 @@
               <td>00</td>
               <td><span class="status-badge active">Ativo</span></td>
               <td>
-                <button class="btn primary small">Adicionar</button>
-                <button class="btn outline small">Pedir</button>
+                <button class="collaborator-btn small btn">Adicionar</button>
+                <button
+                  class="collaborator-btn btn outline"
+                  data-i18n="collaborators.action.request"
+                >
+                  Pedir
+                </button>
               </td>
             </tr>
             <tr>
@@ -255,15 +272,20 @@
               <td>00</td>
               <td><span class="status-badge active">Ativo</span></td>
               <td>
-                <button class="btn primary small">Adicionar</button>
-                <button class="btn outline small">Pedir</button>
+                <button class="collaborator-btn small btn">Adicionar</button>
+                <button
+                  class="collaborator-btn btn outline"
+                  data-i18n="collaborators.action.request"
+                >
+                  Pedir
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </main>
-    <script src="projects-detail.js"></script>
+    <script src="collaborators.js"></script>
     <script src="../../../assets/js/app.js"></script>
     <script src="../../../assets/js/i18nService.js" defer></script>
   </body>
