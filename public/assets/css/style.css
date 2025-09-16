@@ -1,4 +1,27 @@
 /* =========================
+   DARK MODE - BOTÕES OUTLINED
+========================= */
+body.dark .btn.outline {
+  background: transparent;
+  color: #259ceb;
+  border: 2px solid #259ceb;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+body.dark .btn.outline:hover {
+  background: #259ceb;
+  color: #181828;
+  border-color: #259ceb;
+}
+body.dark .btn.small.outline {
+  background: transparent;
+  color: #259ceb;
+  border: 2px solid #259ceb;
+}
+body.dark .btn.small.outline:hover {
+  background: #259ceb;
+  color: #181828;
+}
+/* =========================
    RESET & BASE
 ========================= */
 * {
@@ -298,7 +321,7 @@ body.dark #loader {
 }
 
 .sidebar ul li a:hover {
-  background-color: #3498db;
+  background-color: #7d1bff;
   color: #fff;
 }
 
@@ -310,7 +333,7 @@ body.dark #loader {
 }
 
 .header.primary {
-  background-color: #3498db;
+  background-color: #7d1bff;
   color: white;
   padding: 20px;
   border-radius: 5px;
@@ -469,7 +492,7 @@ nav a.active {
 }
 
 .btn.primary {
-  background: linear-gradient(45deg, #3498db, #5dade2);
+  background: linear-gradient(45deg, #7d1bff, #5dade2);
   color: white;
   border: 2px solid transparent;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -477,7 +500,7 @@ nav a.active {
 }
 
 .btn.primary:hover {
-  background: linear-gradient(45deg, #5dade2, #3498db);
+  background: linear-gradient(45deg, #5dade2, #7d1bff);
   transform: translateY(-3px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
@@ -489,14 +512,14 @@ nav a.active {
 
 .btn.outlined {
   background: transparent;
-  color: #3498db;
-  border: 2px solid #3498db;
+  color: #7d1bff;
+  border: 2px solid #7d1bff;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease-in-out;
 }
 
 .btn.outlined:hover {
-  background: #3498db;
+  background: #7d1bff;
   color: white;
   transform: translateY(-3px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
@@ -512,14 +535,11 @@ nav a.active {
   font-size: 14px;
   border-radius: 5px;
   border: 2px solid transparent;
-  background: linear-gradient(45deg, #3498db, #5dade2);
   color: white;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
 }
 
 .btn.small:hover {
-  background: linear-gradient(45deg, #5dade2, #3498db);
+  background: linear-gradient(45deg, #5dade2, #7d1bff);
   transform: translateY(-3px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
@@ -531,12 +551,12 @@ nav a.active {
 
 .btn.small.outlined {
   background: transparent;
-  border: 2px solid #3498db;
-  color: #3498db;
+  border: 2px solid #7d1bff;
+  color: #7d1bff;
 }
 
 .btn.small.outlined:hover {
-  background: #3498db;
+  background: #7d1bff;
   color: white;
 }
 
@@ -708,7 +728,7 @@ nav a.active {
 }
 
 .table th {
-  background-color: #3498db;
+  background-color: #7d1bff;
   color: white;
   text-align: left;
   padding: 12px;
@@ -754,7 +774,7 @@ nav a.active {
 }
 
 .table-filter:focus {
-  border-color: #3498db;
+  border-color: #7d1bff;
   outline: none;
 }
 
@@ -860,14 +880,14 @@ nav a.active {
 }
 
 .search-bar input:focus {
-  border-color: #3498db;
+  border-color: #7d1bff;
   outline: none;
 }
 
 .search-bar button {
   padding: 10px 20px;
   border: none;
-  background: #3498db;
+  background: #7d1bff;
   color: white;
   font-size: 16px;
   border-radius: 5px;
@@ -876,7 +896,7 @@ nav a.active {
 }
 
 .search-bar button:hover {
-  background-color: #2980b9;
+  background-color: #7d1bff;
 }
 
 /* Menu Dropdown Responsivo */
@@ -924,7 +944,7 @@ nav a.active {
   .menu-items {
     display: none;
     flex-direction: column;
-    background: #3498db;
+    background: #7d1bff;
     position: absolute;
     top: 100%;
     right: 0;
@@ -951,7 +971,7 @@ nav a.active {
 
 .intro-section h1 {
   font-size: 48px;
-  color: #3498db;
+  color: #7d1bff;
   margin-bottom: 20px;
   letter-spacing: 1.5px;
 }
@@ -1040,7 +1060,7 @@ nav a.active {
   position: absolute;
   top: 10px;
   right: 10px;
-  background-color: #3498db;
+  background-color: #7d1bff;
   color: white;
   border: none;
   border-radius: 3px;
@@ -1051,7 +1071,7 @@ nav a.active {
 }
 
 .code-container .copy-btn:hover {
-  background-color: #2980b9;
+  background-color: #7d1bff;
 }
 
 /* =========================
@@ -1137,7 +1157,7 @@ nav a.active {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #3498db;
+  background-color: #7d1bff;
   padding: 15px;
 }
 
@@ -1164,7 +1184,7 @@ nav a.active {
 
 .progress {
   height: 100%;
-  background: linear-gradient(90deg, #3498db, #5dade2);
+  background: linear-gradient(90deg, #7d1bff, #5dade2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1179,7 +1199,7 @@ nav a.active {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: conic-gradient(#3498db 50%, #e0e0e0 50%);
+  background: conic-gradient(#7d1bff 50%, #e0e0e0 50%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1268,7 +1288,7 @@ nav a.active {
 
 .accordion-header {
   width: 100%;
-  background: #3498db;
+  background: #7d1bff;
   color: white;
   padding: 15px;
   font-size: 18px;
@@ -1283,7 +1303,7 @@ nav a.active {
 }
 
 .accordion-header:hover {
-  background: #2980b9;
+  background: #7d1bff;
 }
 
 .accordion-icon {
@@ -1450,7 +1470,7 @@ nav a.active {
 }
 
 .file-dropzone:hover {
-  border-color: #3498db;
+  border-color: #7d1bff;
 }
 
 .file-list {
@@ -1499,7 +1519,7 @@ nav a.active {
 }
 
 .footer-links a:hover {
-  color: #3498db;
+  color: #7d1bff;
 }
 
 .footer.contact {
@@ -1528,7 +1548,7 @@ nav a.active {
 }
 
 .social-icon:hover {
-  background: #3498db;
+  background: #7d1bff;
   color: #fff;
 }
 
@@ -1557,7 +1577,7 @@ nav a.active {
 }
 
 .tab-btn.active {
-  background: #3498db;
+  background: #7d1bff;
   color: white;
 }
 
@@ -1652,7 +1672,7 @@ nav a.active {
 }
 
 .dropdown-toggle {
-  background-color: #3498db;
+  background-color: #7d1bff;
   color: white;
   border: none;
   padding: 10px 15px;
@@ -1663,7 +1683,7 @@ nav a.active {
 }
 
 .dropdown-toggle:hover {
-  background-color: #2980b9;
+  background-color: #7d1bff;
 }
 
 .dropdown-menu {
@@ -1693,7 +1713,7 @@ nav a.active {
 
 .dropdown-menu li a:hover {
   background: #f0f0f0;
-  color: #3498db;
+  color: #7d1bff;
 }
 
 .dropdown-menu.show {
@@ -1712,7 +1732,7 @@ nav a.active {
 
 .spinner {
   border: 4px solid #f0f0f0;
-  border-top: 4px solid #3498db;
+  border-top: 4px solid #7d1bff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -1881,7 +1901,7 @@ input:checked + .slider:before {
   top: 5px;
   width: 20px;
   height: 20px;
-  background-color: #3498db;
+  background-color: #7d1bff;
   border-radius: 50%;
   border: 3px solid white;
   box-shadow: 0 0 0 3px #ddd;
@@ -1942,7 +1962,7 @@ input:checked + .slider:before {
 }
 
 .grid-item {
-  background-color: #3498db;
+  background-color: #7d1bff;
   color: white;
   padding: 20px;
   text-align: center;
@@ -2169,7 +2189,7 @@ body.dark .chevron svg {
 ========================= */
 .loader {
   border: 4px solid rgba(255, 255, 255, 0.2);
-  border-top: 4px solid #3498db;
+  border-top: 4px solid #7d1bff;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -2231,7 +2251,7 @@ body.dark .chevron svg {
    FOCUS STATES
 ========================= */
 :focus {
-  outline: 3px solid #3498db;
+  outline: 3px solid #7d1bff;
   outline-offset: 2px;
 }
 
