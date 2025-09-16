@@ -203,12 +203,14 @@
   color: #fff;
   border: none;
   padding: 0 12px;
+  height: 32px;
 }
 .btn.outline {
   background: none;
   border: 2px solid #7d1bff;
   color: #7d1bff;
   padding: 0 12px;
+  height: 32px;
 }
 .btn.small {
   height: 28px;

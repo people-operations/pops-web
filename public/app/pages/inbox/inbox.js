@@ -240,7 +240,35 @@ const themeBtn = document.getElementById("theme-toggle");
 const themeIcon = document.getElementById("theme-icon");
 const applyTheme = (mode) => {
   document.documentElement.classList.toggle("dark", mode === "dark");
-  themeIcon.textContent = mode === "dark" ? "🌙" : "🌞";
+  themeIcon.textContent = mode === "dark" ? "🌙" : " <svg
+                width="22"
+                height="22"
+                viewBox="0 0 22 22"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="5"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <g
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                >
+                  <line x1="11" y1="1" x2="11" y2="3" />
+                  <line x1="11" y1="19" x2="11" y2="21" />
+                  <line x1="1" y1="11" x2="3" y2="11" />
+                  <line x1="19" y1="11" x2="21" y2="11" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="16.36" y1="16.36" x2="17.78" y2="17.78" />
+                  <line x1="4.22" y1="17.78" x2="5.64" y2="16.36" />
+                  <line x1="16.36" y1="5.64" x2="17.78" y2="4.22" />
+                </g>
+              </svg>";
   localStorage.setItem("pops-theme", mode);
 };
 const stored =

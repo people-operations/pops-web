@@ -1,3 +1,7 @@
+/* Ícones dos cards brancos no modo dark */
+body.dark .project-card img {
+  filter: brightness(0) invert(1) grayscale(1) contrast(1.2);
+}
 /* =====================
    1. GLOBAIS E CONTAINERS
    ===================== */
@@ -96,7 +100,7 @@
   justify-content: center;
   min-width: 118px;
   height: 23px;
-  background-color: #2F7D32;
+  background-color: #2f7d32;
   color: #fff;
   font-weight: 500;
   font-size: 12px;
