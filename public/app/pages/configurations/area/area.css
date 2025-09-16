@@ -1,19 +1,55 @@
-.highlight {
-  margin-top: 1rem;
-  font-size: 18px !important;
+/* Fonte Poppins para o modal */
+.modal, .modal * {
+  font-family: 'Poppins', Arial, Helvetica, sans-serif !important;
+}
+/* Modal dark mode */
+body.dark .modal {
+  background: rgba(24, 24, 40, 0.85);
+}
+body.dark .modal .modal-content {
+  background: #23233a;
+  color: #f3f3f3;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+body.dark .modal .modal-content h3 {
+  color: #fff;
+}
+body.dark .modal .modal-content label {
+  color: #bdbddd;
+}
+body.dark .modal .modal-content input[type="text"] {
+  background: #181828;
+  color: #f3f3f3;
+  border: 1px solid #44446a;
+}
+body.dark .modal .modal-actions .primary {
+  background: #a259e2;
+  color: #fff;
+}
+body.dark .modal .modal-actions .secondary {
+  background: #23233a;
+  color: #f3f3f3;
+  border: 1px solid #44446a;
+}
+/* util */
+.hidden {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
+/* Tabela */
 .skills-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+  background: #fff;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 0 0 1px #ccc;
 }
 
 .skills-table thead {
-  background-color: #7b1fa269;
+  background: #7b1fa269;
 }
 
 .skills-table th,
@@ -24,13 +60,94 @@
 }
 
 .skills-table tbody tr:hover {
-  background-color: #f9f9f9;
+  background: #f9f9f9;
+}
+
+/* Botões da tabela */
+.action-btns {
+  display: flex;
+  gap: 8px;
 }
 
 .edit-btn,
 .delete-btn {
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
   font-size: 16px;
+}
+
+/* Modal básico */
+.modal {
+  position: fixed;
+  width: 100%;
+  height: 100%; /* <— garante área cheia para centralizar */
+  display: flex;
+  align-items: center; /* <— centraliza vertical */
+  justify-content: center; /* <— centraliza horizontal */
+  background: rgba(0, 0, 0, 0.534);
+  padding: 24px;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 1000;
+  border-radius: 0px !important;
+}
+
+.modal:not(.hidden) {
+  visibility: visible;
+  opacity: 1;
+}
+
+.modal .modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal .modal-content h3 {
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+
+.modal .modal-content label {
+  display: block;
+  margin: 10px 0 6px;
+  font-size: 14px;
+}
+
+.modal .modal-content input[type="text"] {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0 10px;
+}
+
+.modal .modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.modal .modal-actions .primary {
+  background: #7b1fa2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.modal .modal-actions .secondary {
+  background: #f1f1f1;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
 }

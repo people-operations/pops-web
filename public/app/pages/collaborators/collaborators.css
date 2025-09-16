@@ -156,6 +156,7 @@
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #eee;
+  width: 12%;
 }
 .collaborators-table tbody tr:hover {
   background-color: #f9f9f9;
@@ -175,6 +176,10 @@
   justify-content: center;
   margin-right: -8px;
   border: 2px solid #fff;
+}
+
+.width-22 {
+  width: 22% !important;
 }
 
 /* 6. STATUS */
@@ -203,12 +208,14 @@
   color: #fff;
   border: none;
   padding: 0 12px;
+  height: 32px;
 }
 .btn.outline {
   background: none;
   border: 2px solid #7d1bff;
   color: #7d1bff;
   padding: 0 12px;
+  height: 32px;
 }
 .btn.small {
   height: 28px;

@@ -1,3 +1,6 @@
+body.dark .back-link img {
+  filter: brightness(0) invert(1);
+}
 body {
   font-family: "Poppins", sans-serif !important;
   margin: 0;
