@@ -73,35 +73,33 @@
           class="theme-toggle-btn"
           title="Alternar tema"
         >
-          <span id="theme-icon"> <svg
-                width="22"
-                height="22"
-                viewBox="0 0 22 22"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="5"
-                  stroke="currentColor"
-                  stroke-width="2"
-                />
-                <g
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                >
-                  <line x1="11" y1="1" x2="11" y2="3" />
-                  <line x1="11" y1="19" x2="11" y2="21" />
-                  <line x1="1" y1="11" x2="3" y2="11" />
-                  <line x1="19" y1="11" x2="21" y2="11" />
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                  <line x1="16.36" y1="16.36" x2="17.78" y2="17.78" />
-                  <line x1="4.22" y1="17.78" x2="5.64" y2="16.36" />
-                  <line x1="16.36" y1="5.64" x2="17.78" y2="4.22" />
-                </g>
-              </svg></span>
+          <span id="theme-icon">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 22 22"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="5"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <g stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="11" y1="1" x2="11" y2="3" />
+                <line x1="11" y1="19" x2="11" y2="21" />
+                <line x1="1" y1="11" x2="3" y2="11" />
+                <line x1="19" y1="11" x2="21" y2="11" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="16.36" y1="16.36" x2="17.78" y2="17.78" />
+                <line x1="4.22" y1="17.78" x2="5.64" y2="16.36" />
+                <line x1="16.36" y1="5.64" x2="17.78" y2="4.22" />
+              </g>
+            </svg>
+          </span>
         </button>
         <div class="avatar">K</div>
         <span class="chevron" aria-hidden="true">
@@ -147,12 +145,14 @@
               alt="Editar"
               class="action-icon"
               title="Editar"
+              style="vertical-align: middle; width: 34px; height: 34px"
             />
             <img
               src="../../../../assets/svg/trash-button.svg"
               alt="Remover"
               class="action-icon"
               title="Remover"
+              style="vertical-align: middle; width: 34px; height: 34px"
             />
           </div>
         </div>
@@ -181,13 +181,6 @@
         </p>
 
         <p class="info-line">
-          <strong data-i18n="projects_detail.satisfaction"
-            >Nota de satisfação:</strong
-          >
-          4.0 / 5.0
-        </p>
-
-        <p class="info-line">
           <strong data-i18n="projects_detail.skills">Skills do squad:</strong>
         </p>
         <div class="skills">
@@ -202,20 +195,27 @@
         <!-- Visão Geral Financeira -->
         <div class="financial-overview">
           <div class="card finance-card">
-            <h3 data-i18n="projects_detail.monthly_cost">Custo Mensal</h3>
-            <div class="value">R$ 8.750</div>
-            <small data-i18n="projects_detail.monthly_hint"
-              >Com base na alocação da equipe</small
-            >
-          </div>
-          <div class="card finance-card">
-            <h3 data-i18n="projects_detail.total_investment">
-              Investimento Total
-            </h3>
-            <div class="value">R$ 26.250</div>
-            <small data-i18n="projects_detail.total_hint"
-              >Incluindo custos com salários</small
-            >
+            <h3 data-i18n="squads_detail.financial_overview" class="mb-16"></h3>
+            <div class="finance-card-inside">
+              <div>
+                <p data-i18n="projects_detail.monthly_cost" class="strong">
+                  Custo Mensal
+                </p>
+                <div class="value pink-text">R$ 8.750</div>
+                <small data-i18n="projects_detail.monthly_hint"
+                  >Com base na alocação da equipe</small
+                >
+              </div>
+              <div>
+                <p data-i18n="projects_detail.total_investment">
+                  Investimento Total
+                </p>
+                <div class="value pink-text">R$ 26.250</div>
+                <small data-i18n="projects_detail.total_hint"
+                  >Incluindo custos com salários</small
+                >
+              </div>
+            </div>
           </div>
         </div>
 
@@ -232,7 +232,7 @@
               <p class="team-info" data-i18n="projects_detail.skills_needed">
                 Skills necessários do projeto:
               </p>
-              <div class="team-skills">
+              <div class="skills">
                 <span class="skill">Python</span>
                 <span class="skill">Java</span>
                 <span class="skill">Node.js</span>
@@ -244,7 +244,7 @@
                 <strong>PO:</strong> Cassandra Castro • 5 membros
               </p>
               <p class="team-info">Skills necessários do projeto:</p>
-              <div class="team-skills">
+              <div class="skills">
                 <span class="skill">Python</span>
                 <span class="skill">Java</span>
                 <span class="skill">Node.js</span>
@@ -256,7 +256,7 @@
                 <strong>PO:</strong> Cassandra Castro • 5 membros
               </p>
               <p class="team-info">Skills necessários do projeto:</p>
-              <div class="team-skills">
+              <div class="skills">
                 <span class="skill">Python</span>
                 <span class="skill">Java</span>
                 <span class="skill">Node.js</span>

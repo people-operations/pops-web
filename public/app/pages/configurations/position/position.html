@@ -72,35 +72,33 @@
           class="theme-toggle-btn"
           title="Alternar tema"
         >
-          <span id="theme-icon"> <svg
-                width="22"
-                height="22"
-                viewBox="0 0 22 22"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="5"
-                  stroke="currentColor"
-                  stroke-width="2"
-                />
-                <g
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                >
-                  <line x1="11" y1="1" x2="11" y2="3" />
-                  <line x1="11" y1="19" x2="11" y2="21" />
-                  <line x1="1" y1="11" x2="3" y2="11" />
-                  <line x1="19" y1="11" x2="21" y2="11" />
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                  <line x1="16.36" y1="16.36" x2="17.78" y2="17.78" />
-                  <line x1="4.22" y1="17.78" x2="5.64" y2="16.36" />
-                  <line x1="16.36" y1="5.64" x2="17.78" y2="4.22" />
-                </g>
-              </svg></span>
+          <span id="theme-icon">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 22 22"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="5"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <g stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="11" y1="1" x2="11" y2="3" />
+                <line x1="11" y1="19" x2="11" y2="21" />
+                <line x1="1" y1="11" x2="3" y2="11" />
+                <line x1="19" y1="11" x2="21" y2="11" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="16.36" y1="16.36" x2="17.78" y2="17.78" />
+                <line x1="4.22" y1="17.78" x2="5.64" y2="16.36" />
+                <line x1="16.36" y1="5.64" x2="17.78" y2="4.22" />
+              </g>
+            </svg>
+          </span>
         </button>
         <div class="avatar">K</div>
         <span class="chevron" aria-hidden="true">
@@ -138,6 +136,26 @@
         Gerencie os cargos disponíveis no sistema conforme sua necessidade.
       </p>
 
+      <!-- Modal de Confirmação de Exclusão -->
+      <div id="modal-excluir" class="modal hidden">
+        <div class="modal-content">
+          <h3>Confirmar exclusão</h3>
+          <p>Tem certeza que deseja excluir este cargo?</p>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="secondary"
+              onclick="fecharModal('modal-excluir')"
+            >
+              Cancelar
+            </button>
+            <button type="button" class="primary" onclick="confirmarExclusao()">
+              Excluir
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="config-container">
         <aside class="config-sidebar">
           <ul>
@@ -169,13 +187,13 @@
             style="margin-bottom: 1rem"
           >
             <div></div>
-            <button class="btn btn-purple">+ Novo cargo</button>
+            <button class="btn btn-purple" onclick="abrirModalArea('Adicionar cargo')">+ Novo cargo</button>
           </div>
           <table class="skills-table">
             <thead>
               <tr>
-                <th>Nome do Cargo ⬇</th>
-                <th>Descrição ⬇</th>
+                <th>Nome do Cargo</th>
+                <th>Descrição</th>
                 <th>Status</th>
                 <th>Ações</th>
               </tr>
@@ -214,6 +232,35 @@
         </section>
       </div>
     </main>
+    <!-- Modal de Adicionar/Editar Cargo -->
+    <div id="modal-cargo" class="modal hidden">
+      <div class="modal-content">
+        <h3>Adicionar cargo</h3>
+        <form id="form-cargo">
+          <div class="form-group">
+            <label for="nome">Nome do Cargo</label>
+            <input type="text" id="nome" name="nome" required />
+          </div>
+          <div class="form-group">
+            <label for="descricao">Descrição</label>
+            <input type="text" id="descricao" name="descricao" required />
+          </div>
+          <!-- Campos ocultos, caso queira expandir depois -->
+          <input type="hidden" id="senioridade" name="senioridade" />
+          <input type="hidden" id="taxa" name="taxa" />
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="secondary"
+              onclick="fecharModal('modal-cargo')"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="primary">Criar</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </body>
 </html>
 <script src="../../../../assets/js/i18nService.js"></script>

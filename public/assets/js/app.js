@@ -47,28 +47,37 @@ document.addEventListener("DOMContentLoaded", () => {
   let savedTheme = localStorage.getItem("theme");
 
   if (savedTheme === "dark" || savedTheme === "light") {
-    // Se houver tema salvo, aplica ele
     applyTheme(savedTheme);
   } else {
-    // Se não houver tema salvo, define automaticamente pelo horário do dia
     const hour = new Date().getHours();
-    // Das 6h às 18h: tema claro, fora desse intervalo: tema escuro
     const autoTheme = hour >= 6 && hour < 18 ? "light" : "dark";
     applyTheme(autoTheme);
     localStorage.setItem("theme", autoTheme);
+    savedTheme = autoTheme;
+  }
+
+  // Sincroniza o select de aparência
+  const appearanceSelect = document.getElementById("appearance-select");
+  if (appearanceSelect) {
+    if (savedTheme === "dark") appearanceSelect.value = "Modo escuro";
+    else appearanceSelect.value = "Modo claro";
+    appearanceSelect.addEventListener("change", () => {
+      const theme = appearanceSelect.value === "Modo escuro" ? "dark" : "light";
+      localStorage.setItem("theme", theme);
+      applyTheme(theme);
+    });
   }
 
   // Adiciona evento de clique no botão de alternância de tema
   document.getElementById("theme-toggle").addEventListener("click", () => {
-    // Verifica o tema atual
-    const currentTheme = document.body.classList.contains("dark")
-      ? "dark"
-      : "light";
-    // Alterna para o outro tema
+    const currentTheme = document.body.classList.contains("dark") ? "dark" : "light";
     const newTheme = currentTheme === "dark" ? "light" : "dark";
-    // Salva o novo tema e aplica
     localStorage.setItem("theme", newTheme);
     applyTheme(newTheme);
+    // Atualiza o select de aparência
+    if (appearanceSelect) {
+      appearanceSelect.value = newTheme === "dark" ? "Modo escuro" : "Modo claro";
+    }
   });
 });
 

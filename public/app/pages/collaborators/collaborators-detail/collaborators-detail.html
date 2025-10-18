@@ -10,6 +10,10 @@
       type="image/svg+xml"
       href="../../../../assets/svg/logo-icon.svg"
     />
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
@@ -69,35 +73,33 @@
           class="theme-toggle-btn"
           title="Alternar tema"
         >
-          <span id="theme-icon"> <svg
-                width="22"
-                height="22"
-                viewBox="0 0 22 22"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="5"
-                  stroke="currentColor"
-                  stroke-width="2"
-                />
-                <g
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                >
-                  <line x1="11" y1="1" x2="11" y2="3" />
-                  <line x1="11" y1="19" x2="11" y2="21" />
-                  <line x1="1" y1="11" x2="3" y2="11" />
-                  <line x1="19" y1="11" x2="21" y2="11" />
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                  <line x1="16.36" y1="16.36" x2="17.78" y2="17.78" />
-                  <line x1="4.22" y1="17.78" x2="5.64" y2="16.36" />
-                  <line x1="16.36" y1="5.64" x2="17.78" y2="4.22" />
-                </g>
-              </svg></span>
+          <span id="theme-icon">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 22 22"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="5"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <g stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="11" y1="1" x2="11" y2="3" />
+                <line x1="11" y1="19" x2="11" y2="21" />
+                <line x1="1" y1="11" x2="3" y2="11" />
+                <line x1="19" y1="11" x2="21" y2="11" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="16.36" y1="16.36" x2="17.78" y2="17.78" />
+                <line x1="4.22" y1="17.78" x2="5.64" y2="16.36" />
+                <line x1="16.36" y1="5.64" x2="17.78" y2="4.22" />
+              </g>
+            </svg>
+          </span>
         </button>
         <div class="avatar">K</div>
         <span class="chevron" aria-hidden="true">
@@ -135,30 +137,18 @@
       <!-- SIDEBAR SUMMARY -->
       <aside class="summary">
         <div class="summary-header">
+          <span class="tag-green mb-16">Ativo</span>
           <div class="avatar-large">
             <img
               src="../../../../assets/svg/avatar-placeholder.svg"
               alt="Foto do colaborador"
             />
           </div>
-          <div class="summary-actions">
-            <img
-              src="../../../../assets/svg/edit-button.svg"
-              alt="Editar"
-              class="action-icon"
-              title="Editar"
-            />
-            <img
-              src="../../../../assets/svg/trash-button.svg"
-              alt="Remover"
-              class="action-icon"
-              title="Remover"
-            />
-          </div>
         </div>
-
-        <h2 class="collab-name">Nome do Colaborador</h2>
-        <p class="role-area">Cargo | Área</p>
+        <div class="d-flex text-center flex-column">
+          <h2 class="collab-name">Nome do Colaborador</h2>
+          <p class="role-area">Cargo | Área</p>
+        </div>
 
         <p class="info-line">
           <strong data-i18n="collaborators_detail.occupancy"
@@ -166,28 +156,22 @@
           >
           100%
         </p>
-        <p class="info-line">
-          <strong data-i18n="collaborators_detail.performance"
-            >Desempenho:</strong
-          >
-          90%
-        </p>
-        <p class="info-line">
-          <strong data-i18n="collaborators_detail.satisfaction"
-            >Nota de satisfação:</strong
-          >
-          4.0 / 5.0
-        </p>
-
-        <div class="skills">
-          <span class="skill">Python</span>
-          <span class="skill">Java</span>
-          <span class="skill">Node.js</span>
+        <div class="skills d-flex flex-column">
+          <p class="info-line">
+            <strong data-i18n="collaborators_detail.skills">Skills:</strong>
+          </p>
+          <div>
+            <span class="skill">Python</span>
+            <span class="skill">Java</span>
+            <span class="skill">Node.js</span>
+          </div>
         </div>
 
-        <h3 data-i18n="collaborators_detail.personal_data">Dados Pessoais</h3>
+        <h3 data-i18n="collaborators_detail.personal_data" class="info-line">
+          Dados Pessoais
+        </h3>
         <div class="data-block">
-          <label>Email</label>
+          <label>E-mail Corporativo</label>
           <input type="email" placeholder="email@exemplo.com" />
           <label>Telefone celular</label>
           <input type="text" placeholder="(00) 00000-0000" />
@@ -201,7 +185,9 @@
           <input type="url" placeholder="Link do perfil" />
         </div>
 
-        <h3 data-i18n="collaborators_detail.address">Endereço</h3>
+        <h3 data-i18n="collaborators_detail.address" class="info-line">
+          Endereço
+        </h3>
         <div class="data-block">
           <label>CEP</label>
           <input type="text" placeholder="00000-000" />
@@ -219,12 +205,12 @@
           <input type="text" placeholder="Digite no campo" />
         </div>
 
-        <h3 data-i18n="collaborators_detail.education">
+        <h3 data-i18n="collaborators_detail.education" class="info-line">
           Educação e certificações
         </h3>
         <div class="certifications">
           <div class="cert-item">
-            <span>Curso aqui</span>
+            <span class="cert-name">Curso aqui</span>
             <span class="cert-period">2000–2025</span>
           </div>
           <!-- repita conforme necessário -->
@@ -243,125 +229,69 @@
           <div class="cards-list squads-list">
             <div class="card light-blue">
               <h5>Nome squad</h5>
-              <p><strong>Ocupação:</strong> 20%</p>
-              <p><strong>Cargo:</strong> aqui</p>
+              <div class="d-flex flex-column text-center">
+                <p><strong>Ocupação:</strong> 20%</p>
+                <p><strong>Cargo:</strong> x</p>
+              </div>
             </div>
             <div class="card pink">
               <h5>Nome squad</h5>
-              <p><strong>Ocupação:</strong> 20%</p>
-              <p><strong>Cargo:</strong> aqui</p>
+              <div class="d-flex flex-column text-center">
+                <p><strong>Ocupação:</strong> 20%</p>
+                <p><strong>Cargo:</strong> x</p>
+              </div>
             </div>
             <div class="card purple">
               <h5>Nome squad</h5>
-              <p><strong>Ocupação:</strong> 20%</p>
-              <p><strong>Cargo:</strong> aqui</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Trilha Profissional -->
-        <div class="section track-section">
-          <div class="section-header">
-            <h4 data-i18n="collaborators_detail.professional_track">
-              Trilha profissional
-            </h4>
-            <button class="btn add-btn">+</button>
-          </div>
-          <div class="track-list">
-            <!-- Cargo Atual -->
-            <div class="track-item current">
-              <div class="track-header">
-                <h5 data-i18n="collaborators_detail.current_role">
-                  Cargo atual
-                </h5>
-                <button class="action-icon edit" title="Editar cargo atual">
-                  <img
-                    src="../../../../assets/svg/edit-button.svg"
-                    alt="Editar"
-                  />
-                </button>
-              </div>
-              <p>
-                <strong data-i18n="collaborators_detail.time"
-                  >Tempo de ocupação:</strong
-                >
-                x anos e x meses/dias
-              </p>
-              <p>
-                <strong data-i18n="collaborators_detail.manager"
-                  >Gestor:</strong
-                >
-                Nome do gestor
-              </p>
-              <p>
-                <strong data-i18n="collaborators_detail.salary"
-                  >Salário:</strong
-                >
-                R$ 0.000
-              </p>
-              <p>
-                <strong data-i18n="collaborators_detail.squads">Squads:</strong>
-              </p>
-              <div class="skills small-skills">
-                <span class="skill">Nome squad</span>
-                <span class="skill">Nome squad</span>
-              </div>
-            </div>
-
-            <!-- Cargos Anteriores -->
-            <div class="track-item">
-              <h5 data-i18n="collaborators_detail.previous_role">
-                Cargo anterior
-              </h5>
-              <p>
-                <strong data-i18n="collaborators_detail.time"
-                  >Tempo de ocupação:</strong
-                >
-                x anos e x meses/dias
-              </p>
-              <p>
-                <strong data-i18n="collaborators_detail.manager"
-                  >Gestor:</strong
-                >
-                Nome do gestor
-              </p>
-              <p>
-                <strong data-i18n="collaborators_detail.salary"
-                  >Salário:</strong
-                >
-                R$ 0.000
-              </p>
-              <p>
-                <strong data-i18n="collaborators_detail.squads">Squads:</strong>
-              </p>
-              <div class="skills small-skills">
-                <span class="skill">Nome squad</span>
+              <div class="d-flex flex-column text-center">
+                <p><strong>Ocupação:</strong> 20%</p>
+                <p><strong>Cargo:</strong> x</p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Feedbacks -->
-        <div class="section feedback-section">
-          <div class="section-header">
-            <h4 data-i18n="collaborators_detail.feedbacks">Feedbacks</h4>
-            <button
-              class="btn request-feedback"
-              data-i18n="collaborators_detail.request_feedback"
-            >
-              Pedir feedback
-            </button>
-          </div>
-          <div class="feedback-list">
-            <div class="feedback-card">
-              <div class="fb-avatar avatar-sm">N</div>
-              <div class="fb-info">
-                <strong>Nome</strong>
-                <span>Cargo aqui</span>
-                <p>Feedback aqui</p>
-              </div>
+        <div class="bottom-sections d-flex justify-between">
+          <!-- Trilha Profissional Unificada -->
+          <div class="section track-section">
+            <div class="section-header">
+              <h4 data-i18n="collaborators_detail.professional_track">
+                Trilha profissional
+              </h4>
+              <button class="add-btn"><span class="mb-4">+</span></button>
             </div>
-            <!-- repita por cada feedback -->
+            <ul class="timeline">
+              <!-- Cargo Atual (mais recente) -->
+              <li class="timeline-item current">
+                <span class="timeline-marker"></span>
+                <div class="timeline-content">
+                  <h3 data-i18n="collaborators_detail.current_role">Cargo atual</h3>
+                  <p><strong data-i18n="collaborators_detail.time">Tempo de ocupação:</strong> x anos e x meses/dias</p>
+                  <p><strong data-i18n="collaborators_detail.manager">Gestor:</strong> Nome do gestor</p>
+                  <p><strong data-i18n="collaborators_detail.salary">Salário:</strong> R$ 0.000</p>
+                  <p><strong data-i18n="collaborators_detail.squads">Squads:</strong></p>
+                  <div class="skills small-skills">
+                    <span class="skill">Nome squad</span>
+                    <span class="skill">Nome squad</span>
+                  </div>
+                </div>
+              </li>
+              <!-- Cargo Anterior (exemplo) -->
+              <li class="timeline-item">
+                <span class="timeline-marker"></span>
+                <div class="timeline-content">
+                  <h3 data-i18n="collaborators_detail.previous_role">Cargo anterior</h3>
+                  <p><strong data-i18n="collaborators_detail.time">Tempo de ocupação:</strong> x anos e x meses/dias</p>
+                  <p><strong data-i18n="collaborators_detail.manager">Gestor:</strong> Nome do gestor</p>
+                  <p><strong data-i18n="collaborators_detail.salary">Salário:</strong> R$ 0.000</p>
+                  <p><strong data-i18n="collaborators_detail.squads">Squads:</strong></p>
+                  <div class="skills small-skills">
+                    <span class="skill">Nome squad</span>
+                  </div>
+                </div>
+              </li>
+              <!-- Adicione mais <li class="timeline-item"> conforme necessário -->
+            </ul>
           </div>
         </div>
       </section>

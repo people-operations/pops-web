@@ -12,25 +12,140 @@
   border-radius: 8px;
   padding: 16px;
 }
-.content {
-  flex: 1;
+.tag-green {
   display: flex;
-  flex-direction: column;
-  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 23px;
+  background-color: #2f7d32;
+  color: #fff;
+  font-weight: 500;
+  font-size: 12px;
+  border-radius: 60px;
+  padding: 12px;
+  white-space: nowrap;
+  align-self: end;
 }
-
-/* 2. SUMMARY HEADER */
 .summary-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  text-align: center;
   margin-bottom: 16px;
 }
-.avatar-large img {
-  width: 100%;
-  border-radius: 50%;
-  display: block;
+/* --- TIMELINE TRILHA PROFISSIONAL --- */
+.track-list {
+  position: relative;
+  margin-left: 24px;
+  padding-left: 0;
 }
+.timeline {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #7d1bff;
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 32px;
+}
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+.timeline-marker,
+.timeline-bullet {
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  border: 2px solid #7d1bff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(125, 27, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #7d1bff;
+  z-index: 1;
+}
+.timeline-content {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+.timeline-content h3,
+.timeline-content h5 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.timeline-content p {
+  font-size: 14px;
+  margin: 2px 0;
+}
+.timeline-content .skills {
+  margin-top: 6px;
+}
+.timeline-item.current .timeline-marker,
+.timeline-item.current .timeline-bullet {
+  background: #7d1bff;
+  color: #fff;
+}
+.timeline-item.current .timeline-content {
+  border-color: #7d1bff;
+}
+
+/* DARK MODE TIMELINE */
+body.dark .timeline::before {
+  background: #a97dff;
+}
+body.dark .timeline-content {
+  background: #23232b;
+  border-color: #444;
+  color: #f5f5f5;
+  box-shadow: 0 2px 8px rgba(125, 27, 255, 0.08);
+}
+body.dark .timeline-content h3,
+body.dark .timeline-content h5 {
+  color: #e0e0e0;
+}
+body.dark .timeline-content p {
+  color: #cfcfcf;
+}
+body.dark .timeline-marker,
+body.dark .timeline-bullet {
+  background: #23232b;
+  border: 2px solid #a97dff;
+  color: #a97dff;
+}
+body.dark .timeline-item.current .timeline-marker,
+body.dark .timeline-item.current .timeline-bullet {
+  background: #a97dff;
+  color: #23232b;
+}
+body.dark .timeline-item.current .timeline-content {
+  border-color: #a97dff;
+}
+.small-skills .skill {
+  background: rgba(0, 123, 255, 0.1);
+  color: #007bff;
+  padding: 4px 6px;
+  font-size: 12px;
+}
+
 .summary-actions .action-icon {
   width: 24px;
   height: 24px;
@@ -43,13 +158,13 @@
 }
 .collab-name {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
 }
 .role-area {
-  font-size: 14px;
-  color: #555;
+  font-size: 16px;
   margin-bottom: 12px;
+  font-weight: 400;
 }
 .info-line {
   font-size: 14px;
@@ -78,6 +193,7 @@
 }
 .data-block label {
   font-size: 14px;
+  margin-bottom: -12px;
 }
 .data-block input {
   width: 100%;
@@ -94,9 +210,14 @@
   border-radius: 6px;
   margin-bottom: 8px;
 }
+.cert-name {
+  font-weight: 400;
+  font-size: 14px;
+}
 .cert-period {
   font-size: 12px;
   color: #555;
+  margin-top: -4px;
 }
 
 /* 4. SECTIONS */
@@ -105,6 +226,7 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 16px;
+  width: 100%;
 }
 .section-header {
   display: flex;
@@ -128,13 +250,27 @@
   background: none;
   border: 2px solid #7d1bff;
   color: #7d1bff;
-  font-size: 20px;
-  line-height: 0;
+  font-size: 20px !important;
+  line-height: 0 !important;
+  width: 25px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  transition: background-color 0.2s, color 0.2s;
+  cursor: pointer;
+}
+.add-btn:hover {
+  background-color: #7d1bff;
+  color: #fff;
+  transform: scale(1.1);
 }
 .request-feedback {
   background-color: #7d1bff;
   color: #fff;
   border: none;
+}
+
+.bottom-sections {
+  gap: 24px;
 }
 
 /* 5. SQUADS LIST */
@@ -150,13 +286,13 @@
   padding: 12px;
 }
 .card.light-blue {
-  background-color: #e0f7fa;
+  background-color: #40ddfe61;
 }
 .card.pink {
-  background-color: #fce4ec;
+  background-color: #ff19e74d;
 }
 .card.purple {
-  background-color: #ede7f6;
+  background-color: #7d1bff61;
 }
 .card h5 {
   margin: 0 0 8px;

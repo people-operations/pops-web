@@ -1,3 +1,6 @@
+.hidden {
+  display: none !important;
+}
 .highlight {
   margin-top: 1rem;
   font-size: 18px !important;
