@@ -1,4 +1,50 @@
 /* =========================
+   TOAST NOTIFICATIONS
+========================= */
+.toast {
+  min-width: 260px;
+  max-width: 360px;
+  padding: 16px 32px 16px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  color: #fff;
+  font-size: 1rem;
+  font-family: "Poppins", sans-serif;
+  position: relative;
+  animation: fadeIn 0.4s;
+  margin-left: auto;
+  margin-right: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.toast-success {
+  background: linear-gradient(90deg, #38b000, #70e000);
+}
+.toast-error {
+  background: linear-gradient(90deg, #d90429, #ef233c);
+}
+.toast-warning {
+  background: linear-gradient(90deg, #f9a602, #ffbe0b);
+  color: #222;
+}
+.toast-close {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.5rem;
+  cursor: pointer;
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  line-height: 1;
+  padding: 0;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* =========================
    DARK MODE - BOTÕES OUTLINED
 ========================= */
 body.dark .btn.outline {

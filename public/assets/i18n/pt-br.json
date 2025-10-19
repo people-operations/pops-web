@@ -204,7 +204,7 @@
     "description_placeholder": "Descreva os objetivos e escopo do projeto...",
     "budget": "Budget *",
     "start_date": "Data de começo *",
-    "end_date": "Data de fim (Opcional)",
+    "end_date": "Data de fim",
     "area": "Área *",
     "select_area": "Selecione uma área",
     "skills_needed": "Skills necessários",

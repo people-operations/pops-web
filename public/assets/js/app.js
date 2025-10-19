@@ -1,3 +1,49 @@
+// =========================
+// SISTEMA DE NOTIFICAÇÕES TOAST
+// =========================
+
+/**
+ * Exibe uma notificação toast no canto superior direito
+ * @param {'success'|'error'|'warning'} type - Tipo da notificação
+ * @param {string} message - Mensagem a ser exibida
+ */
+window.showNotification = function(type, message) {
+  // Cria container se não existir
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.style.position = 'fixed';
+    container.style.top = '32px';
+    container.style.right = '32px';
+    container.style.zIndex = '9999';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '12px';
+    document.body.appendChild(container);
+  }
+
+  // Cria o toast
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  toast.textContent = message;
+  toast.setAttribute('role', 'alert');
+  toast.setAttribute('aria-live', 'assertive');
+
+  // Adiciona botão de fechar
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'toast-close';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.onclick = () => toast.remove();
+  toast.appendChild(closeBtn);
+
+  container.appendChild(toast);
+
+  // Remove automaticamente após 4s
+  setTimeout(() => {
+    toast.remove();
+  }, 4000);
+};
 /**
  * Aplica o tema (dark ou light) ao body e atualiza o ícone do tema.
  * @param {string} theme - O tema a ser aplicado ("dark" ou "light").
@@ -152,23 +198,31 @@ function toggleDropdown() {
 window.addEventListener("click", function (e) {
   const avatar = document.querySelector(".avatar");
   const dropdown = document.getElementById("dropdown");
-  if (!avatar.contains(e.target) && !dropdown.contains(e.target)) {
-    dropdown.classList.add("hidden");
+  if (avatar && dropdown) {
+    if (!avatar.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.classList.add("hidden");
+    }
   }
 });
 
-document.querySelector(".avatar").addEventListener("click", function (e) {
-  e.stopPropagation();
-  toggleDropdown();
-});
-document.querySelector(".chevron").addEventListener("click", function (e) {
-  e.stopPropagation();
-  toggleDropdown();
-});
+const avatarEl = document.querySelector(".avatar");
+if (avatarEl) {
+  avatarEl.addEventListener("click", function (e) {
+    e.stopPropagation();
+    toggleDropdown();
+  });
+}
+const chevronEl = document.querySelector(".chevron");
+if (chevronEl) {
+  chevronEl.addEventListener("click", function (e) {
+    e.stopPropagation();
+    toggleDropdown();
+  });
+}
 
 window.addEventListener("click", function (e) {
   const dropdown = document.getElementById("dropdown");
-  if (!dropdown.classList.contains("hidden")) {
+  if (dropdown && !dropdown.classList.contains("hidden")) {
     dropdown.classList.add("hidden");
   }
 });

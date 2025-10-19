@@ -5,14 +5,26 @@
     <title>POPs Projetos</title>
     <link rel="stylesheet" href="projects.css" />
     <link rel="stylesheet" href="../../../assets/css/style.css" />
-    <link rel="icon" type="image/svg+xml" href="../../../assets/svg/logo-icon.svg" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../../../assets/svg/logo-icon.svg"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link
       href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
       rel="stylesheet"
     />
   </head>
-  <body>
+<body>   <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const avatar = document.querySelector(".avatar");
+        const email = localStorage.getItem("userEmail");
+        if (avatar && email && typeof email === "string" && email.length > 0) {
+          avatar.textContent = email[0].toUpperCase();
+        }
+      });
+    </script>
     <div
       id="loader"
       class="center"
@@ -75,7 +87,8 @@
             class="theme-toggle-btn"
             title="Alternar tema"
           >
-            <span id="theme-icon"> <svg
+            <span id="theme-icon">
+              <svg
                 width="22"
                 height="22"
                 viewBox="0 0 22 22"
@@ -102,8 +115,8 @@
                   <line x1="16.36" y1="16.36" x2="17.78" y2="17.78" />
                   <line x1="4.22" y1="17.78" x2="5.64" y2="16.36" />
                   <line x1="16.36" y1="5.64" x2="17.78" y2="4.22" />
-                </g>
-              </svg></span>
+                </g></svg
+            ></span>
           </button>
           <div class="avatar">K</div>
           <span class="chevron" aria-hidden="true">
