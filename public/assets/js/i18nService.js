@@ -49,14 +49,39 @@ window.i18n = new I18nService();
 
 // Inicializa o serviço de i18n ao carregar a página
 document.addEventListener("DOMContentLoaded", async () => {
+  // Detecta idioma salvo ou padrão
+  let savedLang = localStorage.getItem("lang") || "pt-br";
   try {
-    await i18n.init("pt-br"); // Carrega traduções na língua especificada
-    i18n.apply(); // Aplica as traduções na página
+    await i18n.init(savedLang);
+    i18n.apply();
     if (typeof renderSquads === "function") {
-      renderSquads(); // Garante squads traduzidos
-      i18n.apply(); // Aplica novamente para elementos dinâmicos
+      renderSquads();
+      i18n.apply();
     }
   } catch (err) {
-    console.error(err); // Exibe erro caso falhe ao carregar traduções
+    console.error(err);
+  }
+
+  // Troca de idioma dinâmica
+  const langSelect = document.getElementById("language-select");
+  if (langSelect) {
+    // Sincroniza select com idioma atual
+    if (savedLang === "pt-br") langSelect.value = "Português";
+    else if (savedLang === "en-us") langSelect.value = "Inglês";
+    else if (savedLang === "es-es") langSelect.value = "Espanhol";
+
+    langSelect.addEventListener("change", async (e) => {
+      let lang = "pt-br";
+      if (langSelect.value === "Português") lang = "pt-br";
+      else if (langSelect.value === "Inglês") lang = "en-us";
+      else if (langSelect.value === "Espanhol") lang = "es-es";
+      localStorage.setItem("lang", lang);
+      await i18n.init(lang);
+      i18n.apply();
+      if (typeof renderSquads === "function") {
+        renderSquads();
+        i18n.apply();
+      }
+    });
   }
 });

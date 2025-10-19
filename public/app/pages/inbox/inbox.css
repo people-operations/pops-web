@@ -1,8 +1,7 @@
 /* ====== Page header (breadcrumbs + title) ====== */
 .container {
-  max-width: 1120px;
   margin: 0 auto;
-  padding: 22px 20px 60px;
+  padding: 32px;
 }
 
 /* ====== Toolbar (ano + tabs) ====== */
@@ -11,6 +10,8 @@
   align-items: center;
   gap: 14px;
   margin: 10px 0 16px;
+  padding: 8px 16px;
+  border: none !important;
 }
 .select {
   position: relative;
@@ -22,29 +23,93 @@
   border-radius: 999px;
   padding: 6px 10px;
   cursor: pointer;
+  border: none !important;
 }
 .tabs {
   display: flex;
   gap: 18px;
   align-items: center;
   flex-wrap: wrap;
+  border: none !important;
 }
+
 .tab {
   appearance: none;
-  border: none;
-  background: transparent;
+  border: none !important;
+  outline: none !important;
+  background: var(--bg);
   cursor: pointer;
-  padding: 10px 12px;
-  border-bottom: 2px solid transparent;
-  color: var(--muted);
+  padding: 10px 18px;
+  color: #a0a0a0;
   font-weight: 700;
 }
 .tab.active {
-  color: var(--brand);
-  border-color: var(--brand);
+  color: #fa12e2;
+  border-bottom: 2px solid #fa12e2 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.tab:focus {
+  border-bottom: 2px solid #fa12e2 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.tab:active {
+  border-bottom: 2px solid #fa12e2 !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 .spacer {
   flex: 1;
+  background: var(--bg-soft);
+  color: var(--brand);
+  border: none !important;
+}
+
+.custom-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 126px;
+  height: 32px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: white;
+  background-color: #7d1bff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.custom-primary-button:hover {
+  background-color: #a97dff;
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.custom-outline-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 126px;
+  height: 32px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #7d1bff;
+  background: none;
+  border: 1px solid #7d1bff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.custom-outline-button:hover {
+  background-color: #7d1bff;
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* ====== Table styles ====== */
@@ -54,11 +119,20 @@
   overflow: hidden;
   background: var(--bg);
   box-shadow: var(--shadow);
+  margin-top: 12px;
 }
 table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
+}
+.table-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  margin-top: 12px;
 }
 thead th {
   text-align: left;
@@ -67,18 +141,44 @@ thead th {
   padding: 14px 16px;
   background: var(--bg-soft);
   border-bottom: 1px solid var(--border);
+  font-family: inherit;
+  letter-spacing: 0.01em;
 }
+.table th {
+  background-color: #7b1fa269 !important;
+  color: black !important;
+}
+select{
+  background: transparent;
+  border: none;
+  font-size: 18px;
+}
+
 tbody td {
   padding: 16px;
   border-top: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
 }
 tbody tr:first-child td {
   border-top: none;
 }
-tbody tr:hover {
-  background: color-mix(in oklab, var(--bg) 92%, var(--brand-weak) 8%);
+.avatars-group {
+  display: flex;
 }
-
+.avatar-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #7d1bff;
+  color: #fff;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: -8px;
+  border: 2px solid #fff;
+}
 /* ====== Badges / chips / buttons ====== */
 .badge {
   font-weight: 700;
@@ -98,22 +198,31 @@ tbody tr:hover {
   color: var(--text);
   font-weight: 700;
   border-radius: 999px;
-  padding: 8px 12px;
+  padding: 8px 16px;
   cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s, color 0.2s, border 0.2s;
 }
 .btn:hover {
+  background: var(--bg-soft);
+  color: var(--brand);
+  border-color: var(--brand);
   box-shadow: 0 0 0 4px var(--focus);
 }
 .btn-primary {
   background: var(--brand);
   color: #fff;
-  border-color: transparent;
+  border-color: var(--brand);
 }
 .btn-primary:hover {
   filter: saturate(1.1) brightness(1.02);
+  background: var(--brand-weak);
+  color: #fff;
 }
 .btn-outline {
   background: transparent;
+  color: var(--brand);
+  border-color: var(--brand);
 }
 .actions {
   display: flex;
@@ -156,10 +265,15 @@ tbody tr:hover {
     grid-template-columns: 1fr;
     gap: 8px;
     padding: 12px;
+    background: var(--bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
   }
   tbody td {
     border: none;
     padding: 6px 12px;
+    background: var(--bg);
+    color: var(--text);
   }
   tbody td[data-th]::before {
     content: attr(data-th) " — ";
@@ -170,4 +284,58 @@ tbody tr:hover {
   .actions {
     justify-content: flex-start;
   }
+}
+
+body.dark .tab.active {
+  background: #7d1bff;
+  color: #fff;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+body.dark .tab:hover {
+  background: #2d2c3a;
+  color: #a97dff;
+}
+body.dark .card {
+  background: #23232b;
+  border-color: #444;
+  box-shadow: none;
+}
+body.dark thead th {
+  background: #2d2c3a;
+  color: #a97dff;
+  border-color: #444;
+}
+body.dark tbody td {
+  background: #23232b;
+  color: #f5f5f5;
+  border-color: #444;
+}
+body.dark tbody tr:hover {
+  background: #2d2c3a;
+}
+body.dark .btn {
+  background: #23232b;
+  color: #a97dff;
+  border-color: #7d1bff;
+}
+body.dark .btn:hover {
+  background: #2d2c3a;
+  color: #fff;
+  border-color: #a97dff;
+}
+body.dark .btn-primary {
+  background: #7d1bff;
+  color: #fff;
+  border-color: #7d1bff;
+}
+body.dark .btn-primary:hover {
+  background: #a97dff;
+  color: #fff;
+}
+body.dark .btn-outline {
+  background: transparent;
+  color: #a97dff;
+  border-color: #a97dff;
 }

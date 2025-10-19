@@ -1577,10 +1577,6 @@ nav a.active {
   margin-right: 5px;
 }
 
-.tab-btn.active {
-  background: #7d1bff;
-  color: white;
-}
 
 .tab-content {
   border: 1px solid #ddd;
@@ -1887,18 +1883,16 @@ input:checked + .slider:before {
   position: relative;
   margin: 20px 0;
   padding-left: 40px;
-  border-left: 2px solid #ddd;
 }
 
 .timeline-item {
   position: relative;
   margin-bottom: 20px;
-  padding-left: 20px;
 }
 
 .timeline-marker {
   position: absolute;
-  left: -10px;
+  left: -37px;
   top: 5px;
   width: 20px;
   height: 20px;
@@ -1932,11 +1926,6 @@ input:checked + .slider:before {
   color: #999;
   display: block;
   margin-top: 5px;
-}
-
-.timeline-item:nth-child(odd) .timeline-content {
-  margin-left: -50px;
-  text-align: right;
 }
 
 @media (max-width: 768px) {
@@ -2268,4 +2257,8 @@ body.dark .chevron svg {
 ========================= */
 .visible {
   display: block !important;
+}
+
+.pink-text {
+  color: #fa12e2;
 }
