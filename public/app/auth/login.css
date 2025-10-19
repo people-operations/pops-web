@@ -1,47 +1,46 @@
-/* =========================
-   Variáveis globais e reset
-   ========================= */
+
+/* ====================
+   Variáveis Globais
+==================== */
 :root {
-  --purple: #7c3aed; /* Roxo principal */
-  --blue: #3b82f6; /* Azul secundário */
-  --border-radius: 0.5rem; /* Raio padrão dos cantos */
-  --gap: 1rem; /* Espaçamento padrão */
-  --transition: 0.3s; /* Duração de transições */
-  font-size: 16px; /* Tamanho base da fonte */
+  --purple: #7c3aed;
+  --blue: #3b82f6;
+  --border-radius: 0.5rem;
+  --gap: 1rem;
+  --transition: 0.3s;
+  font-size: 16px;
 }
 
-/* Reset básico para todos os elementos */
+/* ====================
+   Reset e Base
+==================== */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* =========================
-   Estilos gerais
-   ========================= */
 body {
   height: 100vh;
   background-color: #fff !important;
 }
-
 body.dark {
   background: #181824 !important;
   color: #f3f3f3;
 }
 
-/* =========================
-   Layout principal
-   ========================= */
+/* ====================
+   Layout Principal
+==================== */
 .container {
   display: flex;
   height: 100%;
   width: 100%;
 }
 
-/* =========================
-   Painel Esquerdo (Login)
-   ========================= */
+/* ====================
+   Painel Esquerdo (Formulário)
+==================== */
 .left-panel {
   flex: 0 0 40%;
   padding: 4rem;
@@ -50,39 +49,34 @@ body.dark {
   justify-content: center;
   background: #fff;
 }
-
+body.dark .left-panel {
+  background: #232336;
+  color: #f3f3f3;
+}
 .left-panel h1 {
   font-size: 2rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
-
 .left-panel p.lead {
   font-size: 1.25rem;
   font-weight: 400;
   margin-bottom: 2rem;
 }
 
-/* =========================
-   Formulário de Login
-   ========================= */
 form {
   width: 100%;
 }
-
-.form-group {
-  margin-bottom: var(--gap);
-}
-
 .form-group.floating label {
   top: -0.6rem !important;
 }
-
 .theme-toggle-btn {
   margin-top: 0 !important;
 }
 
-/* Botão de envio */
+/* ====================
+   Botão de Ação
+==================== */
 .btn {
   width: 100%;
   padding: 0.75rem;
@@ -98,7 +92,9 @@ form {
   background: #6938b9;
 }
 
-/* Texto de ajuda */
+/* ====================
+   Texto de Ajuda
+==================== */
 .help-text {
   display: flex;
   justify-content: center;
@@ -114,9 +110,9 @@ form {
   text-decoration: underline;
 }
 
-/* =========================
-   Painel Direito (Info/Ilustração)
-   ========================= */
+/* ====================
+   Painel Direito (Visual)
+==================== */
 .right-panel {
   flex: 1;
   display: flex;
@@ -125,8 +121,6 @@ form {
   background: transparent;
   padding: 2rem;
 }
-
-/* Fundo animado e estilização do painel direito */
 .right-panel-bg {
   position: relative;
   background: linear-gradient(120deg, #7512f9, #60a5fa, #7512f9, #60a5fa);
@@ -139,10 +133,20 @@ form {
   height: 98%;
   max-height: 600px;
   box-shadow: 0 4px 24px rgba(60, 30, 90, 0.08);
-  overflow: hidden; /* garante que o canvas não vaze */
+  /* overflow: hidden é importante para garantir que o canvas de estrelas não ultrapasse o painel visual */
+  overflow: hidden;
+}
+body.dark .right-panel-bg {
+  background: linear-gradient(120deg, #2a0859, #1e3a5c, #2a0859, #1e3a5c);
+  background-size: 300% 300%;
+  animation: gradientMove 8s ease-in-out infinite;
+  color: #fff;
 }
 
-/* Canvas de estrelas animadas */
+/*
+  O canvas de estrelas (#stars-bg) precisa estar absoluto e pointer-events: none
+  para não bloquear interações nos elementos acima. Isso é importante para acessibilidade.
+*/
 #stars-bg {
   position: absolute;
   top: 0;
@@ -151,23 +155,12 @@ form {
   height: 100%;
   display: block;
   z-index: 0;
-  pointer-events: none; /* não interfere nos cliques */
+  pointer-events: none;
 }
 
-/* Animação do gradiente de fundo */
-@keyframes gradientMove {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-/* Organização dos elementos internos do painel direito */
+/* ====================
+   Elementos Internos do Painel Direito
+==================== */
 .right-panel-bg .row {
   margin-bottom: 1.5rem;
 }
@@ -190,9 +183,9 @@ form {
   right: 0px;
 }
 
-/* =========================
-   Botão de mostrar/ocultar senha
-   ========================= */
+/* ====================
+   Ícone de Mostrar/Ocultar Senha
+==================== */
 .toggle-password {
   position: absolute;
   top: 50%;
@@ -203,15 +196,20 @@ form {
   align-items: center;
   z-index: 2;
   user-select: none;
-  color: var(--purple); /* cor padrão do olho */
+  /* color define a cor do ícone do olho, facilitando a identificação visual do estado do campo de senha */
+  color: var(--purple);
+}
+body.dark .toggle-password {
+  /* cor do ícone do olho no modo escuro, para melhor contraste */
+  color: #3b82f6;
 }
 .toggle-password svg {
   pointer-events: none;
 }
 
-/* =========================
+/* ====================
    Responsividade
-   ========================= */
+==================== */
 @media (max-width: 1024px) {
   .container {
     flex-direction: column;
@@ -223,19 +221,17 @@ form {
   }
 }
 
-/* =========================
-   Tema escuro (dark mode)
-   ========================= */
-body.dark .left-panel {
-  background: #232336;
-  color: #f3f3f3;
-}
-body.dark .right-panel-bg {
-  background: linear-gradient(120deg, #2a0859, #1e3a5c, #2a0859, #1e3a5c);
-  background-size: 300% 300%;
-  animation: gradientMove 8s ease-in-out infinite;
-  color: #fff;
-}
-body.dark .toggle-password {
-  color: #3b82f6; /* cor do olho no modo dark */
+/* ====================
+   Animações
+==================== */
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }

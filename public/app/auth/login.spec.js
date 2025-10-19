@@ -1,70 +1,117 @@
-/**
- * Testes unitários para a lógica do login (login.js)
- * Utiliza Jest + JSDOM para simular o DOM.
- */
+// login.spec.js
+// Testes do fluxo de login
 
-describe("Login Page", () => {
-  let emailInput, passwordInput, form, alertMock, locationMock;
+// Mocks globais
+window.showNotification = jest.fn();
+window.location = { href: "" };
 
+// Mock do apiService
+jest.mock("../../assets/js/apiService.js", () => ({
+  apiService: {
+    login: jest.fn(),
+  },
+}));
+
+import { apiService } from "../../assets/js/apiService.js";
+
+// Utilitário para criar elementos do DOM necessários
+function setupDOM() {
+  document.body.innerHTML = `
+    <form id="login-form">
+      <input id="email" value="" />
+      <input id="password" value="" type="password" />
+      <button type="submit">Entrar</button>
+    </form>
+    <div id="toggle-password"></div>
+    <span id="eye-closed"></span>
+    <span id="eye-open"></span>
+    <canvas id="stars-bg"></canvas>
+  `;
+}
+
+describe("Login Flow", () => {
   beforeEach(() => {
-    // Monta o DOM necessário para os testes
-    document.body.innerHTML = `
-      <form id="login-form">
-        <input type="email" id="email" />
-        <input type="password" id="password" />
-        <button type="submit">Entrar</button>
-      </form>
-      <span id="theme-icon"></span>
-      <button id="theme-toggle"></button>
-      <span id="eye-closed"></span>
-      <span id="eye-open"></span>
-    `;
-
-    emailInput = document.getElementById("email");
-    passwordInput = document.getElementById("password");
-    form = document.getElementById("login-form");
-
-    // Mock do alert e do location
-    alertMock = jest.spyOn(window, "alert").mockImplementation(() => {});
-    locationMock = jest
-      .spyOn(window.location, "href", "set")
-      .mockImplementation(() => {});
-    // Recarrega o script do login para registrar os listeners
-    jest.resetModules();
+    jest.clearAllMocks();
+    setupDOM();
+    // Recarrega o login.js após DOM
     require("./login.js");
   });
 
-  afterEach(() => {
-    alertMock.mockRestore();
-    locationMock.mockRestore();
-    jest.resetModules();
-  });
-
-  it("deve alertar se o e-mail estiver vazio", () => {
-    emailInput.value = "";
-    passwordInput.value = "123456";
-    form.dispatchEvent(new Event("submit", { bubbles: true }));
-    expect(alertMock).toHaveBeenCalledWith(
-      "Por favor, preencha todos os campos."
+  it("deve exibir aviso se campos estiverem vazios", () => {
+    document.getElementById("email").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-form").dispatchEvent(new Event("submit"));
+    expect(window.showNotification).toHaveBeenCalledWith(
+      "warning",
+      expect.any(String)
     );
   });
 
-  it("deve alertar se a senha estiver vazia", () => {
-    emailInput.value = "teste@teste.com";
-    passwordInput.value = "";
-    form.dispatchEvent(new Event("submit", { bubbles: true }));
-    expect(alertMock).toHaveBeenCalledWith(
-      "Por favor, preencha todos os campos."
+  it("deve chamar apiService.login com email e senha", () => {
+    document.getElementById("email").value = "user@teste.com";
+    document.getElementById("password").value = "123";
+    apiService.login.mockResolvedValue({
+      idToken: "token",
+      email: "user@teste.com",
+    });
+    document.getElementById("login-form").dispatchEvent(new Event("submit"));
+    expect(apiService.login).toHaveBeenCalledWith("user@teste.com", "123");
+  });
+
+  it("deve redirecionar e mostrar sucesso se login OK", async () => {
+    document.getElementById("email").value = "user@teste.com";
+    document.getElementById("password").value = "123";
+    apiService.login.mockResolvedValue({
+      idToken: "token",
+      email: "user@teste.com",
+    });
+    await document
+      .getElementById("login-form")
+      .dispatchEvent(new Event("submit"));
+    setTimeout(() => {
+      expect(window.location.href).toContain("dashboard.html");
+      expect(window.showNotification).toHaveBeenCalledWith(
+        "success",
+        expect.any(String)
+      );
+    }, 1300);
+  });
+
+  it("deve mostrar erro se login falhar", async () => {
+    document.getElementById("email").value = "user@teste.com";
+    document.getElementById("password").value = "123";
+    apiService.login.mockResolvedValue({});
+    await document
+      .getElementById("login-form")
+      .dispatchEvent(new Event("submit"));
+    expect(window.showNotification).toHaveBeenCalledWith(
+      "error",
+      expect.any(String)
     );
   });
 
-  it("deve permitir login com campos preenchidos", () => {
-    emailInput.value = "teste@teste.com";
-    passwordInput.value = "123456";
-    form.dispatchEvent(new Event("submit", { bubbles: true }));
-    expect(alertMock).toHaveBeenCalledWith("Login realizado com sucesso!");
-    expect(locationMock).toHaveBeenCalledWith(
-      "../pages/dashboard/dashboard.html"
+  it("deve mostrar erro se apiService lançar exceção", async () => {
+    document.getElementById("email").value = "user@teste.com";
+    document.getElementById("password").value = "123";
+    apiService.login.mockRejectedValue(new Error("Falha"));
+    await document
+      .getElementById("login-form")
+      .dispatchEvent(new Event("submit"));
+    expect(window.showNotification).toHaveBeenCalledWith(
+      "error",
+      expect.any(String)
     );
+  });
+
+  it("deve alternar visibilidade da senha ao clicar", () => {
+    const passwordInput = document.getElementById("password");
+    const togglePassword = document.getElementById("toggle-password");
+    const eyeClosed = document.getElementById("eye-closed");
+    const eyeOpen = document.getElementById("eye-open");
+    passwordInput.type = "password";
+    togglePassword.click();
+    expect(passwordInput.type).toBe("text");
+    expect(eyeClosed.style.display).toBe("none");
+    expect(eyeOpen.style.display).toBe("inline");
   });
 });

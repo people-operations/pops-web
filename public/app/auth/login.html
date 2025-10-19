@@ -3,10 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <!-- Título da página (internacionalizado) -->
     <title data-i18n="login.page_title"></title>
-
     <!-- Estilos específicos da página de login -->
     <link rel="stylesheet" href="login.css" />
     <!-- Estilos globais do projeto -->
@@ -25,9 +22,7 @@
   </head>
   <body>
     <div class="container">
-      <!-- Painel esquerdo: área de login -->
       <div class="left-panel">
-        <!-- Saudação ao usuário e botão de alternância de tema -->
         <div class="welcome-row">
           <h1 data-i18n="login.welcome"></h1>
           <button
@@ -36,6 +31,7 @@
             aria-label="Alternar tema"
           >
             <span id="theme-icon">
+              <!-- SVG do ícone de alternância de tema. Mantido sem comentários pois é autoexplicativo. -->
               <svg
                 width="22"
                 height="22"
@@ -68,11 +64,8 @@
             </span>
           </button>
         </div>
-        <!-- Orientação para quem não tem acesso -->
         <p class="lead" data-i18n="login.no_access"></p>
-        <!-- Formulário de login -->
         <form id="login-form">
-          <!-- Campo de e-mail com label flutuante -->
           <div class="form-group floating">
             <input
               type="email"
@@ -83,7 +76,6 @@
             />
             <label for="email" data-i18n="login.email"></label>
           </div>
-          <!-- Campo de senha com label flutuante e botão de mostrar/ocultar -->
           <div class="form-group floating" style="position: relative">
             <label for="password" data-i18n="login.password"></label>
             <input
@@ -93,14 +85,13 @@
               placeholder="••••••••"
               required
             />
-            <!-- Botão para mostrar/ocultar senha -->
+            <!-- Toggle de visibilidade da senha: ícones de olho fechado/aberto. Comentado pois envolve manipulação visual dinâmica. -->
             <span
               id="toggle-password"
               class="toggle-password"
               aria-label="Mostrar/ocultar senha"
               tabindex="0"
             >
-              <!-- Ícone de olho fechado (senha oculta) -->
               <svg
                 id="eye-closed"
                 xmlns="http://www.w3.org/2000/svg"
@@ -118,7 +109,6 @@
                   stroke-linejoin="round"
                 />
               </svg>
-              <!-- Ícone de olho aberto (senha visível, escondido inicialmente) -->
               <svg
                 id="eye-open"
                 xmlns="http://www.w3.org/2000/svg"
@@ -135,31 +125,25 @@
               </svg>
             </span>
           </div>
-          <!-- Botão de envio do formulário -->
           <button type="submit" class="btn" data-i18n="login.submit"></button>
-          <!-- Texto de ajuda para problemas de acesso -->
           <p class="help-text">
             <span data-i18n="login.help"></span>&nbsp;
             <a href="recover/recover.html" data-i18n="login.reset"></a>
           </p>
         </form>
       </div>
-
-      <!-- Painel direito: informações e ilustração -->
       <div class="right-panel">
         <div class="right-panel-bg">
-          <!-- Canvas para efeito visual de estrelas -->
+          <!-- Canvas para efeito visual de estrelas no fundo. Mantido comentado pois é uma parte visual não trivial. -->
           <canvas id="stars-bg"></canvas>
           <div class="content">
-            <!-- Título da plataforma -->
             <div class="row title-row">
               <h2 data-i18n="login.platform.title"></h2>
             </div>
-            <!-- Descrição da plataforma -->
             <div class="row subtitle-row">
               <p data-i18n="login.platform.description"></p>
             </div>
-            <!-- Ícone ilustrativo de login -->
+
             <div class="row icon-row">
               <div class="svg">
                 <img
@@ -174,12 +158,9 @@
         </div>
       </div>
     </div>
-    <!-- Scripts da página -->
-    <script src="login.js"></script>
-    <!-- Lógica da tela de login -->
-    <script src="../../assets/js/app.js"></script>
-    <!-- Tema (dark/light) -->
+    <!-- Scripts organizados: internacionalização, lógica principal e módulo de login. -->
     <script src="../../assets/js/i18nService.js" defer></script>
-    <!-- Internacionalização -->
+    <script src="../../assets/js/app.js"></script>
+    <script type="module" src="login.js"></script>
   </body>
 </html>

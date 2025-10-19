@@ -73,35 +73,33 @@
           class="theme-toggle-btn"
           title="Alternar tema"
         >
-          <span id="theme-icon"> <svg
-                width="22"
-                height="22"
-                viewBox="0 0 22 22"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="5"
-                  stroke="currentColor"
-                  stroke-width="2"
-                />
-                <g
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                >
-                  <line x1="11" y1="1" x2="11" y2="3" />
-                  <line x1="11" y1="19" x2="11" y2="21" />
-                  <line x1="1" y1="11" x2="3" y2="11" />
-                  <line x1="19" y1="11" x2="21" y2="11" />
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                  <line x1="16.36" y1="16.36" x2="17.78" y2="17.78" />
-                  <line x1="4.22" y1="17.78" x2="5.64" y2="16.36" />
-                  <line x1="16.36" y1="5.64" x2="17.78" y2="4.22" />
-                </g>
-              </svg></span>
+          <span id="theme-icon">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 22 22"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="5"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <g stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="11" y1="1" x2="11" y2="3" />
+                <line x1="11" y1="19" x2="11" y2="21" />
+                <line x1="1" y1="11" x2="3" y2="11" />
+                <line x1="19" y1="11" x2="21" y2="11" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="16.36" y1="16.36" x2="17.78" y2="17.78" />
+                <line x1="4.22" y1="17.78" x2="5.64" y2="16.36" />
+                <line x1="16.36" y1="5.64" x2="17.78" y2="4.22" />
+              </g>
+            </svg>
+          </span>
         </button>
         <div class="avatar">K</div>
         <span class="chevron" aria-hidden="true">
@@ -139,13 +137,13 @@
     <main class="create-project-page">
       <a href="../projects.html" class="back-link">
         <img src="../../../../assets/svg/left-arrow.svg" alt="Voltar" />
-        <span data-i18n="projects_form.back">Voltar para projetos</span>
+        <span data-i18n="projects_form.back"></span>
       </a>
       <div class="form-container">
-        <h2 data-i18n="projects_form.create_title">Criar um novo projeto</h2>
+        <h2 data-i18n="projects_form.create_title"></h2>
         <form class="form-project">
           <!-- Nome -->
-          <label data-i18n="projects_form.name">Nome do projeto *</label>
+          <label data-i18n="projects_form.name"></label>
           <input
             type="text"
             placeholder="e.g., Mobile Desenvolvimento"
@@ -155,25 +153,21 @@
           <!-- Tipo / Status -->
           <div class="row">
             <div class="col">
-              <label data-i18n="projects_form.type">Tipo *</label>
+              <label data-i18n="projects_form.type"></label>
               <select>
-                <option data-i18n="projects_form.select_type">
-                  Selecione aqui
-                </option>
+                <option data-i18n="projects_form.select_type"></option>
               </select>
             </div>
             <div class="col">
-              <label data-i18n="projects_form.status">Status *</label>
+              <label data-i18n="projects_form.status"></label>
               <select>
-                <option data-i18n="projects_form.select_status">
-                  Selecione aqui
-                </option>
+                <option data-i18n="projects_form.select_status"></option>
               </select>
             </div>
           </div>
 
           <!-- Descrição -->
-          <label data-i18n="projects_form.description">Descrição</label>
+          <label data-i18n="projects_form.description"></label>
           <textarea
             rows="4"
             data-i18n-placeholder="projects_form.description_placeholder"
@@ -182,30 +176,41 @@
           <!-- Budget / Datas -->
           <div class="row">
             <div class="col">
-              <label data-i18n="projects_form.budget">Budget *</label>
+              <label data-i18n="projects_form.budget"></label>
               <input type="text" placeholder="R$ 0000.00" />
             </div>
             <div class="col">
-              <label data-i18n="projects_form.start_date"
-                >Data de começo *</label
-              >
+              <label data-i18n="projects_form.start_date"></label>
               <input type="text" placeholder="00/00/00" />
             </div>
             <div class="col">
-              <label data-i18n="projects_form.end_date"
-                >Data de fim (Opcional)</label
-              >
+              <label data-i18n="projects_form.end_date"></label>
               <input type="text" placeholder="00/00/00" />
             </div>
           </div>
 
-          <!-- Área -->
-          <label data-i18n="projects_form.area">Área *</label>
-          <select>
-            <option data-i18n="projects_form.select_area">
-              Selecione uma área
-            </option>
-          </select>
+          <!-- Área e Skills-->
+          <div class="row">
+            <div class="col">
+              <label data-i18n="projects_form.area"></label>
+              <select>
+                <option data-i18n="projects_form.select_area"></option>
+              </select>
+            </div>
+            <div class="col">
+              <label data-i18n="projects_form.skills"></label>
+              <div id="skills-multiselect" class="skills-multiselect">
+                <input
+                  type="text"
+                  id="skills-input"
+                  placeholder="Adicionar skill..."
+                  autocomplete="off"
+                />
+                <div class="skills-dropdown hidden" id="skills-dropdown"></div>
+                <div class="tags-container" id="skills-tags"></div>
+              </div>
+            </div>
+          </div>
 
           <!-- Botões -->
           <div class="form-actions">
@@ -224,8 +229,17 @@
       </div>
     </main>
 
-    <script src="projects-form.js"></script>
-    <script src="../../../../assets/js/app.js"></script>
     <script src="../../../../assets/js/i18nService.js" defer></script>
+    <script src="../../../../assets/js/app.js"></script>
+    <script type="module" src="projects-form.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const avatar = document.querySelector(".avatar");
+        const email = localStorage.getItem("userEmail");
+        if (avatar && email && typeof email === "string" && email.length > 0) {
+          avatar.textContent = email[0].toUpperCase();
+        }
+      });
+    </script>
   </body>
 </html>

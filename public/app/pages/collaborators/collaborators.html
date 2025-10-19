@@ -16,7 +16,15 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
-  <body>
+<body>   <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const avatar = document.querySelector(".avatar");
+        const email = localStorage.getItem("userEmail");
+        if (avatar && email && typeof email === "string" && email.length > 0) {
+          avatar.textContent = email[0].toUpperCase();
+        }
+      });
+    </script>
     <header>
       <img
         src="../../../assets/svg/logo.svg"

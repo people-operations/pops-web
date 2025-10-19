@@ -1,53 +1,23 @@
-// ----------------------
-// LÓGICA DO FORMULÁRIO DE LOGIN
-// ----------------------
+import { apiService } from "../../assets/js/apiService.js";
 
-// Adiciona um listener para o evento de envio do formulário de login
-document.getElementById("login-form").addEventListener("submit", (e) => {
-  // Impede o comportamento padrão do formulário (recarregar a página)
-  e.preventDefault();
-
-  // Obtém e sanitiza o valor do campo de e-mail
-  const email = document.getElementById("email").value.trim();
-  // Obtém o valor do campo de senha
-  const password = document.getElementById("password").value;
-
-  // Validação simples: verifica se ambos os campos estão preenchidos
-  if (!email || !password) {
-    alert("Por favor, preencha todos os campos.");
-    return;
-  }
-
-  // Aqui seria implementada a lógica de autenticação (ex: chamada à API)
-  console.log("Email:", email);
-  console.log("Senha:", password);
-
-  // Exibe mensagem de sucesso (apenas para demonstração)
-  alert("Login realizado com sucesso!");
-  // Redireciona para o dashboard após login fictício
-  window.location.href = "../pages/dashboard/dashboard.html";
-});
-
-// ----------------------
-// ALTERNÂNCIA DE VISIBILIDADE DA SENHA
-// ----------------------
-
-// Seletores dos elementos relacionados à senha
+// =====================
+// Utilidades de Senha
+// =====================
 const passwordInput = document.getElementById("password");
 const togglePassword = document.getElementById("toggle-password");
 const eyeClosed = document.getElementById("eye-closed");
 const eyeOpen = document.getElementById("eye-open");
 
+// Alternância de visibilidade da senha
 if (togglePassword) {
-  // Clique no ícone alterna entre mostrar e ocultar senha
   togglePassword.addEventListener("click", () => {
     const isPassword = passwordInput.type === "password";
     passwordInput.type = isPassword ? "text" : "password";
     eyeClosed.style.display = isPassword ? "none" : "inline";
     eyeOpen.style.display = isPassword ? "inline" : "none";
   });
-  // Acessibilidade: permite alternar com Enter ou Espaço
   togglePassword.addEventListener("keydown", (e) => {
+    // Permite alternar com Enter ou Espaço para acessibilidade
     if (e.key === "Enter" || e.key === " ") {
       togglePassword.click();
       e.preventDefault();
@@ -55,19 +25,15 @@ if (togglePassword) {
   });
 }
 
-// ----------------------
-// ANIMAÇÃO DE ESTRELAS NO FUNDO DO PAINEL DIREITO
-// ----------------------
-
-/**
- * Inicia a animação de estrelas no canvas de fundo
- */
+// =====================
+// Animação de Estrelas
+// =====================
 function startStarsBg() {
   const canvas = document.getElementById("stars-bg");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
 
-  // Ajusta o tamanho do canvas conforme o painel
+  // Ajusta o tamanho do canvas para o tamanho do painel
   function resize() {
     const parent = canvas.parentElement;
     canvas.width = parent.offsetWidth;
@@ -76,20 +42,20 @@ function startStarsBg() {
   resize();
   window.addEventListener("resize", resize);
 
-  // Configuração das estrelas
+  // Cria as estrelas com propriedades aleatórias
   const STAR_COUNT = 60;
   const stars = [];
   for (let i = 0; i < STAR_COUNT; i++) {
     stars.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      r: Math.random() * 1.2 + 0.5, // Raio da estrela
-      speed: Math.random() * 0.3 + 0.1, // Velocidade de subida
-      alpha: Math.random() * 0.5 + 0.5, // Transparência
+      r: Math.random() * 1.2 + 0.5,
+      speed: Math.random() * 0.3 + 0.1,
+      alpha: Math.random() * 0.5 + 0.5,
     });
   }
 
-  // Função de animação das estrelas
+  // Função de animação: desenha e move as estrelas
   function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (const star of stars) {
@@ -102,10 +68,8 @@ function startStarsBg() {
       ctx.shadowBlur = 8;
       ctx.fill();
       ctx.restore();
-
-      // Movimento suave para cima
+      // Move a estrela para cima; se sair do topo, volta para baixo
       star.y -= star.speed;
-      // Se a estrela sair do topo, volta para baixo em posição aleatória
       if (star.y < 0) {
         star.y = canvas.height + star.r;
         star.x = Math.random() * canvas.width;
@@ -115,6 +79,44 @@ function startStarsBg() {
   }
   animate();
 }
-
-// Inicia a animação das estrelas ao carregar a página
+// O canvas de estrelas é iniciado após o DOM estar pronto
 window.addEventListener("DOMContentLoaded", startStarsBg);
+
+// =====================
+// Login
+// =====================
+document.getElementById("login-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    window.showNotification("warning", "Por favor, preencha todos os campos.");
+    return;
+  }
+
+  apiService
+    .login(email, password)
+    .then((data) => {
+      if (data && data.idToken) {
+        localStorage.setItem("idToken", data.idToken);
+        localStorage.setItem("userEmail", data.email);
+        window.showNotification("success", "Login realizado com sucesso!");
+        setTimeout(() => {
+          window.location.href = "../pages/dashboard/dashboard.html";
+        }, 1200);
+      } else {
+        window.showNotification(
+          "error",
+          "Falha no login. Verifique suas credenciais."
+        );
+      }
+    })
+    .catch((err) => {
+      console.error("Erro ao fazer login:", err);
+      window.showNotification(
+        "error",
+        "Erro ao fazer login. Tente novamente mais tarde."
+      );
+    });
+});
