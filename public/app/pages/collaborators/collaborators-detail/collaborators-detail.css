@@ -184,6 +184,29 @@ body.dark .timeline-item.current .timeline-content {
   font-size: 12px;
 }
 
+.skills div {
+  display: flex;
+  flex-wrap: wrap;      
+  gap: 6px;            
+}
+
+.skill {
+  display: inline-flex; 
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: var(--clr-bg-badge, #2d2f34);
+  white-space: nowrap;  
+}
+
+.readonly-field {
+  background-color: var(--background-light, #f7f7f7);
+  color: var(--text-color, #555);
+  cursor: not-allowed;
+}
+
+
+
 /* 3. DADOS PESSOAIS & ENDEREÇO */
 .data-block {
   display: grid;
@@ -221,6 +244,13 @@ body.dark .timeline-item.current .timeline-content {
 }
 
 /* 4. SECTIONS */
+.content{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
 .section {
   background: #fff;
   border: 1px solid #e0e0e0;
