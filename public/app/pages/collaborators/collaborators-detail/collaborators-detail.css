@@ -208,6 +208,25 @@ body.dark .timeline-item.current .timeline-content {
 
 
 /* 3. DADOS PESSOAIS & ENDEREÇO */
+.avatar-display {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+} 
+
+.text-avatar {
+  background-color: #4c6ef5;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.8rem;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .data-block {
   display: grid;
   grid-template-columns: 1fr;
@@ -241,6 +260,7 @@ body.dark .timeline-item.current .timeline-content {
   font-size: 12px;
   color: #555;
   margin-top: -4px;
+  width: 30%;
 }
 
 /* 4. SECTIONS */
