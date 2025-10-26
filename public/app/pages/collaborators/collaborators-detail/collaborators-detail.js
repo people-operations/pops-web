@@ -36,7 +36,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function preencherInformacoesNoHTML(employee) {
-  // 🧩 Helpers
   const limparFalse = (valor) =>
     valor === "false" || valor === false || valor === null || valor === undefined || valor === ""
       ? "—"
@@ -60,6 +59,24 @@ function preencherInformacoesNoHTML(employee) {
   // Nome + cargo
   document.querySelector(".collab-name").textContent = limparFalse(employee.name);
   document.querySelector(".role-area").textContent = limparFalse(employee.jobTitle);
+
+  const avatarLarge = document.querySelector(".avatar-large");
+  if (avatarLarge && employee.name) {
+    const nomes = employee.name.trim().split(" ");
+    const primeira = nomes[0]?.[0]?.toUpperCase() || "";
+    const ultima = nomes[nomes.length - 1]?.[0]?.toUpperCase() || "";
+    avatarLarge.textContent = `${primeira}${ultima}`;
+    avatarLarge.style.display = "flex";
+    avatarLarge.style.alignItems = "center";
+    avatarLarge.style.justifyContent = "center";
+    avatarLarge.style.fontSize = "1.8rem";
+    avatarLarge.style.fontWeight = "600";
+    avatarLarge.style.color = "white";
+    avatarLarge.style.backgroundColor = "#4C6EF5";
+    avatarLarge.style.borderRadius = "50%";
+    avatarLarge.style.width = "80px";
+    avatarLarge.style.height = "80px";
+  }
 
   // Email
   const emailField = document.querySelector("input[placeholder='email@exemplo.com']");
@@ -109,16 +126,32 @@ function preencherInformacoesNoHTML(employee) {
     skillsContainer.innerHTML = `<span class="skill">—</span>`;
   }
 
+  // Educação e Certificações — mostrar apenas o ano
+  const educations = employee.educations || [];
+  const certContainer = document.querySelector(".certifications");
+  certContainer.innerHTML = "";
+
+  if (educations.length > 0) {
+    educations.forEach((edu) => {
+      const startYear = edu.startDate ? new Date(edu.startDate).getFullYear() : "?";
+      const endYear = edu.endDate ? new Date(edu.endDate).getFullYear() : "?";
+
+      const item = document.createElement("div");
+      item.classList.add("cert-item");
+      item.innerHTML = `
+        <span class="cert-name">${limparFalse(edu.title)}</span>
+        <span class="cert-period">${startYear} – ${endYear}</span>
+      `;
+      certContainer.appendChild(item);
+    });
+  } else {
+    certContainer.innerHTML = "<p>Nenhum curso cadastrado.</p>";
+  }
+
   // Bloquear edição de todos os inputs
   document.querySelectorAll("input").forEach((input) => {
     input.setAttribute("readonly", true);
     input.classList.add("readonly-field");
     input.addEventListener("focus", (e) => e.target.blur());
   });
-
-  // Exemplo: imprimir dados no console
-  const contractStart = formatarData(employee.contractDateStart);
-  const contractEnd = formatarData(employee.contractDateEnd);
-  const wage = formatarSalario(employee.contractWage);
-  console.log("Contrato:", { contractStart, contractEnd, wage });
 }
