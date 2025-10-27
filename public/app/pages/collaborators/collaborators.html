@@ -153,12 +153,12 @@
             </p>
           </div>
           <div class="actions">
-            <button
+            <!-- <button
               class="collaborator-btn btn outline"
               data-i18n="collaborators.export"
             >
               Exportar dados
-            </button>
+            </button> -->
             <button
               class="collaborator-btn btn outline"
               data-i18n="collaborators.report"
@@ -179,11 +179,12 @@
           />
         </div>
         <button class="collaborator-btn btn">Pesquisar</button>
+        <button class="collaborator-btn btn outline">Limpar</button>
       </div>
 
       <!-- Filtros -->
       <div class="filters justify-between">
-        <div>
+        <div class="filters-divider">
           <select>
             <option>Todas as áreas</option>
           </select>
@@ -197,7 +198,7 @@
             <option>Todas os squads</option>
           </select>
         </div>
-        <div>
+        <div class="filters-btn">
           <button
             class="collaborator-btn btn"
             data-i18n="collaborators.apply_filters"
