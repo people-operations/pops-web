@@ -53,9 +53,6 @@ function preencherInformacoesNoHTML(employee) {
   const formatarData = (data) =>
     data && data !== "false" ? new Date(data).toLocaleDateString("pt-BR") : "—";
 
-  const formatarSalario = (valor) =>
-    valor ? `R$ ${valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "—";
-
   // Nome + cargo
   document.querySelector(".collab-name").textContent = limparFalse(employee.name);
   document.querySelector(".role-area").textContent = limparFalse(employee.jobTitle);
@@ -101,19 +98,35 @@ function preencherInformacoesNoHTML(employee) {
   const endereco = employee.address || {};
   document.querySelector("input[placeholder='00000-000']").value = limparFalse(endereco.zip);
 
-  const camposEndereco = document.querySelectorAll("input[placeholder='Digite no campo']");
+  let streetFull = limparFalse(endereco.street); 
+  let street = "—";
+  let number = "—";
+  let neighborhood = "—";
+
+  if (streetFull && streetFull !== "—") {
+    const regex = /(.*?),\s*(\d+)\s*-\s*(.*)/;
+    const match = streetFull.match(regex);
+    if (match) {
+      street = match[1].trim(); 
+      number = match[2].trim();       
+      neighborhood = match[3].trim(); 
+    }
+  }
+
   const enderecoCampos = [
-    limparFalse(endereco.neighborhood),
-    limparFalse(endereco.street),
-    limparFalse(endereco.number),
+    neighborhood,
+    street,
+    number,
     limparFalse(endereco.complement),
     limparFalse(endereco.city),
     limparFalse(endereco.state)
   ];
 
+  const camposEndereco = document.querySelectorAll("input[placeholder='Digite no campo']");
   camposEndereco.forEach((campo, i) => {
     if (enderecoCampos[i] !== undefined) campo.value = enderecoCampos[i];
   });
+
 
   // Skills
   const skillsContainer = document.querySelector(".skills div");
@@ -154,4 +167,32 @@ function preencherInformacoesNoHTML(employee) {
     input.classList.add("readonly-field");
     input.addEventListener("focus", (e) => e.target.blur());
   });
+
+  // Trilha profissional
+  const timeline = document.querySelector(".timeline");
+  timeline.innerHTML = ""; 
+
+  if (employee.experiences && employee.experiences.length > 0) {
+    employee.experiences.forEach((exp, index) => {
+      const startDate = exp.startDate ? new Date(exp.startDate).toLocaleDateString("pt-BR") : "—";
+      const endDate = exp.endDate && exp.endDate !== "false" ? new Date(exp.endDate).toLocaleDateString("pt-BR") : "Atualmente";
+
+      const li = document.createElement("li");
+      li.classList.add("timeline-item");
+      if (index === 0) li.classList.add("current"); 
+
+      li.innerHTML = `
+      <span class="timeline-marker"></span>
+      <div class="timeline-content">
+        <h3>${exp.title}</h3>
+        <p><strong>Empresa:</strong> ${exp.company || "—"}</p>
+        <p><strong>Período:</strong> ${startDate} – ${endDate}</p>
+      </div>
+    `;
+      timeline.appendChild(li);
+    });
+  } else {
+    timeline.innerHTML = "<p>Nenhuma experiência cadastrada.</p>";
+  }
+
 }

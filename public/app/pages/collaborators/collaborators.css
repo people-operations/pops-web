@@ -133,6 +133,16 @@
   color: #333;
 }
 
+.filters-divider {
+  display: flex;
+  gap: 10px;
+}
+
+.filters-btn {
+  display: flex;
+  gap: 10px;
+}
+
 /* 5. TABELA */
 .table-container h3 {
   margin: 0 0 8px;
