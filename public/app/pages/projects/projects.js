@@ -1,104 +1,91 @@
-const projects = [
-  {
-    nome: "Sistema de Gestão RH",
-    descricao: "Plataforma para gestão de colaboradores e folha de pagamento.",
-    area: "RH",
-    budget: 8,
-    startedAt: "01/03/2024",
-    tecnologias: ["Node.js", "React", "PostgreSQL"],
-    preco: "R$ 60.000,00",
-    status: "Em andamento",
-  },
-  {
-    nome: "App de Vendas Mobile",
-    descricao: "Aplicativo para força de vendas com integração a ERP.",
-    area: "Comercial",
-    budget: 5,
-    startedAt: "01/03/2024",
-    tecnologias: ["Flutter", "Firebase"],
-    preco: "R$ 35.000,00",
-    status: "Em andamento",
-  },
-  {
-    nome: "Portal do Cliente",
-    descricao: "Portal web para autoatendimento e abertura de chamados.",
-    area: "Suporte",
-    budget: 4,
-    startedAt: "01/03/2024",
-    tecnologias: ["Angular", "Java", "MySQL"],
-    preco: "R$ 28.000,00",
-    status: "Concluído",
-  },
-  {
-    nome: "BI Analytics",
-    descricao: "Dashboard de indicadores e relatórios gerenciais.",
-    area: "Dados",
-    budget: 3,
-    startedAt: "01/03/2024",
-    tecnologias: ["Power BI", "Python"],
-    preco: "R$ 18.000,00",
-    status: "Em andamento",
-  },
-  {
-    nome: "Infraestrutura Cloud",
-    descricao: "Migração de servidores para nuvem AWS.",
-    area: "Infraestrutura",
-    budget: 2,
-    startedAt: "01/03/2024",
-    tecnologias: ["AWS", "Terraform"],
-    preco: "R$ 12.000,00",
-    status: "Planejado",
-  },
-];
+import { apiService } from "../../../assets/js/apiService.js";
+
+let projects = [];
+
+async function fetchAndRenderProjects() {
+  try {
+    projects = await apiService.getAllProjects();
+    renderProjects(projects);
+  } catch (err) {
+    window.showNotification &&
+      window.showNotification("error", "Erro ao buscar projetos.");
+    console.error("Erro ao buscar projetos:", err);
+  }
+}
 
 function interpolate(str, vars) {
   return str.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`);
 }
 
-function renderProjects() {
+function renderProjects(projects) {
   const container = document.getElementById("project-list");
   container.innerHTML = "";
   const i18n = window.i18n;
+  if (!Array.isArray(projects) || projects.length === 0) {
+    container.innerHTML = `<div style="padding:32px; text-align:center; color:#888;">Nenhum projeto encontrado.</div>`;
+    return;
+  }
   projects.forEach((project) => {
+    const statusName =
+      project.status?.description || project.status?.name || "-";
+    const typeName = project.type?.description || project.type?.name || "-";
+    const area = project.area || "-";
+    const budget = project.budget
+      ? `R$ ${Number(project.budget).toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+        })}`
+      : "-";
+    const startDate = project.startDate
+      ? new Date(project.startDate).toLocaleDateString("pt-BR")
+      : "-";
+    const endDate = project.endDate
+      ? new Date(project.endDate).toLocaleDateString("pt-BR")
+      : "-";
+    const skills = Array.isArray(project.requiredSkills)
+      ? project.requiredSkills.map((s) => s.name).join(", ")
+      : "-";
     container.innerHTML += `
       <div class="project-card">
         <div class="project-header">
-          <h3>${project.nome}</h3>
-          <span class="tag-green">${project.status}</span>
+          <h3>${project.name}</h3>
+          <span class="tag-green">${statusName}</span>
         </div>
-        <p class="project-description">${project.descricao}</p>
-        <p>
-          <img src="/assets/svg/members.svg" alt="Área" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
-          <strong data-i18n="projects.area">${i18n.t(
-            "projects.area"
-          )}</strong> ${project.area}
-        </p>
+        <p class="project-description">${project.description || ""}</p>
         <p>
           <img src="/assets/svg/budget.svg" alt="budget" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
-          <strong data-i18n="projects.budget">${i18n.t(
-            "projects.budget"
-          )}</strong> ${project.budget}
+          <strong data-i18n="projects.budget">${
+            i18n?.t ? i18n.t("projects.budget") : "Budget"
+          }</strong> ${budget}
         </p>
         <p>
           <img src="/assets/svg/calendar.svg" alt="Início" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
-          <strong data-i18n="projects.startedAt">${i18n.t(
-            "projects.startedAt"
-          )}</strong> ${project.startedAt}
+          <strong data-i18n="projects.startedAt">${
+            i18n?.t ? i18n.t("projects.startedAt") : "Início"
+          }</strong> ${startDate}
         </p>
-        <p><strong data-i18n="projects.skills_needed">${i18n.t(
-          "projects.skills_needed"
-        )}</strong></p>
-        <div class="tech-stack">
-          ${project.tecnologias.map((tech) => `<span>${tech}</span>`).join("")}
-        </div>
-        <div class="hours">
-        </div>
+        <p>
+          <img src="/assets/svg/calendar.svg" alt="Fim" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
+          <strong>Fim:</strong> ${endDate}
+        </p>
         <div class="project-footer">
-          <span class="satisfaction-icon">★ 4.5 de satisfação</span>
-          <button class="details-btn" data-i18n="projects.details" onclick="window.location.href='projects-detail/projects-detail.html'"></button>
+          <span></span>
+          <button class="details-btn" data-i18n="projects.details" onclick="window.location.href='projects-detail/projects-detail.html?id=${
+            project.id
+          }'">
+            ${i18n?.t ? i18n.t("projects.details") : "Detalhes"}
+          </button>
         </div>
       </div>
     `;
+  });
+}
+
+// Inicialização dinâmica para garantir tradução e fetch
+if (typeof window !== "undefined") {
+  document.addEventListener("DOMContentLoaded", () => {
+    fetchAndRenderProjects();
+    // Se quiser manter tradução:
+    if (window.i18n) window.i18n.apply();
   });
 }
 

@@ -34,6 +34,10 @@
   border-left: 4px solid #7d1bff;
   padding-left: 8px;
 }
+.summary-actions {
+  display: flex;
+  align-items: center;
+}
 .summary-actions .action-icon {
   width: 24px;
   height: 24px;
