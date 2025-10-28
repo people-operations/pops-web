@@ -16,7 +16,8 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
-<body>   <script>
+  <body>
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const avatar = document.querySelector(".avatar");
         const email = localStorage.getItem("userEmail");
@@ -151,16 +152,16 @@
             <img
               src="../../../../assets/svg/edit-button.svg"
               alt="Editar"
-              class="action-icon"
+              class="action-icon edit-project-btn"
               title="Editar"
-              style="vertical-align: middle; width: 34px; height: 34px"
+              style="vertical-align: middle; width: 34px; height: 34px; cursor:pointer;"
             />
             <img
               src="../../../../assets/svg/trash-button.svg"
               alt="Remover"
-              class="action-icon"
+              class="action-icon delete-project-btn"
               title="Remover"
-              style="vertical-align: middle; width: 34px; height: 34px"
+              style="vertical-align: middle; width: 34px; height: 34px; cursor:pointer;"
             />
           </div>
         </div>
@@ -187,15 +188,6 @@
           <strong data-i18n="projects_detail.dates">Datas:</strong> 00/00/0000 –
           00/00/0000
         </p>
-
-        <p class="info-line">
-          <strong data-i18n="projects_detail.skills">Skills do squad:</strong>
-        </p>
-        <div class="skills">
-          <span class="skill">Python</span>
-          <span class="skill">Java</span>
-          <span class="skill">Node.js</span>
-        </div>
       </aside>
 
       <!-- Main content -->
@@ -274,7 +266,16 @@
         </div>
       </section>
     </main>
-    <script src="projects-detail.js"></script>
+    <!-- Modal de confirmação de exclusão -->
+    <div id="delete-modal" class="modal" style="display:none; position:fixed;  width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:32px 24px; border-radius:8px; max-width:90vw; min-width:320px; box-shadow:0 2px 16px #0002; text-align:center;">
+        <h3 style="margin-bottom:16px;">Tem certeza que deseja excluir este projeto?</h3>
+        <p style="color:#888; margin-bottom:24px;">Esta ação não poderá ser desfeita.</p>
+        <button id="confirm-delete-btn" style="background:#e53935; color:#fff; border:none; padding:10px 24px; border-radius:4px; margin-right:12px; cursor:pointer;">Excluir</button>
+        <button id="cancel-delete-btn" style="background:#eee; color:#333; border:none; padding:10px 24px; border-radius:4px; cursor:pointer;">Cancelar</button>
+      </div>
+    </div>
+    <script type="module" src="projects-detail.js"></script>
     <script src="../../../../assets/js/app.js"></script>
     <script src="../../../../assets/js/i18nService.js" defer></script>
   </body>

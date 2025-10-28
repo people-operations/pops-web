@@ -16,7 +16,8 @@
       rel="stylesheet"
     />
   </head>
-<body>   <script>
+  <body>
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const avatar = document.querySelector(".avatar");
         const email = localStorage.getItem("userEmail");
@@ -115,8 +116,9 @@
                   <line x1="16.36" y1="16.36" x2="17.78" y2="17.78" />
                   <line x1="4.22" y1="17.78" x2="5.64" y2="16.36" />
                   <line x1="16.36" y1="5.64" x2="17.78" y2="4.22" />
-                </g></svg
-            ></span>
+                </g>
+              </svg>
+            </span>
           </button>
           <div class="avatar">K</div>
           <span class="chevron" aria-hidden="true">
@@ -165,7 +167,7 @@
         <div id="project-list" class="project-cards"></div>
       </main>
     </div>
-    <script src="projects.js"></script>
+    <script type="module" src="projects.js"></script>
     <script src="../../../assets/js/app.js"></script>
     <script src="../../../assets/js/i18nService.js" defer></script>
   </body>

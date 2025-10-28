@@ -57,6 +57,7 @@ h3 {
   margin-top: 4px;
   font-size: 14px;
   background: transparent;
+  font-family: "Poppins", sans-serif;
 }
 .form-project textarea {
   resize: vertical;
@@ -171,6 +172,25 @@ h3 {
   padding: 0 !important;
   letter-spacing: 0 !important;
   font-family: "Poppins", sans-serif;
+  transition: background 0.2s, color 0.2s, cursor 0.2s;
+}
+
+.save:disabled,
+.save[disabled] {
+  background: #e0e0e0 !important;
+  color: #b0b0b0 !important;
+  cursor: not-allowed !important;
+  border: none !important;
+  opacity: 1 !important;
+}
+
+body.dark .save:disabled,
+body.dark .save[disabled] {
+  background: #333 !important;
+  color: #888 !important;
+  cursor: not-allowed !important;
+  border: none !important;
+  opacity: 1 !important;
 }
 
 /* 8. BACK LINK */
@@ -240,4 +260,14 @@ body.dark .add-tag {
   align-items: center;
   padding-left: 1px;
   padding-bottom: 3px;
+}
+
+body.dark .form-project textarea::placeholder {
+  font-family: "Poppins", sans-serif;
+  color: #fff;
+}
+
+body.dark .form-project input::placeholder {
+  font-family: "Poppins", sans-serif;
+  color: #fff;
 }

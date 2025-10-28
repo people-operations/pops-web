@@ -32,7 +32,6 @@
     "success_title": "Senha redefinida!",
     "back_to_login": "Voltar para login"
   },
-
   "navbar": {
     "dashboard": "Dashboard",
     "squads": "Squads",
@@ -105,7 +104,7 @@
     "back": "Voltar para squads",
     "create_title": "Criar um novo squad",
     "team_name": "Nome da equipe *",
-    "team_name_placeholder": "e.g., Mobile Desenvolvimento",
+    "team_name_placeholder": "Ex: Mobile Desenvolvimento",
     "project": "Projeto *",
     "select_project": "Selecione um projeto",
     "area": "Área *",
@@ -195,7 +194,7 @@
     "back": "Voltar para projetos",
     "create_title": "Criar um novo projeto",
     "name": "Nome do projeto *",
-    "name_placeholder": "e.g., Mobile Desenvolvimento",
+    "name_placeholder": "Ex: Mobile Desenvolvimento",
     "type": "Tipo *",
     "select_type": "Selecione aqui",
     "status": "Status *",
@@ -203,8 +202,8 @@
     "description": "Descrição",
     "description_placeholder": "Descreva os objetivos e escopo do projeto...",
     "budget": "Budget *",
-    "start_date": "Data de começo *",
-    "end_date": "Data de fim",
+    "start_date": "Data inicial *",
+    "end_date": "Data fim",
     "area": "Área *",
     "select_area": "Selecione uma área",
     "skills_needed": "Skills necessários",

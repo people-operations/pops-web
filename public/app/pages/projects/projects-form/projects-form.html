@@ -146,21 +146,23 @@
           <label data-i18n="projects_form.name"></label>
           <input
             type="text"
+            id="name-input"
             placeholder="e.g., Mobile Desenvolvimento"
             data-i18n-placeholder="projects_form.name_placeholder"
+            required
           />
 
           <!-- Tipo / Status -->
           <div class="row">
             <div class="col">
               <label data-i18n="projects_form.type"></label>
-              <select>
+              <select id="type-select" required>
                 <option data-i18n="projects_form.select_type"></option>
               </select>
             </div>
             <div class="col">
               <label data-i18n="projects_form.status"></label>
-              <select>
+              <select id="status-select">
                 <option data-i18n="projects_form.select_status"></option>
               </select>
             </div>
@@ -169,48 +171,54 @@
           <!-- Descrição -->
           <label data-i18n="projects_form.description"></label>
           <textarea
+            id="description-input"
             rows="4"
             data-i18n-placeholder="projects_form.description_placeholder"
+            required
           ></textarea>
 
           <!-- Budget / Datas -->
           <div class="row">
             <div class="col">
               <label data-i18n="projects_form.budget"></label>
-              <input type="text" placeholder="R$ 0000.00" />
+              <input
+                type="number"
+                id="budget-input"
+                placeholder="R$ 0000.00"
+                min="0"
+                required
+              />
             </div>
             <div class="col">
               <label data-i18n="projects_form.start_date"></label>
-              <input type="text" placeholder="00/00/00" />
+              <input
+                type="date"
+                id="start-date-input"
+                placeholder="00/00/00"
+                required
+              />
             </div>
             <div class="col">
               <label data-i18n="projects_form.end_date"></label>
-              <input type="text" placeholder="00/00/00" />
+              <input
+                type="date"
+                id="end-date-input"
+                placeholder="00/00/00"
+                required
+              />
             </div>
           </div>
 
-          <!-- Área e Skills-->
-          <div class="row">
+          <!-- Área -->
+          <!--           <div class="row">
             <div class="col">
               <label data-i18n="projects_form.area"></label>
               <select>
-                <option data-i18n="projects_form.select_area"></option>
-              </select>
+                <select id="area-select" required>
+                  <option data-i18n="projects_form.select_area"></option>
+                </select>
             </div>
-            <div class="col">
-              <label data-i18n="projects_form.skills"></label>
-              <div id="skills-multiselect" class="skills-multiselect">
-                <input
-                  type="text"
-                  id="skills-input"
-                  placeholder="Adicionar skill..."
-                  autocomplete="off"
-                />
-                <div class="skills-dropdown hidden" id="skills-dropdown"></div>
-                <div class="tags-container" id="skills-tags"></div>
-              </div>
-            </div>
-          </div>
+          </div> -->
 
           <!-- Botões -->
           <div class="form-actions">
@@ -221,7 +229,13 @@
             >
               Cancelar
             </button>
-            <button type="submit" class="save" data-i18n="projects_form.save">
+            <button
+              type="submit"
+              class="save"
+              id="save-btn"
+              data-i18n="projects_form.save"
+              disabled
+            >
               Salvar
             </button>
           </div>
