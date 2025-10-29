@@ -81,6 +81,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const row = document.createElement('tr');
       row.classList.add('collaborator-row');
 
+      // <td>${emp.allocatedPercent || "0"}%</td>
+      // <td>${emp.availablePercent || "100"}%</td>
+
       row.innerHTML = `
         <td>${emp.name || "—"}</td>
         <td>${emp.jobTitle || "—"}</td>
@@ -89,8 +92,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             ${squads.map(s => `<div class="avatar-sm">${s[0]}</div>`).join('')}
           </div>
         </td>
-        <td>${emp.allocatedPercent || "0"}%</td>
-        <td>${emp.availablePercent || "100"}%</td>
         <td>
           <span class="status-badge ${emp.activeEmployee ? 'active' : 'inactive'}">
             ${emp.activeEmployee ? 'Ativo' : 'Inativo'}
