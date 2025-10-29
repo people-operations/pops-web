@@ -22,20 +22,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
 
-    if (!response.ok) {
-      throw new Error(`Erro HTTP: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
 
     const employee = await response.json();
     console.log("Employee carregado:", employee);
-    preencherInformacoesNoHTML(employee);
+
+    preencherInformacoesNoHTML(employee, token);
 
   } catch (error) {
     console.error("Erro ao carregar colaborador:", error);
   }
 });
 
-function preencherInformacoesNoHTML(employee) {
+async function preencherInformacoesNoHTML(employee, token) {
   const limparFalse = (valor) =>
     valor === "false" || valor === false || valor === null || valor === undefined || valor === ""
       ? "—"
@@ -53,7 +52,19 @@ function preencherInformacoesNoHTML(employee) {
   const formatarData = (data) =>
     data && data !== "false" ? new Date(data).toLocaleDateString("pt-BR") : "—";
 
-  // Nome + cargo
+  const statusTag = document.querySelector(".summary-header .tag-green");
+  if (statusTag) {
+    const status = limparFalse(employee.status || (employee.activeEmployee ? "Ativo" : "Inativo"));
+    statusTag.textContent = status;
+
+    statusTag.classList.remove("tag-green", "tag-gray");
+    if (status.toLowerCase() === "ativo") {
+      statusTag.classList.add("tag-green");
+    } else {
+      statusTag.classList.add("tag-gray");
+    }
+  }
+
   document.querySelector(".collab-name").textContent = limparFalse(employee.name);
   document.querySelector(".role-area").textContent = limparFalse(employee.jobTitle);
 
@@ -75,26 +86,21 @@ function preencherInformacoesNoHTML(employee) {
     avatarLarge.style.height = "80px";
   }
 
-  // Email
   const emailField = document.querySelector("input[placeholder='email@exemplo.com']");
   emailField.value = limparFalse(employee.workEmail);
 
-  // Telefone
   const phoneField = document.querySelector("input[placeholder='(00) 00000-0000']");
   phoneField.value = formatarTelefone(limparFalse(employee.mobilePhone));
 
-  // Data de nascimento
   const birthField = document.querySelector("input[placeholder='00/00/0000']");
   birthField.value = formatarData(limparFalse(employee.birthDate));
 
-  // CPF e CNPJ
   const cpfFields = document.querySelectorAll("input[placeholder='000.000.000-00']");
   if (cpfFields.length > 0) {
     cpfFields[0].value = formatarCPF(limparFalse(employee.cpf));
     cpfFields[1].value = formatarCNPJ(limparFalse(employee.cnpj));
   }
 
-  // Endereço
   const endereco = employee.address || {};
   document.querySelector("input[placeholder='00000-000']").value = limparFalse(endereco.zip);
 
@@ -127,8 +133,6 @@ function preencherInformacoesNoHTML(employee) {
     if (enderecoCampos[i] !== undefined) campo.value = enderecoCampos[i];
   });
 
-
-  // Skills
   const skillsContainer = document.querySelector(".skills div");
   skillsContainer.innerHTML = "";
   if (employee.skills && employee.skills.length > 0) {
@@ -139,7 +143,47 @@ function preencherInformacoesNoHTML(employee) {
     skillsContainer.innerHTML = `<span class="skill">—</span>`;
   }
 
-  // Educação e Certificações — mostrar apenas o ano
+  try {
+    const squadResponse = await fetch(`http://localhost:8083/api/teams/allocations/person/${employee.id}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    console.log("Squad response status:", squadResponse);
+
+    const squadsContainer = document.querySelector(".squads-section .avatars-group");
+    if (squadsContainer) {
+      squadsContainer.innerHTML = "";
+
+      if (squadResponse.ok) {
+        const squads = await squadResponse.json();
+        if (squads.length > 0) {
+          squads.forEach(squad => {
+            const initials = squad.name
+              .split(" ")
+              .map(w => w[0].toUpperCase())
+              .join("")
+              .slice(0, 2);
+
+            const div = document.createElement("div");
+            div.classList.add("avatar-sm");
+            div.textContent = initials;
+            squadsContainer.appendChild(div);
+          });
+        } else {
+          squadsContainer.innerHTML = "<span>—</span>";
+        }
+      } else {
+        squadsContainer.innerHTML = "<span>—</span>";
+      }
+    }
+  } catch (err) {
+    console.error("Erro ao carregar squads:", err);
+  }
+
   const educations = employee.educations || [];
   const certContainer = document.querySelector(".certifications");
   certContainer.innerHTML = "";
@@ -161,14 +205,12 @@ function preencherInformacoesNoHTML(employee) {
     certContainer.innerHTML = "<p>Nenhum curso cadastrado.</p>";
   }
 
-  // Bloquear edição de todos os inputs
   document.querySelectorAll("input").forEach((input) => {
     input.setAttribute("readonly", true);
     input.classList.add("readonly-field");
     input.addEventListener("focus", (e) => e.target.blur());
   });
 
-  // Trilha profissional
   const timeline = document.querySelector(".timeline");
   timeline.innerHTML = ""; 
 
@@ -182,17 +224,16 @@ function preencherInformacoesNoHTML(employee) {
       if (index === 0) li.classList.add("current"); 
 
       li.innerHTML = `
-      <span class="timeline-marker"></span>
-      <div class="timeline-content">
-        <h3>${exp.title}</h3>
-        <p><strong>Empresa:</strong> ${exp.company || "—"}</p>
-        <p><strong>Período:</strong> ${startDate} – ${endDate}</p>
-      </div>
-    `;
+        <span class="timeline-marker"></span>
+        <div class="timeline-content">
+          <h3>${exp.title}</h3>
+          <p><strong>Empresa:</strong> ${exp.company || "—"}</p>
+          <p><strong>Período:</strong> ${startDate} – ${endDate}</p>
+        </div>
+      `;
       timeline.appendChild(li);
     });
   } else {
     timeline.innerHTML = "<p>Nenhuma experiência cadastrada.</p>";
   }
-
 }
