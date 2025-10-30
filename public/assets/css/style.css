@@ -6,7 +6,7 @@
   max-width: 360px;
   padding: 16px 32px 16px 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   color: #fff;
   font-size: 1rem;
   font-family: "Poppins", sans-serif;
@@ -41,8 +41,14 @@
   padding: 0;
 }
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 /* =========================
    DARK MODE - BOTÕES OUTLINED
@@ -80,6 +86,7 @@ body {
   font-family: "Poppins", sans-serif;
   line-height: 1.6;
 }
+
 a {
   color: #111;
   text-decoration: none;
@@ -720,7 +727,6 @@ nav a.active {
    INPUTS & FORMS
 ========================= */
 .form-container {
-  max-width: 600px;
   margin: 0 auto;
   padding: 20px;
   background: #fff;
@@ -1623,7 +1629,6 @@ nav a.active {
   margin-right: 5px;
 }
 
-
 .tab-content {
   border: 1px solid #ddd;
   padding: 15px;
@@ -2099,6 +2104,11 @@ body.dark nav a {
 body.dark nav a.active {
   color: #fa12e2;
   border-color: #fa12e2;
+}
+
+body.dark nav a.active img {
+  filter: invert(17%) sepia(97%) saturate(7496%) hue-rotate(295deg)
+    brightness(97%) contrast(106%);
 }
 
 body.dark .dropdown {

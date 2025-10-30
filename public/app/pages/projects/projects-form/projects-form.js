@@ -1,4 +1,3 @@
-
 import { apiService } from "../../../../assets/js/apiService.js";
 
 const saveBtn = document.getElementById("save-btn");
@@ -37,26 +36,34 @@ form.addEventListener("submit", async function (event) {
     endDate: document.getElementById("end-date-input").value,
   };
   let result;
+  const i18n = window.i18n || {};
+  const t = (key) => (i18n.t ? i18n.t(key) : key);
   if (id) {
     // Atualizar projeto (PATCH)
     if (typeof apiService.updateProject === "function") {
       result = await apiService.updateProject(id, project);
     } else {
-      window.showNotification("error", "Função de atualização não implementada.");
+      window.showNotification(
+        "error",
+        t("projects_form.update_not_implemented")
+      );
       return;
     }
   } else {
     result = await apiService.insertProject(project);
   }
   if (result) {
-    window.showNotification("success", id ? "Projeto atualizado com sucesso!" : "Projeto inserido com sucesso!");
+    window.showNotification(
+      "success",
+      id ? t("projects_form.update_success") : t("projects_form.insert_success")
+    );
     setTimeout(() => {
       window.location.href = "../projects.html";
     }, 1200);
   } else {
     window.showNotification(
       "error",
-      id ? "Erro ao atualizar projeto. Veja o console para mais detalhes." : "Erro ao inserir projeto. Veja o console para mais detalhes."
+      id ? t("projects_form.update_error") : t("projects_form.insert_error")
     );
   }
 });
@@ -72,7 +79,8 @@ async function fillProjectTypes(selectedId) {
         const option = document.createElement("option");
         option.value = type.id;
         option.textContent = type.name;
-        if (selectedId && Number(selectedId) === type.id) option.selected = true;
+        if (selectedId && Number(selectedId) === type.id)
+          option.selected = true;
         select.appendChild(option);
       }
     });
@@ -93,7 +101,8 @@ async function fillProjectStatuses(selectedId) {
         const option = document.createElement("option");
         option.value = status.id;
         option.textContent = status.name;
-        if (selectedId && Number(selectedId) === status.id) option.selected = true;
+        if (selectedId && Number(selectedId) === status.id)
+          option.selected = true;
         statusSelect.appendChild(option);
       }
     });
@@ -104,11 +113,15 @@ async function fillProjectStatuses(selectedId) {
 
 async function patchFormValues(project) {
   document.getElementById("name-input").value = project.name || "";
-  document.getElementById("description-input").value = project.description || "";
+  document.getElementById("description-input").value =
+    project.description || "";
   document.getElementById("budget-input").value = project.budget || "";
-  document.getElementById("start-date-input").value = project.startDate ? project.startDate.substring(0,10) : "";
-  document.getElementById("end-date-input").value = project.endDate ? project.endDate.substring(0,10) : "";
-  // selects preenchidos por fillProjectTypes/Statuses
+  document.getElementById("start-date-input").value = project.startDate
+    ? project.startDate.substring(0, 10)
+    : "";
+  document.getElementById("end-date-input").value = project.endDate
+    ? project.endDate.substring(0, 10)
+    : "";
 }
 
 async function initForm() {
@@ -122,7 +135,13 @@ async function initForm() {
       await patchFormValues(project);
       validateForm();
     } else {
-      window.showNotification && window.showNotification("error", "Projeto não encontrado para edição.");
+      window.showNotification &&
+        window.showNotification(
+          "error",
+          window.i18n && window.i18n.t
+            ? window.i18n.t("projects_form.not_found_edit")
+            : "Projeto não encontrado para edição."
+        );
     }
   } else {
     fillProjectTypes();

@@ -28,7 +28,6 @@ const membros = [
 
 function renderMembros() {
   const teamList = document.querySelector(".team-list");
-  teamList.innerHTML = "";
   membros.forEach((membro, index) => {
     const card = document.createElement("div");
     card.className = "member-card";
@@ -55,7 +54,6 @@ function renderMembros() {
         "squads_form.available_hours"
       )} ${membro.horasDisponiveis}</p>
     `;
-    teamList.appendChild(card);
   });
 
   // Adiciona evento de clique para remover membro
@@ -100,116 +98,19 @@ if (document.readyState === "loading") {
   waitForI18nAndRender();
 }
 
-// referências
-const openBtn = document.querySelector(".team-section p");
-const modal = document.getElementById("addMemberModal");
-const overlay = document.getElementById("modalOverlay");
-const closeBtn = document.getElementById("closeModal");
-const cancelBtn = document.getElementById("cancelAdd");
-const modalTitle = modal.querySelector(".modal-header h2");
+function nextStep() {
+  window.location.href =
+    "./squads-weekly-requirements/squads-weekly-requirements.html";
+}
 
-// função para mostrar modal
-function showModal(isEdit = false) {
-  const modalTitle = document.getElementById("modalTitle");
-  if (isEdit) {
-    modalTitle.textContent = i18n.t("squads_form.edit_member");
-  } else {
-    modalTitle.textContent = i18n.t("squads_form.add_member");
+// Garante que o botão "Próximo" chama nextStep corretamente
+document.addEventListener("DOMContentLoaded", function () {
+  const saveBtn = document.getElementById("save-btn");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", nextStep);
   }
-  modal.classList.add("modal-open");
-  modal.classList.remove("hidden");
-  overlay.classList.remove("hidden");
-}
-
-// função para esconder modal
-function hideModal() {
-  modal.classList.remove("modal-open");
-  modal.classList.add("hidden");
-  overlay.classList.add("hidden");
-}
-
-// abrir ao clicar em “Adicione pessoas”
-openBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  showModal(false);
 });
 
-// fechar ao clicar no X ou no overlay
-[closeBtn, overlay].forEach((el) =>
-  el.addEventListener("click", (e) => {
-    e.preventDefault();
-    hideModal();
-  })
-);
-// cancelar do modal só fecha o modal
-cancelBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  hideModal();
-});
-
-// (opcional) tratar submissão do form
-document.getElementById("addMemberForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  //  você pega os valores e adiciona em `membros`, faz renderMembros(), etc.
-  hideModal();
-});
-
-// pega elementos
-const rolesSelect = document.getElementById("memberRoles");
-const selectedRolesContainer = document.getElementById("selectedRoles");
-const selectedRoles = [];
-
-// quando escolher uma função no dropdown
-rolesSelect.addEventListener("change", (e) => {
-  const role = e.target.value;
-  if (!role || selectedRoles.includes(role)) return;
-  selectedRoles.push(role);
-  renderSelectedRoles();
-  rolesSelect.value = ""; // reseta o dropdown
-});
-
-// desenha as tags na tela
-function renderSelectedRoles() {
-  selectedRolesContainer.innerHTML = "";
-  selectedRoles.forEach((role, idx) => {
-    const pill = document.createElement("span");
-    pill.textContent = role;
-
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = "×";
-    btn.addEventListener("click", () => {
-      selectedRoles.splice(idx, 1);
-      renderSelectedRoles();
-    });
-
-    pill.appendChild(btn);
-    selectedRolesContainer.appendChild(pill);
-  });
-}
-
-// na hora de submeter, inclua selectedRoles no objeto do membro
-document.getElementById("addMemberForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const nome = document.getElementById("memberName").value;
-  const horas = document.getElementById("allocatedHours").value;
-  // usa selectedRoles para as funções
-  membros.push({
-    nome,
-    horasAlocadas: horas + "hrs",
-    horasDisponiveis: "...", // ou calcule
-    funcoes: [...selectedRoles],
-  });
-  renderMembros();
-  selectedRoles.length = 0; // limpa array
-  renderSelectedRoles(); // limpa UI
-  hideModal();
-});
-
-document.querySelector(".form-squad").addEventListener("submit", function (e) {
-  e.preventDefault();
-  window.location.href = "../squads.html";
-});
 const mainCancelBtn = document.querySelector(".form-squad .cancel-btn");
 if (mainCancelBtn) {
   mainCancelBtn.addEventListener("click", (e) => {

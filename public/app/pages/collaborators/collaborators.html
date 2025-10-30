@@ -153,12 +153,12 @@
             </p>
           </div>
           <div class="actions">
-            <button
+            <!-- <button
               class="collaborator-btn btn outline"
               data-i18n="collaborators.export"
             >
               Exportar dados
-            </button>
+            </button> -->
             <button
               class="collaborator-btn btn outline"
               data-i18n="collaborators.report"
@@ -179,11 +179,12 @@
           />
         </div>
         <button class="collaborator-btn btn">Pesquisar</button>
+        <button class="collaborator-btn btn outline">Limpar</button>
       </div>
 
       <!-- Filtros -->
       <div class="filters justify-between">
-        <div>
+        <div class="filters-divider">
           <select>
             <option>Todas as áreas</option>
           </select>
@@ -197,7 +198,7 @@
             <option>Todas os squads</option>
           </select>
         </div>
-        <div>
+        <div class="filters-btn">
           <button
             class="collaborator-btn btn"
             data-i18n="collaborators.apply_filters"
@@ -224,12 +225,9 @@
               <th data-i18n="collaborators.table.name">Nome</th>
               <th data-i18n="collaborators.table.role">Cargo</th>
               <th data-i18n="collaborators.table.squad">Squad</th>
-              <th data-i18n="collaborators.table.allocated">% alocadas</th>
-              <th data-i18n="collaborators.table.available">% disponíveis</th>
+              <!-- <th data-i18n="collaborators.table.allocated">% alocadas</th>
+              <th data-i18n="collaborators.table.available">% disponíveis</th> -->
               <th data-i18n="collaborators.table.status">Status</th>
-              <th class="width-22" data-i18n="collaborators.table.feedback">
-                Ação de feedback
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -244,8 +242,8 @@
                   <div class="avatar-sm">KK</div>
                 </div>
               </td>
-              <td>00</td>
-              <td>00</td>
+              <!-- <td>00</td>
+              <td>00</td> -->
               <td>
                 <span
                   class="status-badge active"
@@ -253,15 +251,6 @@
                 >
                   Ativo
                 </span>
-              </td>
-              <td>
-                <button class="collaborator-btn small btn">Adicionar</button>
-                <button
-                  class="collaborator-btn btn outline"
-                  data-i18n="collaborators.action.request"
-                >
-                  Pedir
-                </button>
               </td>
             </tr>
             <!-- repita conforme necessário -->
@@ -275,18 +264,9 @@
                   <div class="avatar-sm">KK</div>
                 </div>
               </td>
-              <td>00</td>
-              <td>00</td>
+              <!-- <td>00</td>
+              <td>00</td> -->
               <td><span class="status-badge active">Ativo</span></td>
-              <td>
-                <button class="collaborator-btn small btn">Adicionar</button>
-                <button
-                  class="collaborator-btn btn outline"
-                  data-i18n="collaborators.action.request"
-                >
-                  Pedir
-                </button>
-              </td>
             </tr>
             <tr class="collaborator-row">
               <td>Nome aqui</td>
@@ -298,18 +278,9 @@
                   <div class="avatar-sm">KK</div>
                 </div>
               </td>
-              <td>00</td>
-              <td>00</td>
+              <!-- <td>00</td>
+              <td>00</td> -->
               <td><span class="status-badge active">Ativo</span></td>
-              <td class="width-22">
-                <button class="collaborator-btn small btn">Adicionar</button>
-                <button
-                  class="collaborator-btn btn outline"
-                  data-i18n="collaborators.action.request"
-                >
-                  Pedir
-                </button>
-              </td>
             </tr>
           </tbody>
         </table>

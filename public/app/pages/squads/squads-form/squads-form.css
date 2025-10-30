@@ -322,6 +322,22 @@ textarea {
   cursor: pointer;
 }
 
+.step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.step-badge {
+  background: #f5f2ff;
+  color: #7d1bff;
+  border: 1px solid #e6dbff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 /* =====================
    6. MEDIA QUERIES
    ===================== */
@@ -422,4 +438,20 @@ body.dark .add-people-hover:hover img {
   color: #7d1bff;
   filter: invert(27%) sepia(87%) saturate(7476%) hue-rotate(259deg)
     brightness(90%) contrast(101%) !important;
+}
+/* dark */
+body.dark .step-badge {
+  background: #27133f;
+  color: #e6dbff;
+  border-color: #3a2358;
+}
+body.dark .role-card {
+  background: #23232b;
+  border-color: #444;
+}
+body.dark .icon-btn:hover {
+  background: #2c2c36;
+}
+body.dark .tags-input {
+  border-color: #444;
 }

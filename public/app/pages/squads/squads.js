@@ -1,3 +1,5 @@
+import { apiService } from "../../../assets/js/apiService.js";
+
 const squads = [
   {
     nome: "Frontend Ninjas",
@@ -134,9 +136,31 @@ function renderSquads() {
           <p class="by-month"><strong data-i18n="squads.per_month">${i18n.t(
             "squads.per_month"
           )}</strong> ${squad.preco}</p>
-          <button class="details-btn" data-i18n="squads.details" onclick="window.location.href='squads-detail/squads-detail.html'"></button>
+          <button class="details-btn" data-i18n="squads.details" onclick="window.location.href='squads-detail/squads-detail.html'">
+            ${i18n.t("squads.details")}
+          </button>
         </div>
       </div>
     `;
+  });
+}
+
+async function fetchAndRenderSquads() {
+  console.log("Fetching squads from API...");
+  try {
+    const squadsData = await apiService.getAllSquads();
+    renderSquads();
+  } catch (err) {
+    window.showNotification &&
+      window.showNotification("error", "Erro ao buscar squads.");
+    console.error("Erro ao buscar squads:", err);
+  }
+}
+
+if (typeof window !== "undefined") {
+  document.addEventListener("DOMContentLoaded", () => {
+    fetchAndRenderSquads();
+    // Se quiser manter tradução:
+    if (window.i18n) window.i18n.apply();
   });
 }
