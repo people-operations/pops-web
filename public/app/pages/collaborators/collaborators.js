@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (filters.squad) params.append("squad", filters.squad);
 
       const response = await fetch(
-        `http://localhost:8081/api-employee/employees?${params.toString()}`,
+        `/api-employee/employees?${params.toString()}`,
         {
           method: "GET",
           headers: {

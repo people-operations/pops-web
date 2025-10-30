@@ -32,7 +32,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        "http://localhost:8082/api-project/projects",
+        "/api-project/projects",
         {
           method: "POST",
           headers: {
@@ -60,7 +60,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        "http://localhost:8082/api-project/projects",
+        "/api-project/projects",
         {
           method: "GET",
           headers: {
@@ -86,7 +86,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8082/api-project/projects/${id}`,
+        `/api-project/projects/${id}`,
         {
           method: "GET",
           headers: {
@@ -112,7 +112,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8082/api-project/projects/${id}`,
+        `/api-project/projects/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -137,7 +137,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8082/api-project/projects/${id}`,
+        `/api-project/projects/${id}`,
         {
           method: "PATCH",
           headers: {
@@ -164,7 +164,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        "http://localhost:8082/api-project/project-types",
+        "/api-project/project-types",
         {
           method: "GET",
           headers: {
@@ -193,7 +193,7 @@ export const apiService = {
       const token = getAuthTokenOrThrow();
       console.log("Fetching project statuses with token:", token);
       const response = await fetch(
-        "http://localhost:8082/api-project/project-status",
+        "/api-project/project-status",
         {
           method: "GET",
           headers: {
@@ -219,7 +219,7 @@ export const apiService = {
   async getSkills() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("http://localhost:8082/api-project/skills", {
+      const response = await fetch("/api-project/skills", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -242,7 +242,7 @@ export const apiService = {
   async getAllSquads() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("http://localhost:8083/api-squad/teams/1", {
+      const response = await fetch("/api-squad/teams/1", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
