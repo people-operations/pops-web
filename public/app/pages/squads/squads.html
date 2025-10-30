@@ -21,7 +21,8 @@
       href="../../../assets/svg/logo-icon.svg"
     />
   </head>
-<body>   <script>
+  <body>
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const avatar = document.querySelector(".avatar");
         const email = localStorage.getItem("userEmail");
@@ -92,7 +93,8 @@
             class="theme-toggle-btn"
             title="Alternar tema"
           >
-            <span id="theme-icon"> <svg
+            <span id="theme-icon">
+              <svg
                 width="22"
                 height="22"
                 viewBox="0 0 22 22"
@@ -120,7 +122,8 @@
                   <line x1="4.22" y1="17.78" x2="5.64" y2="16.36" />
                   <line x1="16.36" y1="5.64" x2="17.78" y2="4.22" />
                 </g>
-              </svg></span>
+              </svg>
+            </span>
           </button>
           <div class="avatar">K</div>
           <span class="chevron" aria-hidden="true">
@@ -171,7 +174,7 @@
       </main>
     </div>
 
-    <script src="squads.js"></script>
+    <script type="module" src="squads.js"></script>
     <script src="../../../assets/js/app.js"></script>
     <script src="../../../assets/js/i18nService.js" defer></script>
   </body>

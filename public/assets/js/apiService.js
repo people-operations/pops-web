@@ -217,4 +217,27 @@ export const apiService = {
       return null;
     }
   },
+
+  async getAllSquads() {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch("http://localhost:8083/api/teams/1", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
+      }
+      const data = await response.json();
+      return data.content;
+    } catch (error) {
+      console.error("Erro ao buscar squads:", error.message);
+      return null;
+    }
+  },
 };
