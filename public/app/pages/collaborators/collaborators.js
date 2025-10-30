@@ -8,43 +8,52 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const searchInput = document.querySelector(".search-bar input");
   const searchButton = document.querySelector(".search-bar button");
-  const clearSearchButton = document.querySelector(".search-bar button.outline");
+  const clearSearchButton = document.querySelector(
+    ".search-bar button.outline"
+  );
   const applyFiltersButton = document.querySelector(".filters button");
   const clearFiltersButton = document.querySelector(".filters button.outline");
-  const generateReportButton = document.querySelector(".actions button"); 
-  const overviewTitle = document.querySelector('.table-container h3');
+  const generateReportButton = document.querySelector(".actions button");
+  const overviewTitle = document.querySelector(".table-container h3");
 
   const areaSelect = document.querySelector(".filters select:nth-of-type(1)");
   const cargoSelect = document.querySelector(".filters select:nth-of-type(2)");
-  const projetoSelect = document.querySelector(".filters select:nth-of-type(3)");
+  const projetoSelect = document.querySelector(
+    ".filters select:nth-of-type(3)"
+  );
   const squadSelect = document.querySelector(".filters select:nth-of-type(4)");
 
-  let allEmployees = []; 
-  let currentEmployees = []; 
+  let allEmployees = [];
+  let currentEmployees = [];
 
   async function fetchCollaborators(filters = {}) {
     try {
       const params = new URLSearchParams();
-      if (filters.employeeName) params.append("employeeName", filters.employeeName);
-      if (filters.departament) params.append("departmentName", filters.departament);
+      if (filters.employeeName)
+        params.append("employeeName", filters.employeeName);
+      if (filters.departament)
+        params.append("departmentName", filters.departament);
       if (filters.jobTitle) params.append("jobTitle", filters.jobTitle);
       if (filters.project) params.append("project", filters.project);
       if (filters.squad) params.append("squad", filters.squad);
 
-      const response = await fetch(`http://localhost:8081/api/employees?${params.toString()}`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
+      const response = await fetch(
+        `http://localhost:8081/api-employee/employees?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
       const employees = await response.json();
 
       if (!allEmployees.length) allEmployees = employees;
 
-      currentEmployees = employees; 
+      currentEmployees = employees;
 
       populateFilters();
       renderTable(employees);
@@ -55,10 +64,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function populateFilters() {
-    const areas = [...new Set(allEmployees.map(emp => emp.departament?.name).filter(a => a))];
-    areaSelect.innerHTML = `<option>Todas as áreas</option>` + areas.map(a => `<option>${a}</option>`).join("");
-    const cargos = [...new Set(allEmployees.map(emp => emp.jobTitle).filter(j => j))];
-    cargoSelect.innerHTML = `<option>Todos os cargos</option>` + cargos.map(c => `<option>${c}</option>`).join("");
+    const areas = [
+      ...new Set(
+        allEmployees.map((emp) => emp.departament?.name).filter((a) => a)
+      ),
+    ];
+    areaSelect.innerHTML =
+      `<option>Todas as áreas</option>` +
+      areas.map((a) => `<option>${a}</option>`).join("");
+    const cargos = [
+      ...new Set(allEmployees.map((emp) => emp.jobTitle).filter((j) => j)),
+    ];
+    cargoSelect.innerHTML =
+      `<option>Todos os cargos</option>` +
+      cargos.map((c) => `<option>${c}</option>`).join("");
   }
 
   function getMockSquads(employeeId) {
@@ -73,13 +92,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function renderTable(employees) {
-    const tbody = document.querySelector('.collaborators-table tbody');
-    tbody.innerHTML = '';
+    const tbody = document.querySelector(".collaborators-table tbody");
+    tbody.innerHTML = "";
 
-    employees.forEach(emp => {
+    employees.forEach((emp) => {
       const squads = getMockSquads(emp.id);
-      const row = document.createElement('tr');
-      row.classList.add('collaborator-row');
+      const row = document.createElement("tr");
+      row.classList.add("collaborator-row");
 
       // <td>${emp.allocatedPercent || "0"}%</td>
       // <td>${emp.availablePercent || "100"}%</td>
@@ -89,18 +108,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td>${emp.jobTitle || "—"}</td>
         <td>
           <div class="avatars-group">
-            ${squads.map(s => `<div class="avatar-sm">${s[0]}</div>`).join('')}
+            ${squads
+              .map((s) => `<div class="avatar-sm">${s[0]}</div>`)
+              .join("")}
           </div>
         </td>
         <td>
-          <span class="status-badge ${emp.activeEmployee ? 'active' : 'inactive'}">
-            ${emp.activeEmployee ? 'Ativo' : 'Inativo'}
+          <span class="status-badge ${
+            emp.activeEmployee ? "active" : "inactive"
+          }">
+            ${emp.activeEmployee ? "Ativo" : "Inativo"}
           </span>
         </td>
       `;
 
-      row.addEventListener('click', e => {
-        if (e.target.tagName === 'BUTTON') return;
+      row.addEventListener("click", (e) => {
+        if (e.target.tagName === "BUTTON") return;
         window.location.href = `collaborators-detail/collaborators-detail.html?id=${emp.id}`;
       });
 
@@ -132,10 +155,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Aplicar filtros
   applyFiltersButton.addEventListener("click", () => {
     const filters = {
-      departament: areaSelect.value !== "Todas as áreas" ? areaSelect.value : undefined,
-      jobTitle: cargoSelect.value !== "Todos os cargos" ? cargoSelect.value : undefined,
-      project: projetoSelect.value !== "Todos os projetos" ? projetoSelect.value : undefined,
-      squad: squadSelect.value !== "Todas os squads" ? squadSelect.value : undefined
+      departament:
+        areaSelect.value !== "Todas as áreas" ? areaSelect.value : undefined,
+      jobTitle:
+        cargoSelect.value !== "Todos os cargos" ? cargoSelect.value : undefined,
+      project:
+        projetoSelect.value !== "Todos os projetos"
+          ? projetoSelect.value
+          : undefined,
+      squad:
+        squadSelect.value !== "Todas os squads" ? squadSelect.value : undefined,
     };
     fetchCollaborators(filters);
   });
@@ -153,8 +182,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   generateReportButton.addEventListener("click", () => {
     if (!currentEmployees.length) return;
 
-    const headers = ["Nome", "Cargo", "Squads", "% Alocadas", "% Disponíveis", "Status"];
-    const rows = currentEmployees.map(emp => {
+    const headers = [
+      "Nome",
+      "Cargo",
+      "Squads",
+      "% Alocadas",
+      "% Disponíveis",
+      "Status",
+    ];
+    const rows = currentEmployees.map((emp) => {
       const squads = getMockSquads(emp.id).join(", ");
       return [
         emp.name || "",
@@ -162,8 +198,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         squads,
         emp.allocatedPercent || "0",
         emp.availablePercent || "100",
-        emp.activeEmployee ? "Ativo" : "Inativo"
-      ].map(field => `"${field}"`).join(",");
+        emp.activeEmployee ? "Ativo" : "Inativo",
+      ]
+        .map((field) => `"${field}"`)
+        .join(",");
     });
 
     const csvContent = [headers.join(","), ...rows].join("\n");
