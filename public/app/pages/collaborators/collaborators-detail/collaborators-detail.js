@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const response = await fetch(
-      `http://localhost:8081/api-employee/employees/${employeeId}`,
+      `/api-employee/employees/${employeeId}`,
       {
         method: "GET",
         headers: {
@@ -173,7 +173,7 @@ async function preencherInformacoesNoHTML(employee, token) {
 
   try {
     const squadResponse = await fetch(
-      `http://localhost:8083/api-squad/teams/allocations/person/${employee.id}`,
+      `/api-squad/teams/allocations/person/${employee.id}`,
       {
         method: "GET",
         headers: {
