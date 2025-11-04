@@ -1,3 +1,5 @@
+import { apiService } from "../../../../../assets/js/apiService.js";
+
 // --------- Mock helpers / leitura dos passos anteriores ----------
 function readJSON(key, fallback) {
   try {
@@ -8,64 +10,99 @@ function readJSON(key, fallback) {
 }
 
 // Do passo "roles": [{ id, title, seniority, quantity, hardSkills, softSkills }]
-const selectedRoles = readJSON("squads.selectedRoles", [
-  {
-    id: "fe-senior",
-    title: "Front-end Sênior",
-    quantity: 2,
-    hardSkills: ["JavaScript", "React", "CSS"],
-    softSkills: ["Comunicação"],
-  },
-  {
-    id: "fe-junior",
-    title: "Front-end Junior",
-    quantity: 1,
-    hardSkills: ["HTML", "CSS", "JavaScript"],
-    softSkills: ["Colaboração"],
-  },
-]);
+const selectedRoles = readJSON("squads.selectedRoles", []);
 
 // Do passo "weeklyRequirements": [{ id, title, hours }]
-const weeklyReqs = readJSON("squads.weeklyRequirements", [
-  { id: "fe-senior", title: "Front-end Sênior", hours: 20 },
-  { id: "fe-junior", title: "Front-end Junior", hours: 10 },
-]);
+const weeklyReqs = readJSON("squads.weeklyRequirements", []);
 
-// Candidatos de exemplo (substitua pela sua API futuramente)
-const allCandidates = [
-  {
-    id: "u1",
-    name: "Mateus Fantin",
-    title: "Frontend Sênior • Marketing",
-    skills: ["Java", "C#", "Flexibilidade", "React", "CSS"],
-    exp: "Projetos que ele já participou",
-    available: 25,
-  },
-  {
-    id: "u2",
-    name: "Ana Souza",
-    title: "Frontend Sênior • Growth",
-    skills: ["React", "TypeScript", "CSS", "Figma"],
-    exp: "Design System & Landing Pages",
-    available: 18,
-  },
-  {
-    id: "u3",
-    name: "Carlos Lima",
-    title: "Frontend Junior • Produto",
-    skills: ["HTML", "CSS", "JavaScript"],
-    exp: "Squad Webapp Interno",
-    available: 32,
-  },
-  {
-    id: "u4",
-    name: "João Pedro",
-    title: "Frontend Sênior • Mkt",
-    skills: ["Vue", "JavaScript", "Figma", "A11y"],
-    exp: "CMS + Acessibilidade",
-    available: 22,
-  },
-];
+// Carregamento dinâmico dos colaboradores reais
+let allCandidates = [];
+
+// Paginação
+const PAGE_SIZE = 10;
+let currentPage = 1;
+let totalPages = 1;
+
+async function fetchAndPrepareCandidates() {
+  // apiService está disponível via import/export, mas aqui é global (window.apiService)
+  const api = await apiService;
+  if (!api || !api.getCollaborators) {
+    window.showNotification &&
+      window.showNotification("error", "API de colaboradores não encontrada!");
+    return;
+  }
+  // Exibe skeleton
+  showSkeleton();
+  let data = await api.getCollaborators();
+  if (!data || !Array.isArray(data)) {
+    document.getElementById("loader").innerText =
+      "Erro ao carregar colaboradores.";
+    return;
+  }
+  // Adapta para o formato esperado pelo front
+  allCandidates = data.map((col) => ({
+    id: col.id,
+    name: col.name,
+    title: `${col.jobTitle || ""}${
+      col.departament && col.departament.name
+        ? " • " + col.departament.name
+        : ""
+    }`.trim(),
+    skills: Array.isArray(col.skills) ? col.skills.map((s) => s.name) : [],
+    exp: col.jobTitle || "",
+    available: col.workHoursPerWeek || 0,
+  }));
+  currentPage = 1;
+  totalPages =
+    Math.ceil(
+      sortCandidates(allCandidates, state.roleId, state.orderBy).length /
+        PAGE_SIZE
+    ) || 1;
+  hideSkeleton();
+  document.getElementById("loader").style.display = "none";
+  document.getElementById("main-content").classList.remove("hidden");
+  render();
+}
+
+// Skeleton helpers
+function showSkeleton() {
+  const mainContent = document.getElementById("main-content");
+  if (!mainContent) return;
+  mainContent.classList.add("hidden");
+  let skeleton = document.getElementById("skeleton");
+  if (!skeleton) {
+    skeleton = document.createElement("div");
+    skeleton.id = "skeleton";
+    skeleton.innerHTML = Array.from({ length: 10 })
+      .map(
+        () => `
+        <div class="card skeleton-card">
+          <div class="check skeleton-check"></div>
+          <div class="body">
+            <div class="skeleton-line skeleton-name"></div>
+            <div class="skeleton-line skeleton-badges"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+            <div class="skeleton-line skeleton-tags"></div>
+            <div class="skeleton-line skeleton-exp"></div>
+          </div>
+        </div>
+      `
+      )
+      .join("");
+    const cards = document.getElementById("cards");
+    if (cards && cards.parentNode) {
+      cards.parentNode.insertBefore(skeleton, cards);
+    }
+  }
+  skeleton.style.display = "block";
+}
+
+function hideSkeleton() {
+  const skeleton = document.getElementById("skeleton");
+  if (skeleton) skeleton.style.display = "none";
+  const mainContent = document.getElementById("main-content");
+  if (mainContent) mainContent.classList.remove("hidden");
+}
 
 // --------- Estado global da tela ----------
 const state = {
@@ -77,13 +114,41 @@ const state = {
 // --------- Scoring simples por interseção de skills ----------
 function getRequiredSkills(roleId) {
   const role = selectedRoles.find((r) => r.id === roleId);
+  if (!role) return [];
+  // Suporte a roles criadas com skillsByType (novo formato)
+  if (role.skillsByType && typeof role.skillsByType === "object") {
+    let all = [];
+    if (Array.isArray(role.skillsByType.HARD))
+      all = all.concat(role.skillsByType.HARD);
+    if (Array.isArray(role.skillsByType.SOFT))
+      all = all.concat(role.skillsByType.SOFT);
+    if (Array.isArray(role.skillsByType.MANAGEMENT))
+      all = all.concat(role.skillsByType.MANAGEMENT);
+    if (Array.isArray(role.skillsByType.ANALYTICS))
+      all = all.concat(role.skillsByType.ANALYTICS);
+    return all;
+  }
+  // fallback antigo
   return (role?.hardSkills || []).concat(role?.softSkills || []);
 }
 function matchPercent(candidate, roleId) {
-  const req = getRequiredSkills(roleId);
-  if (!req.length) return 89; // fallback parecido ao mock
-  const inter = candidate.skills.filter((s) => req.includes(s)).length;
-  return Math.round((inter / req.length) * 100) || 68;
+  const req = getRequiredSkills(roleId)
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  if (!req.length) return 0;
+  let inter = 0;
+  candidate.skills.forEach((skill) => {
+    const skillNorm = skill.trim().toLowerCase();
+    if (req.includes(skillNorm)) inter++;
+    else {
+      // fuzzy: se skill contém parte do nome da requerida
+      if (req.some((r) => skillNorm.includes(r) || r.includes(skillNorm)))
+        inter += 0.5;
+    }
+  });
+  // Se não houver nenhuma interseção, retorna 0
+  if (inter === 0) return 0;
+  return Math.round((inter / req.length) * 100);
 }
 
 // --------- Ordenação ----------
@@ -95,6 +160,8 @@ function sortCandidates(list, roleId, orderBy) {
     copy.sort((a, b) => b.available - a.available);
   } else if (orderBy === "name") {
     copy.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (orderBy === "name-desc") {
+    copy.sort((a, b) => b.name.localeCompare(a.name));
   }
   return copy;
 }
@@ -128,16 +195,73 @@ function render() {
   // Ordenação
   orderSelect.value = state.orderBy;
 
-  // Lista de candidatos
+  // Paginação
   const ordered = sortCandidates(allCandidates, state.roleId, state.orderBy);
-  cards.innerHTML = "";
-  ordered.forEach((c) => cards.appendChild(buildCard(c, currentRole)));
+  totalPages = Math.ceil(ordered.length / PAGE_SIZE) || 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+  const startIdx = (currentPage - 1) * PAGE_SIZE;
+  const paginated = ordered.slice(startIdx, startIdx + PAGE_SIZE);
 
-  // Habilita salvar se houver pelo menos 1 selecionado em algum papel
-  const anySelected = Object.values(state.selectedByRole).some(
-    (arr) => (arr || []).length > 0
-  );
-  saveBtn.disabled = !anySelected;
+  cards.innerHTML = "";
+  paginated.forEach((c) => cards.appendChild(buildCard(c, currentRole)));
+
+  // Paginação UI
+  let pagination = document.getElementById("pagination");
+  if (!pagination) {
+    pagination = document.createElement("div");
+    pagination.id = "pagination";
+    cards.parentNode.insertBefore(pagination, cards.nextSibling);
+  }
+  pagination.innerHTML = "";
+  if (totalPages > 1) {
+    const prevBtn = document.createElement("button");
+    prevBtn.textContent = "Anterior";
+    prevBtn.className = "pagination-btn";
+    if (currentPage === 1) prevBtn.classList.add("disabled");
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => {
+      if (currentPage > 1) {
+        currentPage--;
+        render();
+      }
+    };
+    pagination.appendChild(prevBtn);
+
+    for (let i = 1; i <= totalPages; i++) {
+      const pageBtn = document.createElement("button");
+      pageBtn.textContent = i;
+      pageBtn.className = "pagination-btn";
+      if (i === currentPage) pageBtn.classList.add("active");
+      pageBtn.disabled = i === currentPage;
+      pageBtn.onclick = () => {
+        currentPage = i;
+        render();
+      };
+      pagination.appendChild(pageBtn);
+    }
+
+    const nextBtn = document.createElement("button");
+    nextBtn.textContent = "Próxima";
+    nextBtn.className = "pagination-btn";
+    if (currentPage === totalPages) nextBtn.classList.add("disabled");
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        render();
+      }
+    };
+    pagination.appendChild(nextBtn);
+  } else {
+    pagination.innerHTML = "";
+  }
+
+  // Habilita salvar SOMENTE se todos os cargos estiverem preenchidos
+  const allFilled = selectedRoles.every((r) => {
+    const arr = state.selectedByRole[r.id] || [];
+    return arr.length === (r.quantity ?? 2);
+  });
+  saveBtn.disabled = !allFilled;
 }
 
 function buildCard(c, role) {
@@ -158,10 +282,16 @@ function buildCard(c, role) {
   const requiredHours =
     weeklyReqs.find((w) => w.id === state.roleId)?.hours ?? 0;
 
+  // Badge color logic
+  let matchClass = "match-low";
+  if (match >= 95) matchClass = "match-perfect";
+  else if (match >= 75) matchClass = "match-good";
+  else if (match >= 50) matchClass = "match-medium";
+
   body.innerHTML = `
     <div class="name-row">
       <span class="name">${c.name}</span>
-      <span class="badge match">${match}% Match</span>
+      <span class="badge match ${matchClass}">${match}% Match</span>
       <span class="badge avail">${c.available}h disponíveis</span>
       ${
         requiredHours
@@ -174,7 +304,7 @@ function buildCard(c, role) {
       .slice(0, 5)
       .map((s) => `<span class="tag">${s}</span>`)
       .join("")}</div>
-    <div class="exp">Experiências: ${c.exp}</div>
+    <div class="exp">Experiência: ${c.exp}</div>
   `;
 
   // Limita seleção à quantidade necessária
@@ -209,34 +339,84 @@ function buildCard(c, role) {
 }
 
 // --------- Eventos de UI ----------
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("main-content")?.classList.remove("hidden");
+fetchAndPrepareCandidates();
 
-  document.getElementById("roleSelect").addEventListener("change", (e) => {
-    state.roleId = e.target.value;
-    render();
-  });
-  document.getElementById("orderSelect").addEventListener("change", (e) => {
-    state.orderBy = e.target.value;
-    render();
-  });
-
-  document.getElementById("backBtn").addEventListener("click", () => {
-    window.location.href =
-      "../squads-weekly-requirements/squads-weekly-requirements.html";
-  });
-
-  document.getElementById("saveBtn").addEventListener("click", () => {
-    localStorage.setItem(
-      "squads.membersSelection",
-      JSON.stringify(state.selectedByRole)
-    );
-    if (window.showNotification) {
-      window.showNotification("success", "Seleção salva!");
-    }
-    // Próxima etapa/Resumo:
-    window.location.href = "squads-review.html";
-  });
-
+document.getElementById("roleSelect").addEventListener("change", (e) => {
+  state.roleId = e.target.value;
+  currentPage = 1;
   render();
+});
+document.getElementById("orderSelect").addEventListener("change", (e) => {
+  state.orderBy = e.target.value;
+  currentPage = 1;
+  render();
+});
+
+// Adiciona opção Z-A se não existir
+const orderSelect = document.getElementById("orderSelect");
+if (orderSelect && !orderSelect.querySelector('option[value="name-desc"]')) {
+  const option = document.createElement("option");
+  option.value = "name-desc";
+  option.textContent = "Nome (Z–A)";
+  orderSelect.appendChild(option);
+}
+
+document.getElementById("backBtn").addEventListener("click", () => {
+  window.location.href =
+    "../squads-weekly-requirements/squads-weekly-requirements.html";
+});
+
+document.getElementById("saveBtn").addEventListener("click", () => {
+  localStorage.setItem(
+    "squads.membersSelection",
+    JSON.stringify(state.selectedByRole)
+  );
+
+  // Pega squadId da URL
+  const params = new URLSearchParams(window.location.search);
+  const squadId = params.get("squadId");
+  if (!squadId) {
+    if (window.showNotification) {
+      window.showNotification("error", "ID da Squad não encontrado na URL!");
+    }
+    return;
+  }
+
+  // Monta allocations
+  const today = new Date();
+  const startedAt = today.toISOString().split("T")[0]; // yyyy-mm-dd
+  const allocations = [];
+  Object.entries(state.selectedByRole).forEach(([roleId, memberIds]) => {
+    const role = selectedRoles.find((r) => r.id == roleId);
+    const weekly = weeklyReqs.find((w) => w.id == roleId);
+    const allocatedHours = weekly?.hours || 0;
+    const position = role?.title || "";
+    (memberIds || []).forEach((personId) => {
+      allocations.push({
+        startedAt,
+        allocatedHours,
+        personId: Number(personId),
+        position,
+        team: Number(squadId),
+      });
+    });
+  });
+
+  // Chama API
+  apiService
+    .insertSquadAllocations(squadId, allocations)
+    .then((result) => {
+      if (window.showNotification) {
+        if (result) {
+          window.showNotification("success", "Alocações salvas!");
+        } else {
+          window.showNotification("error", "Erro ao salvar alocações!");
+        }
+      }
+    })
+    .catch((err) => {
+      if (window.showNotification) {
+        window.showNotification("error", "Erro ao salvar alocações!");
+      }
+    });
 });

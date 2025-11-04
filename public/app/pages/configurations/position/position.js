@@ -1,6 +1,5 @@
 // Utilitários para modal
 function abrirModal(id) {
-  console.log("Abrindo modal:", id);
   document.getElementById(id).classList.remove("hidden");
 }
 function fecharModal(id) {

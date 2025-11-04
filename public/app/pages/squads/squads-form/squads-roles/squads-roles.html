@@ -218,6 +218,7 @@
         </div>
 
         <div class="modal-overlay hidden" id="roleModalOverlay"></div>
+        <!-- Modal deve vir DEPOIS do overlay para garantir z-index correto -->
         <div
           class="modal hidden"
           id="roleModal"
@@ -252,16 +253,6 @@
               </select>
             </div>
 
-            <div class="chips-group">
-              <div class="chips-title">Hard skills:</div>
-              <div id="hardSkillsBox" class="chips"></div>
-            </div>
-
-            <div class="chips-group">
-              <div class="chips-title">Soft skills:</div>
-              <div id="softSkillsBox" class="chips"></div>
-            </div>
-
             <!-- Botões -->
             <div class="form-actions">
               <button
@@ -283,6 +274,6 @@
     </div>
     <script src="../../../../../assets/js/app.js"></script>
     <script src="../../../../../assets/js/i18nService.js"></script>
-    <script src="squads-roles.js"></script>
+    <script type="module" src="squads-roles.js"></script>
   </body>
 </html>

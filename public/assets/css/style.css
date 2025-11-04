@@ -144,6 +144,9 @@ a:hover {
 .align-center {
   align-items: center !important;
 }
+.align-self-center {
+  align-self: center !important;
+}
 .align-end {
   align-items: flex-end !important;
 }

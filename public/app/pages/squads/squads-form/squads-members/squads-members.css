@@ -1,3 +1,172 @@
+/* Skeleton loading */
+#skeleton {
+  margin-top: 10px;
+}
+.skeleton-card {
+  opacity: 0.7;
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  animation: skeleton-fade 1.2s infinite linear alternate;
+}
+.skeleton-line {
+  height: 16px;
+  border-radius: 6px;
+  background: #e5e7eb;
+  margin-bottom: 8px;
+  width: 100%;
+  animation: skeleton-fade 1.2s infinite linear alternate;
+}
+.skeleton-name {
+  width: 40%;
+  height: 18px;
+}
+.skeleton-badges {
+  width: 30%;
+  height: 16px;
+}
+.skeleton-meta {
+  width: 30%;
+  height: 14px;
+}
+.skeleton-tags {
+  width: 60%;
+  height: 14px;
+}
+.skeleton-exp {
+  width: 30%;
+  height: 14px;
+}
+.skeleton-check {
+  width: 22px;
+  height: 22px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  margin-right: 8px;
+}
+@keyframes skeleton-fade {
+  0% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+body.dark #skeleton .skeleton-card {
+  background: #232336;
+  border-color: #333;
+}
+body.dark .skeleton-line,
+body.dark .skeleton-check {
+  background: #333;
+}
+
+/* Paginação estilizada */
+#pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0;
+}
+#pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.form-container #pagination {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  flex-wrap: wrap;
+}
+.pagination-btn {
+  background: #f5f2ff;
+  color: #7d1bff;
+  border: 1.5px solid #e6dbff;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.pagination-btn.active,
+.pagination-btn:disabled {
+  background: #7d1bff;
+  color: #fff;
+  border-color: #7d1bff;
+  .pagination-btn {
+    max-width: 48px;
+    min-width: 36px;
+    box-sizing: border-box;
+    word-break: break-word;
+    white-space: nowrap;
+  }
+}
+.pagination-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+body.dark .pagination-btn {
+  background: #232336;
+  color: #7d1bff;
+  border-color: #7d1bff;
+}
+body.dark .pagination-btn.active,
+body.dark .pagination-btn:disabled {
+  background: #7d1bff;
+  color: #fff;
+  border-color: #7d1bff;
+}
+
+/* Badge de match colorida */
+.badge.match.match-low {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+.badge.match.match-medium {
+  background: #fef9c3;
+  color: #b45309;
+  border-color: #fde68a;
+}
+.badge.match.match-good {
+  background: #d1fae5;
+  color: #047857;
+  border-color: #6ee7b7;
+}
+.badge.match.match-perfect {
+  background: linear-gradient(90deg, #7dffb0 60%, #1bff7d 100%);
+  color: #065f46;
+  border-color: #1bff7d;
+  font-weight: 800;
+  box-shadow: 0 0 8px #1bff7d44;
+}
+body.dark .badge.match.match-low {
+  background: #3b1a1a;
+  color: #ff6b6b;
+  border-color: #b91c1c;
+}
+body.dark .badge.match.match-medium {
+  background: #3b2f1a;
+  color: #ffe066;
+  border-color: #b45309;
+}
+body.dark .badge.match.match-good {
+  background: #1e293b;
+  color: #34d399;
+  border-color: #6ee7b7;
+}
+body.dark .badge.match.match-perfect {
+  background: linear-gradient(90deg, #7dffb0 60%, #1bff7d 100%);
+  color: #1bff7d;
+  border-color: #1bff7d;
+  font-weight: 800;
+  box-shadow: 0 0 8px #1bff7d44;
+}
 .create-squad-page {
   margin: 24px auto 56px;
   padding: 0 16px;
@@ -108,6 +277,7 @@ body.dark .ai-hint {
   font-weight: 500;
   color: #374151;
   transition: background 0.3s, color 0.3s;
+  margin-top: 4px;
 }
 body.dark .select select {
   background: #232336;
@@ -172,7 +342,7 @@ body.dark .card {
   border-color: #7d1bff;
 }
 .card .check input[type="checkbox"]:checked::after {
-  content: '';
+  content: "";
   display: block;
   position: absolute;
   left: 6px;
@@ -313,7 +483,16 @@ body.dark .exp {
   letter-spacing: 0 !important;
   font-family: "Poppins", sans-serif;
   box-shadow: 0 2px 8px rgba(125, 27, 255, 0.1);
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s, opacity 0.2s;
+}
+.save:disabled,
+.save[disabled] {
+  background: #e5e7eb !important;
+  color: #a1a1aa !important;
+  border: none !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  box-shadow: none;
 }
 .save.dark-mode {
   background: #fff;

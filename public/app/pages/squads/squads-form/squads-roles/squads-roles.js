@@ -1,3 +1,5 @@
+import { apiService } from "../../../../../assets/js/apiService.js";
+
 (() => {
   const rolesListEl = document.getElementById("rolesList");
   const addRoleBtn = document.getElementById("addRoleBtn");
@@ -36,22 +38,8 @@
     "Analista de Dados",
   ];
   const SENIORIDADES = ["Júnior", "Pleno", "Sênior", "Especialista"];
-  const HARD_SKILLS = [
-    "JavaScript",
-    "React",
-    "Node.js",
-    "SQL",
-    "Testes",
-    "UX/UI",
-    "Python",
-  ];
-  const SOFT_SKILLS = [
-    "Comunicação",
-    "Trabalho em equipe",
-    "Proatividade",
-    "Resolução de problemas",
-    "Gestão de tempo",
-  ];
+  // Skills agrupadas por tipo (ex: { HARD: [], SOFT: [], ... })
+  let SKILLS_BY_TYPE = {};
 
   function popularSelect(select, options) {
     select.innerHTML = '<option value="" selected disabled>Selecione</option>';
@@ -84,8 +72,34 @@
   }
 
   // ===== Helpers =====
-  function openModal(isEdit = false, data = null) {
-    console.log("openModal", isEdit, data);
+  // 1) helper no topo do arquivo (perto dos outros helpers)
+  function normalizeTypeKey(t = "") {
+    const up = String(t).toUpperCase().trim().replace(/:$/, "");
+    if (up.startsWith("HARD")) return "HARD";
+    if (up.startsWith("SOFT")) return "SOFT";
+    if (up.startsWith("MANAGEMENT") || up.startsWith("GEST"))
+      return "MANAGEMENT";
+    if (up.startsWith("ANALYTICS")) return "ANALYTICS";
+    return up.replace(/\s+/g, "_");
+  }
+
+  async function openModal(isEdit = false, data = null) {
+    // Busca skills reais da API e agrupa por tipo
+    try {
+      const skills = await apiService.getSkills();
+      SKILLS_BY_TYPE = {};
+      if (Array.isArray(skills)) {
+        skills.forEach((s) => {
+          if (!s.type || !s.type.name) return;
+          const type = s.type.name;
+          if (!SKILLS_BY_TYPE[type]) SKILLS_BY_TYPE[type] = [];
+          SKILLS_BY_TYPE[type].push(s.name);
+        });
+      }
+    } catch (e) {
+      SKILLS_BY_TYPE = {};
+    }
+
     modal.classList.remove("hidden");
     overlay.classList.remove("hidden");
     modal.style.display = "block";
@@ -97,26 +111,105 @@
       : "Adicionar função";
 
     roleForm.reset();
-    tempHardSkills = [];
-    tempSoftSkills = [];
+    // Skills selecionadas por tipo
+    let tempSkillsByType = {};
     editingId = null;
 
+    // Corrigir: carregar valor de quantidade ao editar
+    const qtyInput = roleForm.querySelector('input[name="quantity"]');
     if (isEdit && data) {
       editingId = data.id;
       roleFunction.value = data.funcao;
       roleSeniority.value = data.senioridade;
-      tempHardSkills = Array.isArray(data.hardSkills)
-        ? [...data.hardSkills]
-        : [];
-      tempSoftSkills = Array.isArray(data.softSkills)
-        ? [...data.softSkills]
-        : [];
+      // Preenche skills selecionadas por tipo usando data.skillsByType
+      tempSkillsByType = {};
+      if (data.skillsByType && typeof data.skillsByType === "object") {
+        Object.entries(data.skillsByType).forEach(([k, arr]) => {
+          const norm = normalizeTypeKey(k);
+          tempSkillsByType[norm] = Array.isArray(arr) ? [...arr] : [];
+        });
+      }
+      // Garante todas as chaves existentes, mesmo se não vieram no payload
+      Object.keys(SKILLS_BY_TYPE).forEach((type) => {
+        if (!Array.isArray(tempSkillsByType[type])) tempSkillsByType[type] = [];
+      });
+      if (qtyInput) {
+        qtyInput.value =
+          data.quantity && !isNaN(data.quantity) ? data.quantity : 1;
+      }
+    } else {
+      Object.keys(SKILLS_BY_TYPE).forEach((type) => {
+        tempSkillsByType[type] = [];
+      });
+      if (qtyInput) {
+        qtyInput.value = 1;
+      }
     }
-    renderChips(hardSkillsBox, HARD_SKILLS, tempHardSkills);
-    renderChips(softSkillsBox, SOFT_SKILLS, tempSoftSkills);
+
+    // Função para renderizar todos os grupos de skills e manter seleção reativa
+    function renderAllSkillGroupsReactive() {
+      // Remove grupos antigos
+      const chipsGroups = roleForm.querySelectorAll(
+        ".chips-group.dynamic-skill-group"
+      );
+      chipsGroups.forEach((g) => g.remove());
+
+      // Para cada tipo, cria um grupo
+      Object.entries(SKILLS_BY_TYPE).forEach(([type, skills]) => {
+        if (!skills.length) return;
+        const groupDiv = document.createElement("div");
+        groupDiv.className = "chips-group dynamic-skill-group";
+        groupDiv.dataset.type = type;
+        const titleDiv = document.createElement("div");
+        titleDiv.className = "chips-title";
+        let label = type.charAt(0) + type.slice(1).toLowerCase();
+        if (type === "HARD") label = "Hard skills:";
+        else if (type === "SOFT") label = "Soft skills:";
+        else if (type === "MANAGEMENT") label = "Gestão:";
+        else if (type === "ANALYTICS") label = "Analytics:";
+        else label = type.charAt(0) + type.slice(1).toLowerCase() + ":";
+        titleDiv.textContent = label;
+        groupDiv.appendChild(titleDiv);
+        const chipsDiv = document.createElement("div");
+        chipsDiv.className = "chips";
+        // Renderiza chips e adiciona eventos de clique para cada skill
+        skills.forEach((skill) => {
+          const chip = document.createElement("span");
+          chip.className =
+            "chip" + (tempSkillsByType[type].includes(skill) ? " active" : "");
+          chip.textContent = skill;
+          chip.addEventListener("click", () => {
+            if (tempSkillsByType[type].includes(skill)) {
+              tempSkillsByType[type] = tempSkillsByType[type].filter(
+                (s) => s !== skill
+              );
+            } else {
+              tempSkillsByType[type].push(skill);
+            }
+            renderAllSkillGroupsReactive();
+          });
+          chipsDiv.appendChild(chip);
+        });
+        groupDiv.appendChild(chipsDiv);
+        // Insere antes dos botões do form
+        const actions = roleForm.querySelector(".form-actions");
+        roleForm.insertBefore(groupDiv, actions);
+      });
+    }
+
+    renderAllSkillGroupsReactive();
 
     roleFunction.focus();
     trapFocus(modal);
+    // Função auxiliar para mapear tipo para key do objeto data
+    function skillTypeToKey(type) {
+      if (type === "HARD") return "hardSkills";
+      if (type === "SOFT") return "softSkills";
+      if (type === "MANAGEMENT") return "managementSkills";
+      if (type === "ANALYTICS") return "analyticsSkills";
+      // fallback para outros tipos
+      return type.toLowerCase() + "Skills";
+    }
   }
   function closeModal() {
     modal.classList.add("hidden");
@@ -126,48 +219,65 @@
     document.body.style.overflow = "";
     releaseFocusTrap();
   }
-  // Não é mais necessário addSkillTag nem escapeHtml
 
   function renderRoles() {
     rolesListEl.innerHTML = "";
-    if (!roles.length) return;
+    if (!roles.length) {
+      const emptyMsg = document.createElement("div");
+      emptyMsg.textContent = "Nenhuma função adicionada ainda.";
+      emptyMsg.style.textAlign = "center";
+      emptyMsg.style.color = "#888";
+      emptyMsg.style.fontSize = "18px";
+      emptyMsg.style.margin = "32px 0";
+      emptyMsg.id = "empty-roles-msg";
+      rolesListEl.appendChild(emptyMsg);
+      return;
+    }
 
     roles.forEach((r) => {
       const card = document.createElement("article");
       card.className = "role-card";
       card.setAttribute("data-role-id", r.id);
 
+      // Monta HTML dos grupos de skills
+      let skillsHtml = "";
+      if (r.skillsByType) {
+        Object.entries(r.skillsByType).forEach(([type, arr]) => {
+          if (!arr || !arr.length) return;
+          let label = type.charAt(0) + type.slice(1).toLowerCase();
+          if (type === "HARD") label = "Hard skills:";
+          else if (type === "SOFT") label = "Soft skills:";
+          else if (type === "MANAGEMENT") label = "Gestão:";
+          else if (type === "ANALYTICS") label = "Analytics:";
+          else label = type.charAt(0) + type.slice(1).toLowerCase() + ":";
+          skillsHtml += `<div class="chips-title">${label}</div><div class="skill-chips">${arr
+            .map((s) => `<span class="skill-chip">${s}</span>`)
+            .join("")}</div>`;
+        });
+      }
+
       card.innerHTML = `
-        <div class="role-card__header">
-          <div>
-            <div class="role-card__title">${r.funcao || "Função"} (${
-        r.senioridade || "-"
-      })</div>
-          </div>
-          <div class="role-card__actions">
-            <button class="icon-btn icon--edit" type="button" aria-label="Editar" title="Editar">
-              ✎
-            </button>
-            <button class="icon-btn icon--delete" type="button" aria-label="Excluir" title="Excluir">
-              ✖
-            </button>
-          </div>
-        </div>
+      <div class="role-card__header">
         <div>
-          <div class="chips-title">Hard skills:</div>
-          <div class="skill-chips">
-            ${(r.hardSkills || [])
-              .map((s) => `<span class="skill-chip">${s}</span>`)
-              .join("")}
-          </div>
-          <div class="chips-title">Soft skills:</div>
-          <div class="skill-chips">
-            ${(r.softSkills || [])
-              .map((s) => `<span class="skill-chip">${s}</span>`)
-              .join("")}
+          <div class="role-card__title">
+            ${r.quantity ?? 1}x ${r.funcao || "Função"} (${
+        r.senioridade || "-"
+      })
           </div>
         </div>
-      `;
+        <div class="role-card__actions">
+          <button class="icon-btn icon--edit" type="button" aria-label="Editar" title="Editar">
+            ✎
+          </button>
+          <button class="icon-btn icon--delete" type="button" aria-label="Excluir" title="Excluir">
+            ✖
+          </button>
+        </div>
+      </div>
+      <div>
+        ${skillsHtml}
+      </div>
+    `;
 
       const [editBtn, delBtn] = card.querySelectorAll(".icon-btn");
       editBtn.addEventListener("click", () => openModal(true, r));
@@ -186,18 +296,14 @@
 
   function persist() {
     sessionStorage.setItem("squadRoles", JSON.stringify(roles));
-    // Também salva no localStorage para integração entre etapas
-    // Formato simplificado para os próximos passos
-    const rolesForNext = roles.map(r => ({
+    const rolesForNext = roles.map((r) => ({
       id: r.id,
-      title: `${r.funcao}${r.senioridade ? ' ' + r.senioridade : ''}`,
+      title: `${r.funcao}${r.senioridade ? " " + r.senioridade : ""}`,
       seniority: r.senioridade,
-      hardSkills: r.hardSkills,
-      softSkills: r.softSkills,
-      quantity: 1 // ou ajuste conforme necessário
+      skillsByType: r.skillsByType || {},
+      quantity: r.quantity || 1,
     }));
     localStorage.setItem("squads.selectedRoles", JSON.stringify(rolesForNext));
-    // se já tiver um estado maior do wizard, dispare um evento:
     document.dispatchEvent(
       new CustomEvent("squads:rolesChanged", { detail: roles })
     );
@@ -209,7 +315,6 @@
 
   // ===== Eventos gerais =====
   addRoleBtn.addEventListener("click", () => openModal(false, null));
-  console.log("addRoleBtn", addRoleBtn);
   overlay.addEventListener("click", closeModal);
   closeModalBtn.addEventListener("click", closeModal);
   // Adiciona evento ao botão Cancelar do modal
@@ -222,43 +327,116 @@
   });
 
   // Back/Next – integre com seu fluxo real
+  // Recupera squadId da URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const squadId = urlParams.get("squadId");
+
   backBtn.addEventListener("click", () => {
-    // Ex.: voltar para passo 1
-    window.location.href = "../squads-form.html";
+    // Voltar para o form, mantendo o id
+    window.location.href = `../squads-form.html${squadId ? `?squadId=${squadId}` : ""}`;
   });
   nextBtn.addEventListener("click", () => {
-    // vá para o próximo passo (ex.: definição de pessoas / calendário)
-    window.location.href =
-      "../squads-weekly-requirements/squads-weekly-requirements.html";
+    // Avançar para weekly requirements, mantendo o id
+    window.location.href = `../squads-weekly-requirements/squads-weekly-requirements.html${squadId ? `?squadId=${squadId}` : ""}`;
   });
 
   // ===== Form do Modal =====
   // Adiciona campo de quantidade ao modal, se não existir
   let qtyInput = roleForm.querySelector('input[name="quantity"]');
   if (!qtyInput) {
-    const qtyDiv = document.createElement('div');
-    qtyDiv.className = 'field';
-    qtyDiv.innerHTML = `<label>Quantidade</label><input type="number" name="quantity" min="1" max="10" value="1" style="width: 80px; margin-left: 8px;">`;
-    roleForm.insertBefore(qtyDiv, roleForm.firstChild.nextSibling);
-    qtyInput = qtyDiv.querySelector('input');
+    const qtyDiv = document.createElement("div");
+    qtyDiv.className = "field";
+    qtyDiv.innerHTML = `
+      <label for="roleQuantity">Quantidade *</label>
+      <input id="roleQuantity" name="quantity" type="number" min="1" max="10" value="1" required style="appearance: none; width: 100%; padding: 10px 12px; border: 1px solid #dcdce1; border-radius: 8px; font-size: 14px; background: #fff; margin-top: 4px;" />
+    `;
+    // Insere após o campo de senioridade
+    const seniorityField = roleForm
+      .querySelector("#roleSeniority")
+      .closest(".field");
+    if (seniorityField && seniorityField.nextSibling) {
+      roleForm.insertBefore(qtyDiv, seniorityField.nextSibling);
+    } else {
+      roleForm.appendChild(qtyDiv);
+    }
+    qtyInput = qtyDiv.querySelector("input");
+  }
+
+  // Bloqueia digitação de '-' e valores negativos no campo quantidade
+  if (qtyInput) {
+    qtyInput.addEventListener("keydown", function (e) {
+      // Permite: backspace, delete, tab, escape, enter, setas
+      if (
+        [
+          "Backspace",
+          "Delete",
+          "Tab",
+          "Escape",
+          "Enter",
+          "ArrowLeft",
+          "ArrowRight",
+          "Home",
+          "End",
+        ].includes(e.key)
+      )
+        return;
+      // Permite Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        ["a", "c", "v", "x"].includes(e.key.toLowerCase())
+      )
+        return;
+      // Permite números (linha superior e teclado numérico)
+      if (/^[0-9]$/.test(e.key)) {
+        // Bloqueia digitação se já houver 2 dígitos e valor >= 10
+        const val = this.value;
+        if (val.length === 2 && Number(val) >= 10) {
+          e.preventDefault();
+          return;
+        }
+        return;
+      }
+      // Bloqueia tudo o resto
+      e.preventDefault();
+    });
+    qtyInput.addEventListener("input", function (e) {
+      // Remove qualquer caractere não numérico
+      this.value = this.value.replace(/[^0-9]/g, "");
+      if (this.value && Number(this.value) < 1) {
+        this.value = "1";
+      }
+      if (this.value && Number(this.value) > 10) {
+        this.value = "10";
+      }
+    });
   }
 
   roleForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const funcao = roleFunction.value;
     const senioridade = roleSeniority.value;
-    const quantity = Number(roleForm.querySelector('input[name="quantity"]').value) || 1;
+    let quantity =
+      Number(roleForm.querySelector('input[name="quantity"]').value) || 1;
     if (!funcao || !senioridade) {
       roleFunction.focus();
       return;
     }
+    if (quantity < 1) quantity = 1;
+    // Coleta skills selecionadas por tipo
+    const tempSkillsByType = {};
+    Array.from(
+      roleForm.querySelectorAll(".chips-group.dynamic-skill-group")
+    ).forEach((group) => {
+      const type = group.dataset.type;
+      const chips = group.querySelectorAll(".chip.active");
+      tempSkillsByType[type] = Array.from(chips).map((c) => c.textContent);
+    });
     const payload = {
       id: editingId ?? crypto.randomUUID(),
       funcao,
       senioridade,
-      hardSkills: [...tempHardSkills],
-      softSkills: [...tempSoftSkills],
-      quantity
+      skillsByType: tempSkillsByType,
+      quantity,
     };
     if (editingId) {
       roles = roles.map((r) => (r.id === editingId ? payload : r));
@@ -293,6 +471,7 @@
     };
     document.addEventListener("keydown", trapHandler);
   }
+
   function releaseFocusTrap() {
     if (trapHandler) document.removeEventListener("keydown", trapHandler);
     if (lastFocused) lastFocused.focus();
