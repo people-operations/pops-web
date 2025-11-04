@@ -1,3 +1,7 @@
+/* Cursor pointer para linhas clicáveis da tabela */
+.collaborator-row {
+  cursor: pointer;
+}
 /* 1. LAYOUT PRINCIPAL */
 .container.collaborators-page {
   display: flex;
@@ -170,6 +174,25 @@
 }
 .collaborators-table tbody tr:hover {
   background-color: #f9f9f9;
+}
+.skeleton-row {
+  animation: skeleton-loading 1.2s infinite linear alternate;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+}
+.skeleton-cell {
+  height: 18px;
+  border-radius: 4px;
+  background: #e0e0e0;
+  width: 100%;
+  display: block;
+}
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
 }
 .avatars-group {
   display: flex;

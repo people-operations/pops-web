@@ -101,7 +101,7 @@
             </svg>
           </span>
         </button>
-        <div class="avatar">K</div>
+        <div class="avatar"></div>
         <span class="chevron" aria-hidden="true">
           <svg
             width="20"
@@ -139,7 +139,34 @@
         <img src="../../../../assets/svg/left-arrow.svg" alt="Voltar" />
         <span data-i18n="projects_form.back"></span>
       </a>
-      <div class="form-container">
+      <!-- Skeleton Loader -->
+      <div
+        id="skeleton-loader"
+        class="skeleton-container"
+        style="display: none"
+      >
+        <div class="skeleton-title"></div>
+        <div class="skeleton-row">
+          <div class="skeleton-input"></div>
+        </div>
+        <div class="skeleton-row">
+          <div class="skeleton-input"></div>
+          <div class="skeleton-input"></div>
+        </div>
+        <div class="skeleton-row">
+          <div class="skeleton-textarea"></div>
+        </div>
+        <div class="skeleton-row">
+          <div class="skeleton-input"></div>
+          <div class="skeleton-input"></div>
+          <div class="skeleton-input"></div>
+        </div>
+        <div class="skeleton-row">
+          <div class="skeleton-btn"></div>
+          <div class="skeleton-btn"></div>
+        </div>
+      </div>
+      <div class="form-container" id="form-container">
         <h2 data-i18n="projects_form.create_title"></h2>
         <form class="form-project">
           <!-- Nome -->
@@ -156,13 +183,23 @@
             <div class="col">
               <label data-i18n="projects_form.type"></label>
               <select id="type-select" required>
-                <option data-i18n="projects_form.select_type"></option>
+                <option
+                  data-i18n="projects_form.select_type"
+                  disabled
+                  selected
+                  hidden
+                ></option>
               </select>
             </div>
             <div class="col">
               <label data-i18n="projects_form.status"></label>
-              <select id="status-select">
-                <option data-i18n="projects_form.select_status"></option>
+              <select id="status-select" required>
+                <option
+                  data-i18n="projects_form.select_status"
+                  disabled
+                  selected
+                  hidden
+                ></option>
               </select>
             </div>
           </div>
@@ -181,49 +218,49 @@
             <div class="col">
               <label data-i18n="projects_form.budget"></label>
               <input
-                type="number"
+                type="text"
                 id="budget-input"
                 data-i18n-placeholder="projects_form.budget_placeholder"
-                min="0"
                 required
+                inputmode="numeric"
+                autocomplete="off"
+                maxlength="20"
+                placeholder="R$ 0,00"
               />
             </div>
             <div class="col">
               <label data-i18n="projects_form.start_date"></label>
               <input
-                type="date"
+                type="text"
                 id="start-date-input"
                 data-i18n-placeholder="projects_form.start_date_placeholder"
+                placeholder="dd/mm/yyyy"
+                autocomplete="off"
                 required
+                readonly
               />
+              <div class="datepicker" id="datepicker-start" style="display:none;"></div>
             </div>
             <div class="col">
               <label data-i18n="projects_form.end_date"></label>
               <input
-                type="date"
+                type="text"
                 id="end-date-input"
                 data-i18n-placeholder="projects_form.end_date_placeholder"
+                placeholder="dd/mm/yyyy"
+                autocomplete="off"
                 required
+                readonly
               />
+              <div class="datepicker" id="datepicker-end" style="display:none;"></div>
             </div>
           </div>
-
-          <!-- Área -->
-          <!--           <div class="row">
-            <div class="col">
-              <label data-i18n="projects_form.area"></label>
-              <select>
-                <select id="area-select" required>
-                  <option data-i18n="projects_form.select_area"></option>
-                </select>
-            </div>
-          </div> -->
-
           <!-- Botões -->
           <div class="form-actions">
             <button
               type="button"
               class="cancel"
+              id="cancel-btn"
               data-i18n="projects_form.cancel"
             ></button>
             <button
