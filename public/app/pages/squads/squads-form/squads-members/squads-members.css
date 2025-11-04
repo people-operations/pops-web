@@ -162,7 +162,7 @@ body.dark .badge.match.match-good {
 }
 body.dark .badge.match.match-perfect {
   background: linear-gradient(90deg, #7dffb0 60%, #1bff7d 100%);
-  color: #1bff7d;
+  color: #22583a;
   border-color: #1bff7d;
   font-weight: 800;
   box-shadow: 0 0 8px #1bff7d44;

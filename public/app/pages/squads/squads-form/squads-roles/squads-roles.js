@@ -84,16 +84,39 @@ import { apiService } from "../../../../../assets/js/apiService.js";
   }
 
   async function openModal(isEdit = false, data = null) {
-    // Busca skills reais da API e agrupa por tipo
+    // Busca skills reais da API Odoo e agrupa por tipo adaptado
     try {
-      const skills = await apiService.getSkills();
+      const skills = await apiService.getOdooSkills();
       SKILLS_BY_TYPE = {};
       if (Array.isArray(skills)) {
+        // Agrupa e remove duplicadas (case-insensitive)
+        const seen = {};
         skills.forEach((s) => {
-          if (!s.type || !s.type.name) return;
-          const type = s.type.name;
+          if (!s.skillType || !s.skillType.name) return;
+          let type = s.skillType.name.trim();
+          if (type === "Programming Languages") type = "Hard Skills";
+          if (type === "Soft Skills") type = "Soft Skills";
+          if (type === "Languages") type = "Idiomas";
+          if (type === "IT") type = "TI";
+          if (type === "Marketing") type = "Marketing";
           if (!SKILLS_BY_TYPE[type]) SKILLS_BY_TYPE[type] = [];
-          SKILLS_BY_TYPE[type].push(s.name);
+          // Padroniza para camel case
+          let skillName = String(s.name)
+            .toLowerCase()
+            .replace(
+              /(^|\s|\-|_)([a-z])/g,
+              (m, p1, p2) => p1 + p2.toUpperCase()
+            );
+          // Remove duplicadas (case-insensitive)
+          const key = skillName
+            .normalize("NFD")
+            .replace(/\p{Diacritic}/gu, "")
+            .toLowerCase();
+          if (!seen[type]) seen[type] = new Set();
+          if (!seen[type].has(key)) {
+            SKILLS_BY_TYPE[type].push(skillName);
+            seen[type].add(key);
+          }
         });
       }
     } catch (e) {
@@ -162,22 +185,31 @@ import { apiService } from "../../../../../assets/js/apiService.js";
         groupDiv.dataset.type = type;
         const titleDiv = document.createElement("div");
         titleDiv.className = "chips-title";
-        let label = type.charAt(0) + type.slice(1).toLowerCase();
-        if (type === "HARD") label = "Hard skills:";
-        else if (type === "SOFT") label = "Soft skills:";
-        else if (type === "MANAGEMENT") label = "Gestão:";
-        else if (type === "ANALYTICS") label = "Analytics:";
-        else label = type.charAt(0) + type.slice(1).toLowerCase() + ":";
+        // Adapta label para português
+        let label = type;
+        if (type === "Hard Skills") label = "Hard skills:";
+        else if (type === "Soft Skills") label = "Soft skills:";
+        else if (type === "Idiomas") label = "Idiomas:";
+        else if (type === "TI") label = "TI:";
+        else if (type === "Marketing") label = "Marketing:";
+        else label = type + ":";
         titleDiv.textContent = label;
         groupDiv.appendChild(titleDiv);
         const chipsDiv = document.createElement("div");
         chipsDiv.className = "chips";
         // Renderiza chips e adiciona eventos de clique para cada skill
         skills.forEach((skill) => {
+          // Padroniza para camel case na exibição
+          let displaySkill = String(skill)
+            .toLowerCase()
+            .replace(
+              /(^|\s|\-|_)([a-z])/g,
+              (m, p1, p2) => p1 + p2.toUpperCase()
+            );
           const chip = document.createElement("span");
           chip.className =
             "chip" + (tempSkillsByType[type].includes(skill) ? " active" : "");
-          chip.textContent = skill;
+          chip.textContent = displaySkill;
           chip.addEventListener("click", () => {
             if (tempSkillsByType[type].includes(skill)) {
               tempSkillsByType[type] = tempSkillsByType[type].filter(
@@ -333,11 +365,15 @@ import { apiService } from "../../../../../assets/js/apiService.js";
 
   backBtn.addEventListener("click", () => {
     // Voltar para o form, mantendo o id
-    window.location.href = `../squads-form.html${squadId ? `?squadId=${squadId}` : ""}`;
+    window.location.href = `../squads-form.html${
+      squadId ? `?squadId=${squadId}` : ""
+    }`;
   });
   nextBtn.addEventListener("click", () => {
     // Avançar para weekly requirements, mantendo o id
-    window.location.href = `../squads-weekly-requirements/squads-weekly-requirements.html${squadId ? `?squadId=${squadId}` : ""}`;
+    window.location.href = `../squads-weekly-requirements/squads-weekly-requirements.html${
+      squadId ? `?squadId=${squadId}` : ""
+    }`;
   });
 
   // ===== Form do Modal =====
