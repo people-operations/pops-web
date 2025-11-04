@@ -26,7 +26,12 @@ function t(key) {
 // Simula o envio do token por e-mail (substitua por chamada real de API)
 function sendTokenToEmail(email, token) {
   // Aqui você faria uma chamada para o backend enviar o e-mail
-  alert(`(Simulação) ${t("recover.code_sent")} (${email}: ${token})`);
+  if (window.showNotification) {
+    window.showNotification(
+      "success",
+      `(Simulação) ${t("recover.code_sent")} (${email}: ${token})`
+    );
+  }
   console.log(`${t("recover.code_sent")} ${email}: ${token}`);
 }
 
@@ -38,6 +43,7 @@ function startTimer() {
   const timerEl = document.getElementById("timer");
   const resendBtn = document.getElementById("resend-token-btn");
   timerEl.textContent = "00:30";
+  u;
   resendBtn.style.display = "none";
   timerInterval = setInterval(() => {
     timeLeft--;

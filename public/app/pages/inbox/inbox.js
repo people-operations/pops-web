@@ -185,17 +185,28 @@ const renderers = {
 window.notify = (idx, direct = false) => {
   if (direct) {
     DATA.feedback[idx].notified = true;
+    if (window.showNotification) {
+      window.showNotification("success", "Marcado como avisado.");
+    }
+  } else {
+    if (window.showNotification) {
+      window.showNotification(
+        "warning",
+        "Abrir modal de feedback (placeholder)."
+      );
+    }
   }
-  alert(
-    direct ? "Marcado como avisado." : "Abrir modal de feedback (placeholder)."
-  );
   renderCurrent();
 };
 window.approve = (i) => {
-  alert("Solicitação aprovada.");
+  if (window.showNotification) {
+    window.showNotification("success", "Solicitação aprovada.");
+  }
 };
 window.reject = (i) => {
-  alert("Solicitação reprovada.");
+  if (window.showNotification) {
+    window.showNotification("error", "Solicitação reprovada.");
+  }
 };
 
 // ====== Tabs ======

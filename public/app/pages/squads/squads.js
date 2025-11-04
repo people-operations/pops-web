@@ -1,84 +1,25 @@
+function showSkeleton() {
+  const container = document.getElementById("squad-list");
+  if (!container) return;
+  let skeletons = "";
+  for (let i = 0; i < 3; i++) {
+    skeletons += `
+      <div class="skeleton-card">
+        <div class="skeleton-header"></div>
+        <div class="skeleton-line" style="width:90%"></div>
+        <div class="skeleton-line" style="width:70%"></div>
+        <div class="skeleton-line" style="width:60%"></div>
+        <div class="skeleton-line" style="width:80%"></div>
+        <div class="skeleton-btn"></div>
+      </div>
+    `;
+  }
+  container.innerHTML = skeletons;
+}
+
 import { apiService } from "../../../assets/js/apiService.js";
 
-const squads = [
-  {
-    nome: "Frontend Ninjas",
-    descricao: "Equipe especializada em interfaces modernas e responsivas.",
-    area: "Design & Frontend",
-    membros: 4,
-    tecnologias: ["React", "TypeScript", "Sass"],
-    horasAlocadas: 120,
-    horasTotais: 160,
-    preco: "R$ 32.000,00",
-    projetosAtivos: 3,
-  },
-  {
-    nome: "Data Science Squad",
-    descricao: "Time focado em análise de dados e machine learning.",
-    area: "Dados",
-    membros: 6,
-    tecnologias: ["Python", "TensorFlow", "SQL"],
-    horasAlocadas: 140,
-    horasTotais: 180,
-    preco: "R$ 45.000,00",
-    projetosAtivos: 2,
-  },
-  {
-    nome: "DevOps Masters",
-    descricao: "Automação de deploys, infraestrutura e monitoramento.",
-    area: "DevOps",
-    membros: 3,
-    tecnologias: ["AWS", "Docker", "Kubernetes"],
-    horasAlocadas: 90,
-    horasTotais: 120,
-    preco: "R$ 28.000,00",
-    projetosAtivos: 4,
-  },
-  {
-    nome: "Mobile Force",
-    descricao: "Desenvolvimento de apps nativos e híbridos.",
-    area: "Mobile",
-    membros: 5,
-    tecnologias: ["Flutter", "Kotlin", "Swift"],
-    horasAlocadas: 110,
-    horasTotais: 150,
-    preco: "R$ 36.000,00",
-    projetosAtivos: 2,
-  },
-  {
-    nome: "QA Guardians",
-    descricao: "Garantia de qualidade, testes automatizados e manuais.",
-    area: "Qualidade",
-    membros: 4,
-    tecnologias: ["Cypress", "Jest", "Postman"],
-    horasAlocadas: 80,
-    horasTotais: 100,
-    preco: "R$ 18.000,00",
-    projetosAtivos: 5,
-  },
-  {
-    nome: "Backend Titans",
-    descricao: "APIs robustas, integrações e arquitetura escalável.",
-    area: "Backend",
-    membros: 7,
-    tecnologias: ["Node.js", "Go", "MongoDB"],
-    horasAlocadas: 200,
-    horasTotais: 220,
-    preco: "R$ 52.000,00",
-    projetosAtivos: 6,
-  },
-  {
-    nome: "UX Researchers",
-    descricao: "Pesquisa e validação de experiência do usuário.",
-    area: "UX",
-    membros: 2,
-    tecnologias: ["Figma", "Hotjar", "Maze"],
-    horasAlocadas: 60,
-    horasTotais: 80,
-    preco: "R$ 12.000,00",
-    projetosAtivos: 1,
-  },
-];
+let squads = [];
 
 // Função utilitária para interpolar variáveis em traduções
 function interpolate(str, vars) {
@@ -89,54 +30,56 @@ function renderSquads() {
   const container = document.getElementById("squad-list");
   container.innerHTML = "";
   const i18n = window.i18n;
+  if (!squads || squads.length === 0) {
+    container.innerHTML = `<p style="text-align:center;">Nenhuma squad encontrada.</p>`;
+    return;
+  }
   squads.forEach((squad) => {
-    const porcentagem = (squad.horasAlocadas / squad.horasTotais) * 100;
+    // Adapta para os campos vindos do backend, usando '-' se não existir
+    const nome = squad.name || squad.nome || "-";
+    const descricao = squad.description || squad.descricao || "-";
+    const area = squad.area || "-";
+    const membros = squad.membros || squad.members || "-";
+    const tecnologias = squad.tecnologias || squad.technologies || [];
+    const projetosAtivos = squad.projetosAtivos || squad.activeProjects || "-";
+    const horasAlocadas = squad.horasAlocadas || squad.allocatedHours || 0;
+    const horasTotais = squad.horasTotais || squad.totalHours || 0;
+    const preco = squad.preco || squad.price || "-";
+    const porcentagem = (horasTotais > 0) ? (horasAlocadas / horasTotais) * 100 : 0;
     container.innerHTML += `
       <div class="squad-card">
         <div class="squad-header">
-          <h3>${squad.nome}</h3>
+          <h3>${nome}</h3>
           <span class="tag-green">${interpolate(
             i18n.t("squads.active_projects"),
-            { count: squad.projetosAtivos }
+            { count: projetosAtivos }
           )}</span>
         </div>
-        <p class="squad-description">${squad.descricao}</p>
+        <p class="squad-description">${descricao}</p>
         <p>
           <img src="/assets/svg/squad-area.svg" alt="Área" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
-          <strong data-i18n="squads.area">${i18n.t("squads.area")}</strong> ${
-      squad.area
-    }
+          <strong data-i18n="squads.area">${i18n.t("squads.area")}</strong> ${area}
         </p>
         <p>
           <img src="/assets/svg/members.svg" alt="Membros" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
-          <strong data-i18n="squads.members">${i18n.t(
-            "squads.members"
-          )}</strong> ${squad.membros}
+          <strong data-i18n="squads.members">${i18n.t("squads.members")}</strong> ${membros}
         </p>
-        <p><strong data-i18n="squads.capacity">${i18n.t(
-          "squads.capacity"
-        )}</strong></p>
+        <p><strong data-i18n="squads.capacity">${i18n.t("squads.capacity")}</strong></p>
         <div class="tech-stack">
-          ${squad.tecnologias.map((tech) => `<span>${tech}</span>`).join("")}
+          ${Array.isArray(tecnologias) && tecnologias.length > 0 ? tecnologias.map((tech) => `<span>${tech}</span>`).join("") : "-"}
         </div>
         <div class="hours">
           <div class="hours-row">
-            <span data-i18n="squads.allocated_hours">${i18n.t(
-              "squads.allocated_hours"
-            )}</span>
-            <span class="hours-value">${squad.horasAlocadas}h / ${
-      squad.horasTotais
-    }h</span>
+            <span data-i18n="squads.allocated_hours">${i18n.t("squads.allocated_hours")}</span>
+            <span class="hours-value">${horasAlocadas}h / ${horasTotais}h</span>
           </div>
           <div class="progress-bar">
             <div class="progress" style="width: ${porcentagem}%"></div>
           </div>
         </div>
         <div class="squad-footer">
-          <p class="by-month"><strong data-i18n="squads.per_month">${i18n.t(
-            "squads.per_month"
-          )}</strong> ${squad.preco}</p>
-          <button class="details-btn" data-i18n="squads.details" onclick="window.location.href='squads-detail/squads-detail.html'">
+          <p class="by-month"><strong data-i18n="squads.per_month">${i18n.t("squads.per_month")}</strong> ${preco}</p>
+          <button class="details-btn" data-i18n="squads.details" onclick="window.location.href='squads-detail/squads-detail.html?id=${squad.id}'">
             ${i18n.t("squads.details")}
           </button>
         </div>
@@ -146,14 +89,23 @@ function renderSquads() {
 }
 
 async function fetchAndRenderSquads() {
-  console.log("Fetching squads from API...");
+  showSkeleton();
   try {
-    const squadsData = await apiService.getAllSquads();
+    const response = await apiService.getAllSquads();
+    // Se vier paginado, pega o array correto
+    if (Array.isArray(response)) {
+      squads = response;
+    } else if (response && Array.isArray(response.content)) {
+      squads = response.content;
+    } else {
+      squads = [];
+    }
     renderSquads();
   } catch (err) {
     window.showNotification &&
       window.showNotification("error", "Erro ao buscar squads.");
     console.error("Erro ao buscar squads:", err);
+    renderSquads([]);
   }
 }
 

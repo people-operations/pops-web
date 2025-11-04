@@ -16,7 +16,8 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
-<body>   <script>
+  <body>
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const avatar = document.querySelector(".avatar");
         const email = localStorage.getItem("userEmail");
@@ -109,7 +110,7 @@
             </svg>
           </span>
         </button>
-        <div class="avatar">K</div>
+        <div class="avatar"></div>
         <span class="chevron" aria-hidden="true">
           <svg
             width="20"
@@ -142,7 +143,6 @@
       </div>
     </header>
     <main class="container collaborators-page">
-      <!-- Cabeçalho da página -->
       <div class="page-header">
         <div class="collaborators-header">
           <div>
@@ -153,12 +153,6 @@
             </p>
           </div>
           <div class="actions">
-            <!-- <button
-              class="collaborator-btn btn outline"
-              data-i18n="collaborators.export"
-            >
-              Exportar dados
-            </button> -->
             <button
               class="collaborator-btn btn outline"
               data-i18n="collaborators.report"
@@ -168,8 +162,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Barra de busca -->
       <div class="search-bar">
         <div class="search-input-wrapper">
           <input
@@ -181,8 +173,6 @@
         <button class="collaborator-btn btn">Pesquisar</button>
         <button class="collaborator-btn btn outline">Limpar</button>
       </div>
-
-      <!-- Filtros -->
       <div class="filters justify-between">
         <div class="filters-divider">
           <select>
@@ -213,8 +203,6 @@
           </button>
         </div>
       </div>
-
-      <!-- Tabela de colaboradores -->
       <div class="table-container">
         <h3 data-i18n="collaborators.overview">
           Visão Geral de Pessoas (5 resultados)
@@ -225,13 +213,10 @@
               <th data-i18n="collaborators.table.name">Nome</th>
               <th data-i18n="collaborators.table.role">Cargo</th>
               <th data-i18n="collaborators.table.squad">Squad</th>
-              <!-- <th data-i18n="collaborators.table.allocated">% alocadas</th>
-              <th data-i18n="collaborators.table.available">% disponíveis</th> -->
               <th data-i18n="collaborators.table.status">Status</th>
             </tr>
           </thead>
           <tbody>
-            <!-- Exemplo de linha -->
             <tr class="collaborator-row">
               <td>Nome aqui</td>
               <td>Cargo</td>
@@ -242,8 +227,6 @@
                   <div class="avatar-sm">KK</div>
                 </div>
               </td>
-              <!-- <td>00</td>
-              <td>00</td> -->
               <td>
                 <span
                   class="status-badge active"
@@ -253,7 +236,6 @@
                 </span>
               </td>
             </tr>
-            <!-- repita conforme necessário -->
             <tr class="collaborator-row">
               <td>Nome aqui</td>
               <td>Cargo</td>
@@ -264,8 +246,6 @@
                   <div class="avatar-sm">KK</div>
                 </div>
               </td>
-              <!-- <td>00</td>
-              <td>00</td> -->
               <td><span class="status-badge active">Ativo</span></td>
             </tr>
             <tr class="collaborator-row">
@@ -278,15 +258,13 @@
                   <div class="avatar-sm">KK</div>
                 </div>
               </td>
-              <!-- <td>00</td>
-              <td>00</td> -->
               <td><span class="status-badge active">Ativo</span></td>
             </tr>
           </tbody>
         </table>
       </div>
     </main>
-    <script src="collaborators.js"></script>
+    <script type="module" src="collaborators.js"></script>
     <script src="../../../assets/js/app.js"></script>
     <script src="../../../assets/js/i18nService.js" defer></script>
   </body>

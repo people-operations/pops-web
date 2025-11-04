@@ -16,7 +16,8 @@
       href="../../../../assets/svg/logo-icon.svg"
     />
   </head>
-<body>   <script>
+  <body>
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const avatar = document.querySelector(".avatar");
         const email = localStorage.getItem("userEmail");
@@ -119,7 +120,7 @@
               </svg>
             </span>
           </button>
-          <div class="avatar">K</div>
+          <div class="avatar"></div>
           <span class="chevron" aria-hidden="true">
             <svg
               width="20"
@@ -184,14 +185,6 @@
             <strong data-i18n="squads_detail.area"></strong> Desenvolvimento •
             <strong data-i18n="squads_detail.members"></strong> 5
           </p>
-          <p class="info-line">
-            <strong data-i18n="squads_detail.skills"></strong>
-          </p>
-          <div class="skills">
-            <span class="skill">Python</span>
-            <span class="skill">Java</span>
-            <span class="skill">Node.js</span>
-          </div>
         </div>
         <!-- Main content -->
         <section class="content">
@@ -206,11 +199,6 @@
               <h3 data-i18n="squads_detail.overload_index"></h3>
               <div class="value" id="overload-index"></div>
               <small data-i18n="squads_detail.overload_index_hint"></small>
-            </div>
-            <div class="card verde">
-              <h3 data-i18n="squads_detail.satisfaction_index"></h3>
-              <div class="value" id="satisfaction-index"></div>
-              <small data-i18n="squads_detail.satisfaction_index_hint"></small>
             </div>
           </div>
           <!-- Financial overview -->
@@ -235,7 +223,9 @@
           </div>
           <!-- Team members -->
           <div class="team-members">
-            <h4 data-i18n="squads_detail.team"></h4>
+            <header class="projects-header">
+              <h4 data-i18n="squads_detail.team"></h4>
+            </header>
             <div class="members-list" id="members-list">
               <!-- Os cards de membros serão renderizados via JS -->
             </div>
@@ -244,19 +234,6 @@
           <div class="projects-list">
             <header class="projects-header">
               <h4 data-i18n="squads_detail.projects"></h4>
-              <div class="status-filter">
-                <select id="status-select" required>
-                  <option value="" disabled selected hidden></option>
-                  <option data-i18n="squads_detail.all"></option>
-                  <option data-i18n="squads_detail.in_progress"></option>
-                  <option data-i18n="squads_detail.planned"></option>
-                  <option data-i18n="squads_detail.completed"></option>
-                </select>
-                <label
-                  for="status-select"
-                  data-i18n="squads_detail.status"
-                ></label>
-              </div>
             </header>
             <div id="projects-cards">
               <!-- Os cards de projetos serão renderizados via JS -->
@@ -264,36 +241,69 @@
           </div>
         </section>
       </main>
-      <div class="modal-overlay hidden" id="deleteModalOverlay"></div>
-      <div class="modal hidden" id="delete-modal">
-        <div class="modal-header">
-          <h2 data-i18n="squads_detail.delete_title"></h2>
+      <!-- Modal de confirmação de exclusão -->
+      <div
+        id="delete-modal"
+        class="modal"
+        style="
+          display: none;
+          position: fixed;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.4);
+          z-index: 9999;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <div
+          style="
+            background: #fff;
+            padding: 32px 24px;
+            border-radius: 8px;
+            max-width: 90vw;
+            min-width: 320px;
+            box-shadow: 0 2px 16px #0002;
+            text-align: center;
+          "
+        >
+          <h3 style="margin-bottom: 16px">
+            Tem certeza que deseja excluir esta squad?
+          </h3>
+          <p style="color: #888; margin-bottom: 24px">
+            Esta ação não poderá ser desfeita.
+          </p>
           <button
-            class="close-btn"
-            id="closeDeleteModal"
-            data-i18n="squads_detail.close"
-          ></button>
-        </div>
-        <div style="margin-top: 24px">
-          <p data-i18n="squads_detail.delete_warning"></p>
-        </div>
-        <div class="form-actions">
+            id="confirm-delete-btn"
+            style="
+              background: #e53935;
+              color: #fff;
+              border: none;
+              padding: 10px 24px;
+              border-radius: 4px;
+              margin-right: 12px;
+              cursor: pointer;
+            "
+          >
+            Excluir
+          </button>
           <button
-            type="button"
-            class="btn cancel"
-            id="cancel-delete"
-            data-i18n="squads_detail.cancel"
-          ></button>
-          <button
-            type="button"
-            class="btn save-modal"
-            id="confirm-delete"
-            data-i18n="squads_detail.delete"
-          ></button>
+            id="cancel-delete-btn"
+            style="
+              background: #eee;
+              color: #333;
+              border: none;
+              padding: 10px 24px;
+              border-radius: 4px;
+              cursor: pointer;
+            "
+          >
+            Cancelar
+          </button>
         </div>
       </div>
     </div>
-    <script src="squads-detail.js"></script>
+    <script type="module" src="squads-detail.js"></script>
     <script src="../../../../assets/js/app.js"></script>
     <script src="../../../../assets/js/i18nService.js"></script>
   </body>

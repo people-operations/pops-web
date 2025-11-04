@@ -1,3 +1,101 @@
+/* =========================
+   DARK MODE - INBOX
+========================= */
+body.dark {
+  background: #181824 !important;
+}
+body.dark main.container {
+  background: #181824 !important;
+  color: #f5f5f5;
+}
+body.dark .subtitle,
+body.dark .gradient-title {
+  color: #a97dff !important;
+}
+body.dark .toolbar,
+body.dark .select,
+body.dark .tabs,
+body.dark .spacer {
+  background: #23232b !important;
+  color: #a97dff !important;
+  border-color: #444 !important;
+}
+body.dark .select select {
+  color: #a97dff !important;
+}
+body.dark .tab {
+  background: #23232b !important;
+  color: #a0a0a0 !important;
+}
+body.dark .tab.active {
+  background: #7d1bff !important;
+  color: #fff !important;
+  border: none !important;
+}
+body.dark .tab:focus,
+body.dark .tab:active {
+  border-bottom: 2px solid #a97dff !important;
+  color: #fff !important;
+}
+body.dark .custom-primary-button {
+  background: #7d1bff !important;
+  color: #fff !important;
+}
+body.dark .custom-primary-button:hover {
+  background: #a97dff !important;
+  color: #fff !important;
+}
+body.dark .custom-outline-button {
+  background: none !important;
+  color: #a97dff !important;
+  border: 1px solid #a97dff !important;
+}
+body.dark .custom-outline-button:hover {
+  background: #7d1bff !important;
+  color: #fff !important;
+}
+body.dark .card,
+body.dark .table-section {
+  background: #23232b !important;
+  border-color: #444 !important;
+  box-shadow: none !important;
+}
+body.dark thead th {
+  background: #2d2c3a !important;
+  color: #a97dff !important;
+  border-color: #444 !important;
+}
+body.dark tbody td {
+  background: #23232b !important;
+  color: #f5f5f5 !important;
+  border-color: #444 !important;
+}
+body.dark tbody tr:hover {
+  background: #2d2c3a !important;
+}
+body.dark .badge {
+  background: #2d2c3a !important;
+  color: #a97dff !important;
+  border-color: #7d1bff !important;
+}
+body.dark .badge.error,
+body.dark .badge-urgency {
+  color: #ff4d8b !important;
+  border-color: #ff4d8b !important;
+}
+body.dark .avatars-group .avatar-sm {
+  background: #7d1bff !important;
+  color: #fff !important;
+  border: 2px solid #23232b !important;
+}
+body.dark select {
+  background: #23232b !important;
+  color: #a97dff !important;
+  border: 1px solid #444 !important;
+}
+body.dark .actions {
+  background: transparent !important;
+}
 /* ====== Page header (breadcrumbs + title) ====== */
 .container {
   margin: 0 auto;

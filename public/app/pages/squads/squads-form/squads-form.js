@@ -1,30 +1,32 @@
-// Exemplo de dados dos membros
-const membros = [
-  {
-    nome: "Ana Souza",
-    funcoes: ["Product Owner", "Analista"],
-    horasAlocadas: "20hrs",
-    horasDisponiveis: "20hrs",
-  },
-  {
-    nome: "Carlos Lima",
-    funcoes: ["Techlead", "Desenvolvedor Sênior"],
-    horasAlocadas: "32hrs",
-    horasDisponiveis: "8hrs",
-  },
-  {
-    nome: "Juliana Alves",
-    funcoes: ["QA", "Tester"],
-    horasAlocadas: "16hrs",
-    horasDisponiveis: "24hrs",
-  },
-  {
-    nome: "Rafael Torres",
-    funcoes: ["UX Designer"],
-    horasAlocadas: "40hrs",
-    horasDisponiveis: "0hrs",
-  },
-];
+import { apiService } from "../../../../assets/js/apiService.js";
+// Exemplo de dados dos membros (mantido para testes locais)
+const membros = [];
+
+// Função para popular o dropdown de projetos
+async function popularDropdownProjetos() {
+  // Seleciona o select de projetos corretamente (segunda linha, primeira coluna)
+  const selectProjeto = document.querySelector(
+    ".form-squad .row:nth-of-type(2) .col:first-child select"
+  );
+  if (!selectProjeto) return;
+  // Remove todas as opções exceto a primeira (placeholder)
+  while (selectProjeto.options.length > 1) {
+    selectProjeto.remove(1);
+  }
+  try {
+    const projetos = await apiService.getAllProjects();
+    if (Array.isArray(projetos)) {
+      projetos.forEach((proj) => {
+        const opt = document.createElement("option");
+        opt.value = proj.id;
+        opt.textContent = proj.name;
+        selectProjeto.appendChild(opt);
+      });
+    }
+  } catch (e) {
+    // Silencioso
+  }
+}
 
 function renderMembros() {
   const teamList = document.querySelector(".team-list");
@@ -92,29 +94,47 @@ function waitForI18nAndRender() {
   }
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", waitForI18nAndRender);
-} else {
+function onReady() {
   waitForI18nAndRender();
+  popularDropdownProjetos();
 }
 
-function nextStep() {
-  window.location.href =
-    "./squads-weekly-requirements/squads-weekly-requirements.html";
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", onReady);
+} else {
+  onReady();
 }
 
-// Garante que o botão "Próximo" chama nextStep corretamente
+
+// Integração do fluxo: salva dados do formulário e avança para roles
+function nextStep(e) {
+  e?.preventDefault();
+  const form = document.querySelector(".form-squad");
+  if (!form) return;
+
+  // Coleta dados do formulário (ajuste os selectors conforme necessário)
+  const data = {
+    name: form.querySelector('input[name="name"]')?.value || "",
+    projectId: form.querySelector('select[name="project"]')?.value || "",
+    sprintDuration: form.querySelector('input[type="text"]')?.value || "",
+    description: form.querySelector('textarea')?.value || "",
+    approver: form.querySelector('select')?.value || "",
+    // Adicione outros campos conforme necessário
+  };
+  localStorage.setItem("squads.formData", JSON.stringify(data));
+  window.location.href = "./squads-roles/squads-roles.html";
+}
+
 document.addEventListener("DOMContentLoaded", function () {
-  const saveBtn = document.getElementById("save-btn");
+  const saveBtn = document.querySelector(".form-actions .save, #save-btn");
   if (saveBtn) {
     saveBtn.addEventListener("click", nextStep);
   }
+  const mainCancelBtn = document.querySelector(".form-squad .cancel-btn");
+  if (mainCancelBtn) {
+    mainCancelBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = "../squads.html";
+    });
+  }
 });
-
-const mainCancelBtn = document.querySelector(".form-squad .cancel-btn");
-if (mainCancelBtn) {
-  mainCancelBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    window.location.href = "../squads.html";
-  });
-}

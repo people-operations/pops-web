@@ -1,3 +1,54 @@
+/* Skeleton Loader */
+.skeleton-card {
+  background: #f3f3f3;
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  width: 100%;
+  max-width: 440px;
+  min-width: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
+  animation: pulse 1.2s infinite ease-in-out;
+}
+.skeleton-header,
+.skeleton-line,
+.skeleton-btn {
+  background: #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+.skeleton-header {
+  width: 60%;
+  height: 24px;
+}
+.skeleton-line {
+  width: 80%;
+  height: 16px;
+}
+.skeleton-btn {
+  width: 120px;
+  height: 32px;
+  margin-top: 16px;
+}
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+body.dark .skeleton-card,
+body.dark .skeleton-header,
+body.dark .skeleton-line,
+body.dark .skeleton-btn {
+  background: #33364a;
+}
 /* =====================
    1. GLOBAIS E CONTAINERS
    ===================== */
