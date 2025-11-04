@@ -101,6 +101,10 @@ document.getElementById("login-form").addEventListener("submit", (e) => {
       if (data && data.idToken) {
         localStorage.setItem("idToken", data.idToken);
         localStorage.setItem("userEmail", data.email);
+        localStorage.setItem("userId", ((data.localId).split("_")[1]));
+
+        sessionStorage.setItem("userIdToken", data.idToken);
+        sessionStorage.setItem("userId", ((data.localId).split("_")[1]));
         window.showNotification("success", "Login realizado com sucesso!");
         setTimeout(() => {
           window.location.href = "../pages/dashboard/dashboard.html";

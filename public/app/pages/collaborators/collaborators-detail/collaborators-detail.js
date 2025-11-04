@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const params = new URLSearchParams(window.location.search);
+
+  console.log("Parâmetros da URL:", params.toString());
   const employeeId = params.get("id");
   if (!employeeId) {
     console.error("ID do colaborador não fornecido na URL!");
@@ -15,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const response = await fetch(
-      `/api-employee/employees/${employeeId}`,
+      `http://localhost:8081/api-employee/employees/${employeeId}`,
       {
         method: "GET",
         headers: {
@@ -173,7 +175,7 @@ async function preencherInformacoesNoHTML(employee, token) {
 
   try {
     const squadResponse = await fetch(
-      `/api-squad/teams/allocations/person/${employee.id}`,
+      `http://localhost:8083/api-squad/teams/allocations/person/${employee.id}`,
       {
         method: "GET",
         headers: {
