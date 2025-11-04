@@ -1,3 +1,10 @@
+/* Select de área desativado (modo dark) */
+body.dark #select-area[disabled] {
+  background: #23232b !important;
+  color: #aaa !important;
+  border-color: #444 !important;
+  cursor: not-allowed !important;
+}
 /* =====================
    1. GLOBAIS E CONTAINERS PRINCIPAIS
    ===================== */
@@ -61,11 +68,81 @@ h3 {
   font-size: 14px;
   background: transparent;
 }
-.form-squad textarea::placeholder {
-  font-family: "Poppins", sans-serif;
-}
-textarea {
+.form-squad textarea {
   resize: vertical;
+}
+.form-squad textarea::placeholder,
+.form-squad input::placeholder,
+.form-squad select::placeholder,
+.form-squad input[type="date"]::placeholder,
+.form-squad select:invalid {
+  font-family: "Poppins", sans-serif;
+  color: #888 !important;
+}
+
+/* For select placeholder (option[disabled], option[hidden], option[disabled][hidden], option[disabled][selected]) */
+.form-squad select option[disabled],
+.form-squad select option[hidden],
+.form-squad select option[disabled][hidden],
+.form-squad select option[disabled][selected] {
+  color: #888 !important;
+}
+
+/* For select with invalid (placeholder selected) */
+
+/* Corrige cor do placeholder do select (Status) e força cor #888 quando inválido */
+.form-squad select:invalid,
+.form-squad select option[disabled],
+.form-squad select option[hidden],
+.form-squad select option[disabled][hidden],
+.form-squad select option[disabled][selected] {
+  color: #888 !important;
+}
+
+/* Força cor #888 no select quando a primeira opção (placeholder) está selecionada */
+.form-squad select:required:invalid {
+  color: #888 !important;
+}
+
+/* For select when first option is selected (force color) */
+.form-squad select:required:invalid {
+  color: #888 !important;
+}
+
+/* For date input placeholder color in all browsers */
+
+/* Corrige cor do placeholder do input de data (Data de término) para #888 em todos browsers */
+.form-squad input[type="date"]::-webkit-input-placeholder {
+  color: #888 !important;
+}
+.form-squad input[type="date"]::-moz-placeholder {
+  color: #888 !important;
+}
+.form-squad input[type="date"]:-ms-input-placeholder {
+  color: #888 !important;
+}
+.form-squad input[type="date"]::placeholder {
+  color: #888 !important;
+}
+
+/* Força cor #888 quando o campo de data está vazio (placeholder visível) */
+.form-squad input[type="date"]:not(:focus):placeholder-shown {
+  color: #888 !important;
+}
+
+/* Força cor #888 quando input de data é required e inválido */
+.form-squad input[type="date"]:required:invalid {
+  color: #888 !important;
+}
+
+/* For empty date input (force text color if empty) */
+.form-squad input[type="date"]:not(:focus):placeholder-shown {
+  color: #888 !important;
+}
+
+/* For input[type=date] when empty (Webkit/Blink: show text color as #888) */
+.form-squad input[type="date"]:required:invalid {
+  color: #888 !important;
 }
 
 /* =====================
@@ -145,12 +222,11 @@ textarea {
   border-radius: 4px;
   cursor: pointer;
   height: 40px;
-  width: 123px;
   font-size: 20px !important;
   font-weight: 500 !important;
-  padding: 0 !important;
   letter-spacing: 0 !important;
   font-family: "Poppins", sans-serif;
+  padding: 0 4px 0 4px !important;
 }
 .cancel:hover {
   color: #fff !important;
@@ -254,12 +330,12 @@ textarea {
   padding: 24px;
   width: 782px !important;
   max-width: 90%;
-  min-height: 400px !important;
   height: fit-content !important;
-  z-index: 101;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
+  z-index: 10001;
+  height: 180px !important;
 }
 /* Header com título e botão de fechar */
 .modal-header {

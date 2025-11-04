@@ -1,5 +1,3 @@
-/* começando uma API service pra colocar todos os fetchs */
-
 function getAuthTokenOrThrow() {
   const token = localStorage.getItem("idToken");
   if (!token) {
@@ -31,17 +29,14 @@ export const apiService = {
   async insertProject(project) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(
-        "/api-project/projects",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(project),
-        }
-      );
+      const response = await fetch("http://localhost:8082/api/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(project),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -56,19 +51,15 @@ export const apiService = {
   },
 
   async getAllProjects() {
-    console.log("Fetching all projects from API...");
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(
-        "/api-project/projects",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch("http://localhost:8082/api/projects", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -85,16 +76,13 @@ export const apiService = {
   async getProjectById(id) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(
-        `/api-project/projects/${id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`http://localhost:8082/api/projects/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -111,16 +99,13 @@ export const apiService = {
   async deleteProjectById(id) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(
-        `/api-project/projects/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`http://localhost:8082/api/projects/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -136,17 +121,14 @@ export const apiService = {
   async updateProject(id, project) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(
-        `/api-project/projects/${id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(project),
-        }
-      );
+      const response = await fetch(`http://localhost:8082/api/projects/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(project),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -163,16 +145,13 @@ export const apiService = {
   async getProjectTypes() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(
-        "/api-project/project-types",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch("http://localhost:8082/api/project-types", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -187,21 +166,15 @@ export const apiService = {
   },
 
   async getProjectStatuses() {
-    console.log("Getting project statuses...");
     try {
-      console.log("Getting project statuses...");
       const token = getAuthTokenOrThrow();
-      console.log("Fetching project statuses with token:", token);
-      const response = await fetch(
-        "/api-project/project-status",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch("http://localhost:8082/api/project-status", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -219,7 +192,7 @@ export const apiService = {
   async getSkills() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("/api-project/skills", {
+      const response = await fetch("http://localhost:8082/api/skills", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -242,7 +215,7 @@ export const apiService = {
   async getAllSquads() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("/api-squad/teams/1", {
+      const response = await fetch("http://localhost:8083/api/teams", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -258,6 +231,223 @@ export const apiService = {
       return data.content;
     } catch (error) {
       console.error("Erro ao buscar squads:", error.message);
+      return null;
+    }
+  },
+
+  async insertSquad(squad) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch("http://localhost:8083/api/teams", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(squad),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Erro ao inserir squad:", error.message);
+      return null;
+    }
+  },
+
+  async deleteSquadById(squadId) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(
+        `http://localhost:8083/api/teams/${squadId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+
+      return true;
+    } catch (error) {
+      console.error("Erro ao deletar squad:", error);
+      return false;
+    }
+  },
+
+  async getSquadById(squadId) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(
+        `http://localhost:8083/api/teams/${squadId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+
+      const squad = await response.json();
+      return squad;
+    } catch (error) {
+      console.error("Erro ao carregar squad:", error);
+      return null;
+    }
+  },
+
+  async getSquadAllocations(squadId) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(
+        `http://localhost:8083/api/teams/${squadId}/allocations`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+
+      const allocations = await response.json();
+      return allocations;
+    } catch (error) {
+      console.error("Erro ao carregar alocações do squad:", error);
+      return null;
+    }
+  },
+
+  async insertSquadAllocations(squadId, allocations) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(
+        `http://localhost:8083/api/teams/${squadId}/allocations`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(allocations),
+        }
+      );
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("Erro ao inserir alocações do squad:", error);
+      return null;
+    }
+  },
+
+  async getCollaboratorById(employeeId) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(
+        `http://localhost:8081/api/employees/${employeeId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+
+      const employee = await response.json();
+      return employee;
+    } catch (error) {
+      console.error("Erro ao carregar colaborador:", error);
+      return null;
+    }
+  },
+
+  async getSquadsByCollaboratorId(employeeId) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(
+        `http://localhost:8083/api/teams/allocations/person/${employeeId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+
+      const squads = await response.json();
+      return squads;
+    } catch (error) {
+      console.error("Erro ao carregar squads do colaborador:", error);
+      return null;
+    }
+  },
+
+  async getCollaborators(filters = {}) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const params = new URLSearchParams();
+      if (filters.employeeName)
+        params.append("employeeName", filters.employeeName);
+      if (filters.departament)
+        params.append("departmentName", filters.departament);
+      if (filters.jobTitle) params.append("jobTitle", filters.jobTitle);
+      if (filters.project) params.append("project", filters.project);
+      if (filters.squad) params.append("squad", filters.squad);
+      const response = await fetch(
+        `http://localhost:8081/api/employees?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error("Erro ao carregar colaboradores:", error);
+      return null;
+    }
+  },
+
+  async getOdooSkills() {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(`http://localhost:8081/api/skills`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error("Erro ao carregar skills do Odoo:", error);
       return null;
     }
   },

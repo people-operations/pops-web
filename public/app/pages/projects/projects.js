@@ -3,6 +3,7 @@ import { apiService } from "../../../assets/js/apiService.js";
 let projects = [];
 
 async function fetchAndRenderProjects() {
+  showSkeleton();
   try {
     projects = await apiService.getAllProjects();
     renderProjects(projects);
@@ -17,7 +18,27 @@ async function fetchAndRenderProjects() {
       i18n?.t ? i18n.t("projects.fetch_error") : "Erro ao buscar projetos:",
       err
     );
+    renderProjects([]);
   }
+}
+
+function showSkeleton() {
+  const container = document.getElementById("project-list");
+  if (!container) return;
+  let skeletons = "";
+  for (let i = 0; i < 3; i++) {
+    skeletons += `
+      <div class="skeleton-card">
+        <div class="skeleton-header"></div>
+        <div class="skeleton-line" style="width:90%"></div>
+        <div class="skeleton-line" style="width:70%"></div>
+        <div class="skeleton-line" style="width:60%"></div>
+        <div class="skeleton-line" style="width:80%"></div>
+        <div class="skeleton-btn"></div>
+      </div>
+    `;
+  }
+  container.innerHTML = skeletons;
 }
 
 function renderProjects(projects) {
@@ -52,7 +73,7 @@ function renderProjects(projects) {
         </div>
         <p class="project-description">${project.description || ""}</p>
         <p>
-          <img src="/assets/svg/budget.swvg" alt="budget" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
+          <img src="/assets/svg/budget.svg" alt="budget" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
           <strong data-i18n="projects.budget">${
             i18n?.t ? i18n.t("projects.budget") : "Budget:"
           }</strong> ${budget}

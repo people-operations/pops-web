@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title data-i18n="squads.page_title"></title>
-    <link rel="stylesheet" href="squads-weekly-requirements.css" />
+    <link rel="stylesheet" href="squads-roles.css" />
     <link rel="stylesheet" href="../../../../../assets/css/style.css" />
     <link
       type="image/svg+xml"
@@ -158,8 +158,8 @@
           </div>
         </div>
       </header>
-      <main class="create-squad-page" id="weekly-step">
-        <a href="squads-roles.html" class="back-link">
+      <main class="create-squad-page" id="roles-step">
+        <a href="../squads-form.html" class="back-link">
           <img
             src="../../../../../assets/svg/left-arrow.svg"
             alt=""
@@ -167,34 +167,113 @@
             width="30"
             height="30"
           />
-          <span data-i18n="squads_form.back">Voltar para squads</span>
+          <span data-i18n="squads_form.back"></span>
         </a>
 
         <div class="form-container">
           <div class="step-header">
-            <h2>Criar uma nova squad</h2>
-            <span class="step-badge">3 / 4</span>
+            <h2 data-i18n="squads_roles.title"></h2>
+            <span class="step-badge">2 / 4</span>
           </div>
 
           <div class="roles-toolbar">
-            <h3>Definir requisitos semanais de horas</h3>
-            <div></div>
+            <h3 data-i18n="squads_roles.subtitle">Definição de função</h3>
+            <button
+              type="button"
+              class="save"
+              id="addRoleBtn"
+              data-i18n="squads_roles.add_role"
+            >
+              + Adicionar função
+            </button>
           </div>
 
-          <!-- Lista dinâmica de papéis com sliders -->
-          <section id="weeklyList" aria-live="polite"></section>
+          <!-- Lista de funções -->
+          <section
+            id="rolesList"
+            class="roles-list"
+            aria-live="polite"
+          ></section>
 
+          <!-- Ações -->
           <div class="form-actions">
-            <button type="button" class="cancel" id="backBtn">Voltar</button>
-            <button type="button" class="save" id="nextBtn" disabled>
+            <button
+              type="button"
+              class="cancel"
+              id="backBtn"
+              data-i18n="squads_roles.back"
+            >
+              Voltar
+            </button>
+            <button
+              type="button"
+              class="save"
+              id="nextBtn"
+              data-i18n="squads_roles.next"
+              disabled
+            >
               Próximo
             </button>
           </div>
+        </div>
+
+        <div class="modal-overlay hidden" id="roleModalOverlay"></div>
+        <!-- Modal deve vir DEPOIS do overlay para garantir z-index correto -->
+        <div
+          class="modal hidden"
+          id="roleModal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="roleModalTitle"
+        >
+          <div class="modal-header">
+            <h2 id="roleModalTitle">Adicionar função e skills necessários</h2>
+            <button
+              class="close-btn"
+              type="button"
+              id="closeRoleModal"
+              aria-label="Fechar"
+            >
+              ×
+            </button>
+          </div>
+
+          <form id="roleForm" class="form-modal v2">
+            <div class="field">
+              <label for="roleFunction">Função *</label>
+              <select id="roleFunction" required>
+                <option value="" selected disabled>Selecione função</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="roleSeniority">Senioridade *</label>
+              <select id="roleSeniority" required>
+                <option value="" selected disabled>Selecione aqui</option>
+              </select>
+            </div>
+
+            <!-- Botões -->
+            <div class="form-actions">
+              <button
+                type="button"
+                class="cancel"
+                id="cancelRole"
+                data-i18n="squads_form.cancel"
+              ></button>
+              <button
+                type="submit"
+                class="save"
+                id="save-btn"
+                data-i18n="squads_form.next"
+              ></button>
+            </div>
+          </form>
         </div>
       </main>
     </div>
     <script src="../../../../../assets/js/app.js"></script>
     <script src="../../../../../assets/js/i18nService.js"></script>
-    <script src="squads-weekly-requirements.js"></script>
+    <script type="module" src="squads-roles.js"></script>
   </body>
 </html>

@@ -1,3 +1,179 @@
+/* === DATEPICKER CUSTOMIZADO === */
+.datepicker {
+  position: absolute;
+  z-index: 1000;
+  background: var(--bg-card, #fff);
+  box-shadow: var(--shadow, 0 2px 8px #0002);
+  border-radius: 8px;
+  padding: 12px 12px 8px 12px;
+  min-width: 220px;
+  max-width: 260px;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  color: #23232b;
+  border: 1px solid #e0e0e0;
+  animation: fadeIn 0.2s;
+}
+.datepicker table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+}
+.datepicker th {
+  color: #7d1bff;
+  font-weight: 600;
+  padding: 2px 0;
+  text-align: center;
+}
+.datepicker td {
+  text-align: center;
+  padding: 4px 0;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.15s, color 0.15s;
+  font-weight: 500;
+}
+.datepicker td:hover {
+  background: #f0e6ff;
+  color: #7d1bff;
+}
+.datepicker .selected {
+  background: #7d1bff !important;
+  color: #fff !important;
+}
+.datepicker .today {
+  background: #e0e0e0;
+  color: #7d1bff;
+}
+.datepicker button {
+  background: none;
+  border: none;
+  color: #7d1bff;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0 8px;
+  transition: color 0.2s;
+}
+.datepicker button:hover {
+  color: #4e0bbd;
+}
+.datepicker span {
+  font-weight: 600;
+  color: #23232b;
+}
+
+body.dark .datepicker {
+  background: #23232b;
+  color: #f5f5f5;
+  border: 1px solid #444;
+  box-shadow: 0 2px 8px #0008;
+}
+body.dark .datepicker th {
+  color: #bda6ff;
+}
+body.dark .datepicker td {
+  color: #f5f5f5;
+}
+body.dark .datepicker td:hover {
+  background: #2d1b4e;
+  color: #bda6ff;
+}
+body.dark .datepicker .selected {
+  background: #7d1bff !important;
+  color: #fff !important;
+}
+body.dark .datepicker .today {
+  background: #333;
+  color: #bda6ff;
+}
+body.dark .datepicker span {
+  color: #f5f5f5;
+}
+body.dark .datepicker button {
+  color: #bda6ff;
+}
+body.dark .datepicker button:hover {
+  color: #fff;
+}
+/* SKELETON LOADER */
+.skeleton-container {
+  background: var(--bg-card, #fff);
+  border-radius: 8px;
+  box-shadow: var(--shadow, 0 2px 8px #0001);
+  padding: 24px;
+  margin-bottom: 16px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.skeleton-title {
+  height: 32px;
+  width: 60%;
+  background: #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 24px;
+  animation: skeleton-loading 1.2s infinite linear alternate;
+}
+.skeleton-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.skeleton-input {
+  flex: 1;
+  height: 40px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  animation: skeleton-loading 1.2s infinite linear alternate;
+}
+.skeleton-textarea {
+  flex: 1;
+  height: 70px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  animation: skeleton-loading 1.2s infinite linear alternate;
+}
+.skeleton-btn {
+  width: 120px;
+  height: 40px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  animation: skeleton-loading 1.2s infinite linear alternate;
+}
+@keyframes skeleton-loading {
+  0% {
+    background-color: #e0e0e0;
+  }
+  100% {
+    background-color: #f5f5f5;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+body.dark .skeleton-container,
+body.dark .skeleton-title,
+body.dark .skeleton-input,
+body.dark .skeleton-textarea,
+body.dark .skeleton-btn {
+  background: #23232b !important;
+  color: #444;
+  animation: skeleton-loading-dark 1.2s infinite linear alternate;
+}
+@keyframes skeleton-loading-dark {
+  0% {
+    background-color: #23232b;
+  }
+  100% {
+    background-color: #181820;
+  }
+}
 body.dark .back-link img {
   filter: brightness(0) invert(1);
 }
@@ -58,12 +234,98 @@ h3 {
   font-size: 14px;
   background: transparent;
   font-family: "Poppins", sans-serif;
+  box-sizing: border-box;
 }
+
 .form-project textarea {
   resize: vertical;
 }
-.form-project textarea::placeholder {
+.form-project textarea::placeholder,
+.form-project input::placeholder,
+.form-project select::placeholder,
+.form-project input[type="date"]::placeholder,
+.form-project select:invalid {
   font-family: "Poppins", sans-serif;
+  color: #888 !important;
+}
+
+/* For date input placeholder color in Webkit browsers */
+.form-project input[type="date"]::-webkit-input-placeholder {
+  color: #888 !important;
+}
+.form-project input[type="date"]::-moz-placeholder {
+  color: #888 !important;
+}
+.form-project input[type="date"]:-ms-input-placeholder {
+  color: #888 !important;
+}
+.form-project input[type="date"]::placeholder {
+  color: #888 !important;
+}
+
+/* For select placeholder (option[disabled], option[hidden], option[disabled][hidden], option[disabled][selected]) */
+.form-project select option[disabled],
+.form-project select option[hidden],
+.form-project select option[disabled][hidden],
+.form-project select option[disabled][selected] {
+  color: #888 !important;
+}
+
+/* For select with invalid (placeholder selected) */
+
+/* Corrige cor do placeholder do select (Status) e força cor #888 quando inválido */
+.form-project select:invalid,
+.form-project select option[disabled],
+.form-project select option[hidden],
+.form-project select option[disabled][hidden],
+.form-project select option[disabled][selected] {
+  color: #888 !important;
+}
+
+/* Força cor #888 no select quando a primeira opção (placeholder) está selecionada */
+.form-project select:required:invalid {
+  color: #888 !important;
+}
+
+/* For select when first option is selected (force color) */
+.form-project select:required:invalid {
+  color: #888 !important;
+}
+
+/* For date input placeholder color in all browsers */
+
+/* Corrige cor do placeholder do input de data (Data de término) para #888 em todos browsers */
+.form-project input[type="date"]::-webkit-input-placeholder {
+  color: #888 !important;
+}
+.form-project input[type="date"]::-moz-placeholder {
+  color: #888 !important;
+}
+.form-project input[type="date"]:-ms-input-placeholder {
+  color: #888 !important;
+}
+.form-project input[type="date"]::placeholder {
+  color: #888 !important;
+}
+
+/* Força cor #888 quando o campo de data está vazio (placeholder visível) */
+.form-project input[type="date"]:not(:focus):placeholder-shown {
+  color: #888 !important;
+}
+
+/* Força cor #888 quando input de data é required e inválido */
+.form-project input[type="date"]:required:invalid {
+  color: #888 !important;
+}
+
+/* For empty date input (force text color if empty) */
+.form-project input[type="date"]:not(:focus):placeholder-shown {
+  color: #888 !important;
+}
+
+/* For input[type=date] when empty (Webkit/Blink: show text color as #888) */
+.form-project input[type="date"]:required:invalid {
+  color: #888 !important;
 }
 
 /* 5. TAGS DE SKILLS */
@@ -262,12 +524,58 @@ body.dark .add-tag {
   padding-bottom: 3px;
 }
 
-body.dark .form-project textarea::placeholder {
+body.dark .form-project textarea::placeholder,
+body.dark .form-project input::placeholder,
+body.dark .form-project select::placeholder,
+body.dark .form-project input[type="date"]::placeholder,
+body.dark .form-project select:invalid {
   font-family: "Poppins", sans-serif;
-  color: #fff;
+  color: #888 !important;
 }
 
-body.dark .form-project input::placeholder {
-  font-family: "Poppins", sans-serif;
-  color: #fff;
+body.dark .form-project input[type="date"]::-webkit-input-placeholder {
+  color: #888 !important;
+}
+body.dark .form-project input[type="date"]::-moz-placeholder {
+  color: #888 !important;
+}
+body.dark .form-project input[type="date"]:-ms-input-placeholder {
+  color: #888 !important;
+}
+body.dark .form-project input[type="date"]::placeholder {
+  color: #888 !important;
+}
+
+body.dark .form-project select option[disabled],
+body.dark .form-project select option[hidden],
+body.dark .form-project select option[disabled][hidden],
+body.dark .form-project select option[disabled][selected] {
+  color: #888 !important;
+}
+
+body.dark .form-project select:invalid,
+body.dark .form-project select:required:invalid,
+body.dark .form-project select option[disabled],
+body.dark .form-project select option[hidden],
+body.dark .form-project select option[disabled][hidden],
+body.dark .form-project select option[disabled][selected] {
+  color: #888 !important;
+}
+body.dark .form-project input[type="date"]::-webkit-input-placeholder {
+  color: #888 !important;
+}
+body.dark .form-project input[type="date"]::-moz-placeholder {
+  color: #888 !important;
+}
+body.dark .form-project input[type="date"]:-ms-input-placeholder {
+  color: #888 !important;
+}
+body.dark .form-project input[type="date"]::placeholder {
+  color: #888 !important;
+}
+body.dark .form-project input[type="date"]:not(:focus):placeholder-shown {
+  color: #888 !important;
+}
+body.dark .form-project input[type="date"]:required:invalid {
+  color: #888 !important;
 }

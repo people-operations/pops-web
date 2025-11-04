@@ -1,11 +1,6 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  const token = localStorage.getItem("idToken");
-  if (!token) {
-    console.warn("Usuário não autenticado! Redirecionando para login...");
-    window.location.href = "../../../auth/login.html";
-    return;
-  }
+import { apiService } from "../../../assets/js/apiService.js";
 
+document.addEventListener("DOMContentLoaded", async () => {
   const searchInput = document.querySelector(".search-bar input");
   const searchButton = document.querySelector(".search-bar button");
   const clearSearchButton = document.querySelector(
@@ -27,40 +22,34 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentEmployees = [];
 
   async function fetchCollaborators(filters = {}) {
+    showSkeleton();
     try {
-      const params = new URLSearchParams();
-      if (filters.employeeName)
-        params.append("employeeName", filters.employeeName);
-      if (filters.departament)
-        params.append("departmentName", filters.departament);
-      if (filters.jobTitle) params.append("jobTitle", filters.jobTitle);
-      if (filters.project) params.append("project", filters.project);
-      if (filters.squad) params.append("squad", filters.squad);
-
-      const response = await fetch(
-        `http://localhost:8081/api-employee/employees?${params.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
-      const employees = await response.json();
-
+      const employees = await apiService.getCollaborators(filters);
       if (!allEmployees.length) allEmployees = employees;
-
       currentEmployees = employees;
-
       populateFilters();
       renderTable(employees);
       overviewTitle.textContent = `Visão Geral de Pessoas (${employees.length} resultados)`;
     } catch (error) {
       console.error("Erro ao carregar colaboradores:", error);
     }
+  }
+
+  function showSkeleton() {
+    const tbody = document.querySelector(".collaborators-table tbody");
+    tbody.innerHTML = "";
+    for (let i = 0; i < 3; i++) {
+      const row = document.createElement("tr");
+      row.className = "skeleton-row";
+      row.innerHTML = `
+        <td><span class='skeleton-cell' style='width: 80px'></span></td>
+        <td><span class='skeleton-cell' style='width: 60px'></span></td>
+        <td><span class='skeleton-cell' style='width: 100px'></span></td>
+        <td><span class='skeleton-cell' style='width: 60px'></span></td>
+      `;
+      tbody.appendChild(row);
+    }
+    overviewTitle.textContent = "Carregando colaboradores...";
   }
 
   function populateFilters() {
@@ -99,10 +88,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const squads = getMockSquads(emp.id);
       const row = document.createElement("tr");
       row.classList.add("collaborator-row");
-
-      // <td>${emp.allocatedPercent || "0"}%</td>
-      // <td>${emp.availablePercent || "100"}%</td>
-
       row.innerHTML = `
         <td>${emp.name || "—"}</td>
         <td>${emp.jobTitle || "—"}</td>
@@ -131,7 +116,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Busca pelo nome
   searchButton.addEventListener("click", () => {
     const searchQuery = searchInput.value.trim();
     if (!searchQuery) return;
@@ -146,13 +130,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Limpar pesquisa
   clearSearchButton.addEventListener("click", () => {
     searchInput.value = "";
     fetchCollaborators();
   });
 
-  // Aplicar filtros
   applyFiltersButton.addEventListener("click", () => {
     const filters = {
       departament:
@@ -169,7 +151,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     fetchCollaborators(filters);
   });
 
-  // Limpar filtros
   clearFiltersButton.addEventListener("click", () => {
     areaSelect.value = "Todas as áreas";
     cargoSelect.value = "Todos os cargos";
@@ -178,7 +159,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     fetchCollaborators();
   });
 
-  // Gerar relatório CSV
   generateReportButton.addEventListener("click", () => {
     if (!currentEmployees.length) return;
 

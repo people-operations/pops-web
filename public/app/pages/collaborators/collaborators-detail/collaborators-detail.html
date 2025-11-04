@@ -16,7 +16,8 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
-<body>   <script>
+  <body>
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const avatar = document.querySelector(".avatar");
         const email = localStorage.getItem("userEmail");
@@ -109,7 +110,7 @@
             </svg>
           </span>
         </button>
-        <div class="avatar">K</div>
+        <div class="avatar"></div>
         <span class="chevron" aria-hidden="true">
           <svg
             width="20"
@@ -233,22 +234,22 @@
             <div class="card light-blue">
               <h5>Nome squad</h5>
               <div class="d-flex flex-column text-center">
-                <p><strong>Ocupação:</strong> 20%</p>
-                <p><strong>Cargo:</strong> x</p>
+                <p><strong>Ocupação:</strong>x</p>
+                <p><strong>Cargo:</strong>x</p>
               </div>
             </div>
             <div class="card pink">
               <h5>Nome squad</h5>
               <div class="d-flex flex-column text-center">
-                <p><strong>Ocupação:</strong> 20%</p>
-                <p><strong>Cargo:</strong> x</p>
+                <p><strong>Ocupação:</strong>x</p>
+                <p><strong>Cargo:</strong>x</p>
               </div>
             </div>
             <div class="card purple">
               <h5>Nome squad</h5>
               <div class="d-flex flex-column text-center">
-                <p><strong>Ocupação:</strong> 20%</p>
-                <p><strong>Cargo:</strong> x</p>
+                <p><strong>Ocupação:</strong>x</p>
+                <p><strong>Cargo:</strong>x</p>
               </div>
             </div>
           </div>
@@ -267,11 +268,32 @@
               <li class="timeline-item current">
                 <span class="timeline-marker"></span>
                 <div class="timeline-content">
-                  <h3 data-i18n="collaborators_detail.current_role">Cargo atual</h3>
-                  <p><strong data-i18n="collaborators_detail.time">Tempo de ocupação:</strong> x anos e x meses/dias</p>
-                  <p><strong data-i18n="collaborators_detail.manager">Gestor:</strong> Nome do gestor</p>
-                  <p><strong data-i18n="collaborators_detail.salary">Salário:</strong> R$ 0.000</p>
-                  <p><strong data-i18n="collaborators_detail.squads">Squads:</strong></p>
+                  <h3 data-i18n="collaborators_detail.current_role">
+                    Cargo atual
+                  </h3>
+                  <p>
+                    <strong data-i18n="collaborators_detail.time"
+                      >Tempo de ocupação:</strong
+                    >
+                    x anos e x meses/dias
+                  </p>
+                  <p>
+                    <strong data-i18n="collaborators_detail.manager"
+                      >Gestor:</strong
+                    >
+                    Nome do gestor
+                  </p>
+                  <p>
+                    <strong data-i18n="collaborators_detail.salary"
+                      >Salário:</strong
+                    >
+                    R$ 0.000
+                  </p>
+                  <p>
+                    <strong data-i18n="collaborators_detail.squads"
+                      >Squads:</strong
+                    >
+                  </p>
                   <div class="skills small-skills">
                     <span class="skill">Nome squad</span>
                     <span class="skill">Nome squad</span>
@@ -282,11 +304,32 @@
               <li class="timeline-item">
                 <span class="timeline-marker"></span>
                 <div class="timeline-content">
-                  <h3 data-i18n="collaborators_detail.previous_role">Cargo anterior</h3>
-                  <p><strong data-i18n="collaborators_detail.time">Tempo de ocupação:</strong> x anos e x meses/dias</p>
-                  <p><strong data-i18n="collaborators_detail.manager">Gestor:</strong> Nome do gestor</p>
-                  <p><strong data-i18n="collaborators_detail.salary">Salário:</strong> R$ 0.000</p>
-                  <p><strong data-i18n="collaborators_detail.squads">Squads:</strong></p>
+                  <h3 data-i18n="collaborators_detail.previous_role">
+                    Cargo anterior
+                  </h3>
+                  <p>
+                    <strong data-i18n="collaborators_detail.time"
+                      >Tempo de ocupação:</strong
+                    >
+                    x anos e x meses/dias
+                  </p>
+                  <p>
+                    <strong data-i18n="collaborators_detail.manager"
+                      >Gestor:</strong
+                    >
+                    Nome do gestor
+                  </p>
+                  <p>
+                    <strong data-i18n="collaborators_detail.salary"
+                      >Salário:</strong
+                    >
+                    R$ 0.000
+                  </p>
+                  <p>
+                    <strong data-i18n="collaborators_detail.squads"
+                      >Squads:</strong
+                    >
+                  </p>
                   <div class="skills small-skills">
                     <span class="skill">Nome squad</span>
                   </div>
@@ -298,9 +341,8 @@
         </div>
       </section>
     </main>
-    <script src="collaborators-detail.js"></script>
+    <script type="module" src="collaborators-detail.js"></script>
     <script src="../../../../assets/js/app.js"></script>
     <script src="../../../../assets/js/i18nService.js" defer></script>
   </body>
 </html>
-<script src="collaborators-detail.js"></script>

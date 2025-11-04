@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title data-i18n="squads.page_title"></title>
-    <link rel="stylesheet" href="squads-weekly-requirements.css" />
+    <link rel="stylesheet" href="squads-members.css" />
     <link rel="stylesheet" href="../../../../../assets/css/style.css" />
     <link
       type="image/svg+xml"
@@ -158,8 +158,8 @@
           </div>
         </div>
       </header>
-      <main class="create-squad-page" id="weekly-step">
-        <a href="squads-roles.html" class="back-link">
+      <main class="create-squad-page" id="members-step">
+        <a href="squads-weekly-requirements.html" class="back-link">
           <img
             src="../../../../../assets/svg/left-arrow.svg"
             alt=""
@@ -173,28 +173,51 @@
         <div class="form-container">
           <div class="step-header">
             <h2>Criar uma nova squad</h2>
-            <span class="step-badge">3 / 4</span>
+            <span class="step-badge">4 / 4</span>
           </div>
 
-          <div class="roles-toolbar">
-            <h3>Definir requisitos semanais de horas</h3>
-            <div></div>
+          <span class="section-title mb-2">Membros da Equipe</span>
+
+          <div class="controls">
+            <label class="select">
+              <span
+                >Selecionar Função para Preencher
+                <span class="small-muted" id="filledInfo"></span
+              ></span>
+              <select id="roleSelect" aria-label="Selecionar função"></select>
+            </label>
+
+            <label class="select">
+              <span>Ordenar por</span>
+              <select id="orderSelect" aria-label="Ordenação">
+                <option value="best">Melhor correspondência</option>
+                <option value="availability">Maior disponibilidade</option>
+                <option value="name">Nome (A–Z)</option>
+              </select>
+            </label>
           </div>
 
-          <!-- Lista dinâmica de papéis com sliders -->
-          <section id="weeklyList" aria-live="polite"></section>
+          <section id="cards" class="cards" aria-live="polite"></section>
 
           <div class="form-actions">
-            <button type="button" class="cancel" id="backBtn">Voltar</button>
-            <button type="button" class="save" id="nextBtn" disabled>
-              Próximo
-            </button>
+            <button
+              type="button"
+              class="cancel"
+              id="backBtn"
+              data-i18n="squads_form.cancel"
+            ></button>
+            <button
+              type="submit"
+              class="save"
+              id="saveBtn"
+              data-i18n="squads_form.save"
+            ></button>
           </div>
         </div>
       </main>
     </div>
     <script src="../../../../../assets/js/app.js"></script>
     <script src="../../../../../assets/js/i18nService.js"></script>
-    <script src="squads-weekly-requirements.js"></script>
+    <script type="module" src="squads-members.js"></script>
   </body>
 </html>

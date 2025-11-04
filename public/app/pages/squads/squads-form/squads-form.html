@@ -126,7 +126,7 @@
               </svg>
             </span>
           </button>
-          <div class="avatar">K</div>
+          <div class="avatar"></div>
           <span class="chevron" aria-hidden="true">
             <svg
               width="20"
@@ -215,30 +215,44 @@
             <div class="row">
               <div class="col">
                 <label data-i18n="squads_form.project"></label>
-                <select>
-                  <option data-i18n="squads_form.select_project"></option>
-                </select>
+                <select
+                  id="select-project"
+                  data-i18n-placeholder="squads_form.select_project"
+                ></select>
               </div>
               <div class="col">
                 <label data-i18n="squads_form.area"></label>
-                <select>
-                  <option data-i18n="squads_form.select_area"></option>
-                </select>
+                <select
+                  id="select-area"
+                  disabled
+                  style="background: #eee; color: #aaa; cursor: not-allowed"
+                  data-i18n-placeholder="squads_form.select_area"
+                ></select>
               </div>
             </div>
             <label data-i18n="squads_form.sprint_duration"></label>
             <input
+              id="sprint-duration"
               type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              autocomplete="off"
               data-i18n-placeholder="squads_form.sprint_duration_placeholder"
+              maxlength="3"
             />
+            <span
+              id="sprint-duration-mask"
+              style="margin-left: 8px; font-size: 13px; color: #666"
+            ></span>
             <label data-i18n="squads_form.description"></label>
             <textarea
               data-i18n-placeholder="squads_form.description_placeholder"
             ></textarea>
             <label data-i18n="squads_form.approver"></label>
-            <select>
-              <option data-i18n="squads_form.select_approver"></option>
-            </select>
+            <select
+              id="select-approver"
+              data-i18n-placeholder="squads_form.select_approver"
+            ></select>
 
             <!-- Botões -->
             <div class="form-actions">
@@ -258,7 +272,7 @@
         </div>
       </main>
     </div>
-    <script src="squads-form.js"></script>
+    <script type="module" src="squads-form.js"></script>
     <script src="../../../../assets/js/app.js"></script>
     <script src="../../../../assets/js/i18nService.js"></script>
   </body>
