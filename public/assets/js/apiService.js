@@ -432,4 +432,23 @@ export const apiService = {
       return null;
     }
   },
+
+  async getOdooSkills() {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(`http://localhost:8081/api/skills`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error("Erro ao carregar skills do Odoo:", error);
+      return null;
+    }
+  },
 };

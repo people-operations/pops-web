@@ -345,7 +345,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Confirma exclusão (só fecha o modal, implemente a lógica real se necessário)
+  // Confirma exclusão (adiciona delay para o toast aparecer)
   if (confirmDeleteBtn) {
     confirmDeleteBtn.addEventListener("click", async function () {
       const squadId = getSquadIdFromUrl();
@@ -356,7 +356,13 @@ document.addEventListener("DOMContentLoaded", function () {
       try {
         await apiService.deleteSquadById(squadId);
         hideDeleteModal();
-        window.location.href = "../squads.html";
+        // Exibe toast de sucesso se existir
+        if (window.toast && typeof window.toast.success === "function") {
+          window.toast.success("Squad excluída com sucesso!");
+        }
+        setTimeout(() => {
+          window.location.href = "../squads.html";
+        }, 1200); // 1.2s para garantir exibição do toast
       } catch (err) {
         hideDeleteModal();
         alert("Erro ao excluir a squad. Tente novamente.");

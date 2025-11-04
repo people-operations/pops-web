@@ -9,8 +9,22 @@ function readJSON(key, fallback) {
   }
 }
 
-// Do passo "roles": [{ id, title, seniority, quantity, hardSkills, softSkills }]
-const selectedRoles = readJSON("squads.selectedRoles", []);
+// Busca roles do sessionStorage (chave 'squadRoles'), se não existir, usa localStorage
+function getSelectedRoles() {
+  let roles = [];
+  try {
+    const session = sessionStorage.getItem("squadRoles");
+    if (session) {
+      roles = JSON.parse(session);
+    } else {
+      roles = readJSON("squads.selectedRoles", []);
+    }
+  } catch {
+    roles = readJSON("squads.selectedRoles", []);
+  }
+  return roles;
+}
+const selectedRoles = getSelectedRoles();
 
 // Do passo "weeklyRequirements": [{ id, title, hours }]
 const weeklyReqs = readJSON("squads.weeklyRequirements", []);
@@ -117,15 +131,11 @@ function getRequiredSkills(roleId) {
   if (!role) return [];
   // Suporte a roles criadas com skillsByType (novo formato)
   if (role.skillsByType && typeof role.skillsByType === "object") {
+    // Junta todas as skills de todos os tipos
     let all = [];
-    if (Array.isArray(role.skillsByType.HARD))
-      all = all.concat(role.skillsByType.HARD);
-    if (Array.isArray(role.skillsByType.SOFT))
-      all = all.concat(role.skillsByType.SOFT);
-    if (Array.isArray(role.skillsByType.MANAGEMENT))
-      all = all.concat(role.skillsByType.MANAGEMENT);
-    if (Array.isArray(role.skillsByType.ANALYTICS))
-      all = all.concat(role.skillsByType.ANALYTICS);
+    Object.values(role.skillsByType).forEach((arr) => {
+      if (Array.isArray(arr)) all = all.concat(arr);
+    });
     return all;
   }
   // fallback antigo
@@ -179,7 +189,8 @@ function render() {
     .map((r) => {
       const filled = (state.selectedByRole[r.id] || []).length;
       const needed = r.quantity ?? 2;
-      const label = `${r.title} – ${filled}/${needed} preenchido`;
+      console.log("Role render:", { r, filled, needed }); // DEBUG
+      const label = `${r.funcao} ${r.senioridade}  – ${filled}/${needed} preenchido`;
       return `<option value="${r.id}" ${
         state.roleId === r.id ? "selected" : ""
       }>${label}</option>`;
