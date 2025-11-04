@@ -56,6 +56,24 @@
     <footer class="footer">
       <p>People Operations © 2025</p>
     </footer>
-  </body>
+    <script>
+      // Redireciona para o perfil com userId na query string
+      document.addEventListener("DOMContentLoaded", function () {
+        var profileLink = document.getElementById("profile-link");
+        if (profileLink) {
+          profileLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            var userId = localStorage.getItem("userId");
+            if (userId) {
+              window.location.href = `../collaborators/collaborators-detail/collaborators-detail.html?id=${userId}`;
+            } else {
+              window.location.href =
+                "../collaborators/collaborators-detail/collaborators-detail.html";
+            }
+          });
+        }
+      });
+    </script>
+</body>
 </html>
 <script src="../../../assets/js/i18nService.js" defer></script>

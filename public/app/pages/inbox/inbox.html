@@ -16,7 +16,8 @@
       rel="stylesheet"
     />
   </head>
-<body>   <script>
+  <body>
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const avatar = document.querySelector(".avatar");
         const email = localStorage.getItem("userEmail");
@@ -122,12 +123,8 @@
           </svg>
         </span>
         <div id="dropdown" class="dropdown hidden">
-          <a
-            href="../collaborators/collaborators-detail/collaborators-detail.html"
+          <a id="profile-link" href="#"
             ><span data-i18n="navbar.profile">Perfil</span></a
-          >
-          <a href="../inbox/inbox.html"
-            ><span data-i18n="navbar.inbox">Caixa de Entrada</span></a
           >
           <a href="../configurations/general/general.html"
             ><span data-i18n="navbar.settings">Configurações</span></a
@@ -183,8 +180,26 @@
         </table>
       </section>
     </main>
+    <script src="inbox.js"></script>
+    <script src="../../../assets/js/app.js"></script>
+    <script src="../../../assets/js/i18nService.js" defer></script>
+    <script>
+      // Redireciona para o perfil com userId na query string
+      document.addEventListener("DOMContentLoaded", function () {
+        var profileLink = document.getElementById("profile-link");
+        if (profileLink) {
+          profileLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            var userId = localStorage.getItem("userId");
+            if (userId) {
+              window.location.href = `../collaborators/collaborators-detail/collaborators-detail.html?id=${userId}`;
+            } else {
+              window.location.href =
+                "../collaborators/collaborators-detail/collaborators-detail.html";
+            }
+          });
+        }
+      });
+    </script>
   </body>
 </html>
-<script src="inbox.js"></script>
-<script src="../../../assets/js/app.js"></script>
-<script src="../../../assets/js/i18nService.js" defer></script>
