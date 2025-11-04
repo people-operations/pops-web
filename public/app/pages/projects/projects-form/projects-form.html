@@ -117,10 +117,9 @@
           </svg>
         </span>
         <div id="dropdown" class="dropdown hidden">
-          <a
-            href="../../collaborators/collaborators-detail/collaborators-detail.html"
-            ><span data-i18n="navbar.profile"></span
-          ></a>
+     <a id="profile-link" href="#"
+            ><span data-i18n="navbar.profile">Perfil</span></a
+          >
           <a href="../../inbox/inbox.html"
             ><span data-i18n="navbar.inbox"></span
           ></a>
@@ -239,7 +238,11 @@
                 required
                 readonly
               />
-              <div class="datepicker" id="datepicker-start" style="display:none;"></div>
+              <div
+                class="datepicker"
+                id="datepicker-start"
+                style="display: none"
+              ></div>
             </div>
             <div class="col">
               <label data-i18n="projects_form.end_date"></label>
@@ -252,7 +255,11 @@
                 required
                 readonly
               />
-              <div class="datepicker" id="datepicker-end" style="display:none;"></div>
+              <div
+                class="datepicker"
+                id="datepicker-end"
+                style="display: none"
+              ></div>
             </div>
           </div>
           <!-- Botões -->
@@ -284,6 +291,24 @@
         const email = localStorage.getItem("userEmail");
         if (avatar && email && typeof email === "string" && email.length > 0) {
           avatar.textContent = email[0].toUpperCase();
+        }
+      });
+    </script>
+    <script>
+      // Redireciona para o perfil com userId na query string
+      document.addEventListener("DOMContentLoaded", function () {
+        var profileLink = document.getElementById("profile-link");
+        if (profileLink) {
+          profileLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            var userId = localStorage.getItem("userId");
+            if (userId) {
+              window.location.href = `../../collaborators/collaborators-detail/collaborators-detail.html?id=${userId}`;
+            } else {
+              window.location.href =
+                "../collaborators/collaborators-detail/collaborators-detail.html";
+            }
+          });
         }
       });
     </script>

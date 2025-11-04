@@ -101,6 +101,13 @@ document.getElementById("login-form").addEventListener("submit", (e) => {
       if (data && data.idToken) {
         localStorage.setItem("idToken", data.idToken);
         localStorage.setItem("userEmail", data.email);
+        // Salva apenas o número do localId
+        if (data.localId) {
+          const match = data.localId.match(/_(\d+)$/);
+          if (match && match[1]) {
+            localStorage.setItem("userId", match[1]);
+          }
+        }
         window.showNotification("success", "Login realizado com sucesso!");
         setTimeout(() => {
           window.location.href = "../pages/dashboard/dashboard.html";
