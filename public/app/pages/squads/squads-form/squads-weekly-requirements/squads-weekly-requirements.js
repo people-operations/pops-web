@@ -26,6 +26,7 @@ function buildMarks(container, min, max) {
 }
 
 // Renderiza um cartão de função com slider
+
 function renderRoleCard(container, role) {
   // defaults de range (você pode ajustar por função se quiser)
   const min = 0;
@@ -35,10 +36,22 @@ function renderRoleCard(container, role) {
   const card = document.createElement("div");
   card.className = "hours-card";
 
+  // Função para calcular média diária
+  function getMediaDiaria(weekHours) {
+    if (!weekHours || isNaN(weekHours)) return "0h/dia";
+    const diaria = weekHours / 5;
+    // Exibe com 1 casa decimal se não for inteiro
+    return diaria % 1 === 0 ? `${diaria}h/dia` : `${diaria.toFixed(1)}h/dia`;
+  }
+
   card.innerHTML = `
     <h4>${role.title}</h4>
-    <div class="hint">${role.hint || "2 - 12 horas por pessoa"}</div>
-
+    <div class="hint-row d-flex">
+      <div class="hint">${role.hint || "1- 40 horas por pessoa"}</div>
+      <div class="media-diaria" style="margin-left:12px; margin-top:-2px; color:#7d1bff; font-weight:600;">${getMediaDiaria(
+        start
+      )}</div>
+    </div>
     <div class="slider-row">
       <div class="slider-wrap">
         <input type="range" min="${min}" max="${max}" step="1" value="${start}" aria-label="Horas alocadas para ${
@@ -56,14 +69,21 @@ function renderRoleCard(container, role) {
   const sliderWrap = card.querySelector(".slider-wrap");
   const rangeEl = card.querySelector('input[type="range"]');
   const numberEl = card.querySelector('input[type="number"]');
+  const mediaDiariaEl = card.querySelector(".media-diaria");
   buildMarks(sliderWrap, min, max);
   paintRangeTrack(rangeEl);
+
+  // Atualiza média diária
+  function updateMediaDiaria(val) {
+    if (mediaDiariaEl) mediaDiariaEl.textContent = getMediaDiaria(val);
+  }
 
   // sincronização range <-> number
   rangeEl.addEventListener("input", () => {
     numberEl.value = rangeEl.value;
     paintRangeTrack(rangeEl);
     role.hours = Number(rangeEl.value);
+    updateMediaDiaria(role.hours);
     checkNextButton();
   });
   numberEl.addEventListener("input", () => {
@@ -75,6 +95,7 @@ function renderRoleCard(container, role) {
     rangeEl.value = v;
     paintRangeTrack(rangeEl);
     role.hours = v;
+    updateMediaDiaria(role.hours);
     checkNextButton();
   });
 
@@ -94,7 +115,7 @@ function loadRolesFromPreviousStep() {
         hardSkills: r.hardSkills,
         softSkills: r.softSkills,
         quantity: r.quantity || 1,
-        hint: r.hint || "2 - 12 horas por pessoa",
+        hint: r.hint || "1- 40 horas por pessoa",
         hours: r.hours ?? 0,
       }));
     } catch {}
@@ -104,13 +125,13 @@ function loadRolesFromPreviousStep() {
     {
       id: "fe-senior",
       title: "Front-end Sênior",
-      hint: "2 - 12 horas por pessoa",
+      hint: "1- 40 horas por pessoa",
       hours: 0,
     },
     {
       id: "fe-junior",
       title: "Front-end Junior",
-      hint: "2 - 12 horas por pessoa",
+      hint: "1- 40 horas por pessoa",
       hours: 0,
     },
   ];
@@ -118,18 +139,31 @@ function loadRolesFromPreviousStep() {
 
 function checkNextButton() {
   const next = document.getElementById("nextBtn");
-  next.disabled = false; // Sempre habilitado
-  // Ajuste de contraste para modo dark
-  if (document.body.classList.contains('dark')) {
-    next.classList.add('dark-mode');
+  // Só habilita se todas as roles tiverem pelo menos 1 hora alocada
+  const allHaveHours = (window.__roles || []).every(
+    (r) => Number(r.hours) >= 1
+  );
+  next.disabled = !allHaveHours;
+  if (!allHaveHours) {
+    if (!next.classList.contains("disabled")) next.classList.add("disabled");
   } else {
-    next.classList.remove('dark-mode');
+    next.classList.remove("disabled");
+  }
+  // Ajuste de contraste para modo dark
+  if (document.body.classList.contains("dark")) {
+    next.classList.add("dark-mode");
+  } else {
+    next.classList.remove("dark-mode");
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   // mostra conteúdo (caso você use skeleton/loader em app.js)
   document.getElementById("main-content")?.classList.remove("hidden");
+
+  // Recupera squadId da URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const squadId = urlParams.get("squadId");
 
   const list = document.getElementById("weeklyList");
   window.__roles = loadRolesFromPreviousStep();
@@ -139,7 +173,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Botões
   document.getElementById("backBtn")?.addEventListener("click", () => {
-    window.location.href = "../squads-roles/squads-roles.html";
+    window.location.href = `../squads-roles/squads-roles.html${
+      squadId ? `?squadId=${squadId}` : ""
+    }`;
   });
 
   document.getElementById("nextBtn")?.addEventListener("click", () => {
@@ -153,6 +189,8 @@ document.addEventListener("DOMContentLoaded", () => {
       "squads.selectedRoles",
       JSON.stringify(window.__roles)
     );
-    window.location.href = "../squads-members/squads-members.html";
+    window.location.href = `../squads-members/squads-members.html${
+      squadId ? `?squadId=${squadId}` : ""
+    }`;
   });
 });

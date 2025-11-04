@@ -30,7 +30,7 @@ function renderSquads() {
   const container = document.getElementById("squad-list");
   container.innerHTML = "";
   const i18n = window.i18n;
-  if (!squads || squads.length === 0) {
+  if (!squads || squads.length === 0) {S
     container.innerHTML = `<p style="text-align:center;">Nenhuma squad encontrada.</p>`;
     return;
   }
@@ -41,7 +41,6 @@ function renderSquads() {
     const area = squad.area || "-";
     const membros = squad.membros || squad.members || "-";
     const tecnologias = squad.tecnologias || squad.technologies || [];
-    const projetosAtivos = squad.projetosAtivos || squad.activeProjects || "-";
     const horasAlocadas = squad.horasAlocadas || squad.allocatedHours || 0;
     const horasTotais = squad.horasTotais || squad.totalHours || 0;
     const preco = squad.preco || squad.price || "-";
@@ -50,10 +49,6 @@ function renderSquads() {
       <div class="squad-card">
         <div class="squad-header">
           <h3>${nome}</h3>
-          <span class="tag-green">${interpolate(
-            i18n.t("squads.active_projects"),
-            { count: projetosAtivos }
-          )}</span>
         </div>
         <p class="squad-description">${descricao}</p>
         <p>

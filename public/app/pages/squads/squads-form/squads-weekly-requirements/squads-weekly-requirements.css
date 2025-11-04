@@ -358,6 +358,23 @@ body.dark .marks .tick::before {
   font-weight: 500 !important;
   letter-spacing: 0 !important;
   font-family: "Poppins", sans-serif;
+  transition: background 0.2s, color 0.2s, opacity 0.2s;
+}
+
+.save:disabled,
+.save.disabled {
+  background: #e5e7eb !important;
+  color: #b0b0b0 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  border: none;
+}
+
+body.dark .save:disabled,
+body.dark .save.disabled {
+  background: #444 !important;
+  color: #bbb !important;
+  border: none;
 }
 
 body.dark .hours-card {

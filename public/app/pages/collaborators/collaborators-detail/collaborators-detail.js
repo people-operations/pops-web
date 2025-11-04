@@ -315,8 +315,6 @@ async function patchValue(employee) {
       employee.id
     );
 
-    console.log("Squad response status:", squadResponse);
-
     const squadsContainer = document.querySelector(
       ".squads-section .avatars-group"
     );

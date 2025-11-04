@@ -51,7 +51,6 @@ export const apiService = {
   },
 
   async getAllProjects() {
-    console.log("Fetching all projects from API...");
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch("http://localhost:8082/api/projects", {
@@ -167,11 +166,8 @@ export const apiService = {
   },
 
   async getProjectStatuses() {
-    console.log("Getting project statuses...");
     try {
-      console.log("Getting project statuses...");
       const token = getAuthTokenOrThrow();
-      console.log("Fetching project statuses with token:", token);
       const response = await fetch("http://localhost:8082/api/project-status", {
         method: "GET",
         headers: {
@@ -235,6 +231,30 @@ export const apiService = {
       return data.content;
     } catch (error) {
       console.error("Erro ao buscar squads:", error.message);
+      return null;
+    }
+  },
+
+  async insertSquad(squad) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch("http://localhost:8083/api/teams", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(squad),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Erro ao inserir squad:", error.message);
       return null;
     }
   },
@@ -310,6 +330,31 @@ export const apiService = {
     }
   },
 
+  async insertSquadAllocations(squadId, allocations) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(
+        `http://localhost:8083/api/teams/${squadId}/allocations`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(allocations),
+        }
+      );
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("Erro ao inserir alocações do squad:", error);
+      return null;
+    }
+  },
+
   async getCollaboratorById(employeeId) {
     try {
       const token = getAuthTokenOrThrow();
@@ -360,7 +405,6 @@ export const apiService = {
 
   async getCollaborators(filters = {}) {
     try {
-      console.log("Fetching collaborators with filters:", filters);
       const token = getAuthTokenOrThrow();
       const params = new URLSearchParams();
       if (filters.employeeName)
