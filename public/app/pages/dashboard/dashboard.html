@@ -2,6 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title data-i18n="dashboard.page_title">POPs Dashboard</title>
     <link rel="stylesheet" href="dashboard.css" />
     <link rel="stylesheet" href="../../../assets/css/style.css" />
@@ -17,15 +18,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const avatar = document.querySelector(".avatar");
-        const email = localStorage.getItem("userEmail");
-        if (avatar && email && typeof email === "string" && email.length > 0) {
-          avatar.textContent = email[0].toUpperCase();
-        }
-      });
-    </script>
     <div
       id="loader"
       class="center"
@@ -155,200 +147,608 @@
           <h1 class="gradient-title" data-i18n="dashboard.main_title"></h1>
           <div class="subtitle" data-i18n="dashboard.subtitle"></div>
 
-          <div class="cards">
-            <div class="card azul">
-              <div class="card-content">
-                <div class="icon">
-                  <img src="../../../assets/svg/file-icon.svg" alt="Projetos" />
-                </div>
-                <h2 data-i18n="dashboard.total_projects"></h2>
-                <div class="value">12</div>
-                <div
-                  class="subtitle"
-                  data-i18n="dashboard.active_projects"
-                ></div>
+          <!-- Filtros Globais -->
+          <div class="global-filters">
+            <div class="filter-group">
+              <label>Período:</label>
+              <select id="timeFilter">
+                <option value="week">Última Semana</option>
+                <option value="month" selected>Último Mês</option>
+                <option value="quarter">Último Trimestre</option>
+                <option value="semester">Último Semestre</option>
+                <option value="year">Último Ano</option>
+              </select>
+            </div>
+            <div class="filter-group" id="squadFilterGroup">
+              <label>Squad:</label>
+              <select id="squadFilter">
+                <option value="all">Todos os Squads</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Dashboard do Gestor -->
+          <div id="manager-dashboard">
+            <!-- Abas -->
+            <div class="tabs-container">
+              <div class="tabs">
+                <button class="tab-button" data-tab="costs">
+                  <span>💰</span> Custos
+                </button>
+                <button class="tab-button" data-tab="allocation">
+                  <span>⏱️</span> Alocação
+                </button>
+                <button class="tab-button" data-tab="competencies">
+                  <span>🎯</span> Competências
+                </button>
+                <button class="tab-button" data-tab="analysis">
+                  <span>📈</span> Análises
+                </button>
               </div>
             </div>
-            <div class="card roxo">
-              <div class="card-content">
-                <div class="icon">
-                  <img src="../../../assets/svg/people-icon.svg" alt="Squads" />
+
+            <!-- Aba: Custos -->
+            <div class="tab-content" id="tab-costs">
+              <!-- KPIs de Custos -->
+              <div class="kpi-section">
+                <h2 class="section-title">Indicadores de Custos</h2>
+                <div class="cards">
+                  <div class="card roxo">
+                    <div class="card-content">
+                      <div class="icon">
+                        <img src="../../../assets/svg/projects.svg" alt="Desvio de Custo" />
+                      </div>
+                      <div class="kpi-header">
+                        <h2>Desvio de Custos em Projetos</h2>
+                        <div class="info-icon" data-kpi="cost-deviation" data-metrics='{"ok": "R$-5.000 a R$2.000", "warning": "R$2.001 - R$3.000", "above": "Acima de R$3.000 ou abaixo de R$-5.000"}'>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="12" cy="8" r="1" fill="currentColor"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="value" id="kpi-cost-deviation">R$ 0</div>
+                      <div class="subtitle">Representa a diferença entre o orçamento planejado e o custo real aplicado nos projetos.</div>
+                      <div class="tag" id="kpi-cost-deviation-tag">0%</div>
+                    </div>
+                  </div>
+                  <div class="card azul">
+                    <div class="card-content">
+                      <div class="icon">
+                        <img src="../../../assets/svg/squads.svg" alt="Custo Médio" />
+                      </div>
+                      <div class="kpi-header">
+                        <h2>Custo Médio por Squad</h2>
+                      </div>
+                      <div class="value" id="kpi-avg-squad-cost">R$ 0</div>
+                      <div class="subtitle">Calcula a média de investimento financeiro por squad. </div>
+                    </div>
+                  </div>
+                  <div class="card rosa">
+                    <div class="card-content">
+                      <div class="icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                      </div>
+                      <div class="kpi-header">
+                        <h2>Custo de Ociosidade</h2>
+                        <div class="info-icon" data-kpi="idle-cost" data-metrics='{"ok": "Até R$5.000", "warning": "R$5.001 - R$10.000", "above": "Acima de R$1.000"}'>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="12" cy="8" r="1" fill="currentColor"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="value" id="kpi-idle-cost">R$ 0</div>
+                      <div class="subtitle">Reflete o custo financeiro de recursos humanos que estão com capacidade não totalmente alocadas.</div>
+                    </div>
+                  </div>
                 </div>
-                <h2 data-i18n="dashboard.total_squads"></h2>
-                <div class="value">12</div>
-                <div class="subtitle" data-i18n="dashboard.active_squads"></div>
+              </div>
+              
+              <div class="section-group">
+                <h2 class="section-title">Análise de Custos</h2>
+                <div class="content">
+                  <div class="chart-card">
+                    <div class="chart-header">
+                      <div class="chart-title-group">
+                        <h3>Custo Previsto vs Realizado</h3>
+                      </div>
+                      <div class="chart-filters">
+                        <select id="costDeviationSquadFilter">
+                          <option value="all">Todos os Squads</option>
+                        </select>
+                      </div>
+                    </div>
+                    <p class="chart-description">Visualização comparativa entre o custo planejado e o custo real, auxiliando na tomada de decisão, no ajuste dos gastos ao longo do projeto e na verificação da precisão do planejamento para aprimorar previsões futuras.</p>
+                    <canvas id="costDeviationChart"></canvas>
+                  </div>
+                  <div class="chart-card">
+                    <div class="chart-header">
+                      <div class="chart-title-group">
+                        <h3>Custo Alocado por Squad</h3>
+                        <div class="info-icon" data-tooltip="Apresenta o total de recursos financeiros alocados para cada squad, incluindo custos de pessoal, infraestrutura e ferramentas. Útil para análise de distribuição de investimentos e identificação de squads com maior ou menor investimento.">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="12" cy="8" r="1" fill="currentColor"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="chart-filters">
+                        <select id="costAllocatedSquadFilter">
+                          <option value="all">Todos os Squads</option>
+                        </select>
+                      </div>
+                    </div>
+                    <p class="chart-description">Distribuição do investimento financeiro total por squad. Este gráfico ajuda a entender como os recursos estão sendo distribuídos entre as equipes, permitindo identificar desequilíbrios e oportunidades de otimização na alocação de orçamento.</p>
+                    <canvas id="costAllocatedChart"></canvas>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="card rosa">
-              <div class="card-content">
-                <div class="icon">
-                  <img src="../../../assets/svg/time-icon.svg" alt="Horas" />
+
+            <!-- Aba: Alocação -->
+            <div class="tab-content" id="tab-allocation">
+              <!-- KPIs de Alocação -->
+              <div class="kpi-section">
+                <h2 class="section-title">Indicadores de Alocação</h2>
+                <div class="cards">
+                  <div class="card azul">
+                    <div class="card-content">
+                      <div class="icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M14 2V8H20" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M16 13H8" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M16 17H8" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M10 9H9H8" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                      </div>
+                      <h2>Total de Projetos Ativos</h2>
+                      <div class="value" id="kpi-total-projects">0</div>
+                      <div class="subtitle">Quantidade de projetos que estão em andamento no momento.</div>
+                    </div>
+                  </div>
+                  <div class="card roxo">
+                    <div class="card-content">
+                      <div class="icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                      </div>
+                      <h2>Total de Squads Ativos</h2>
+                      <div class="value" id="kpi-total-squads">0</div>
+                      <div class="subtitle">Número de squads atualmente operando e alocados em atividades.</div>
+                    </div>
+                  </div>
+                  <div class="card rosa">
+                    <div class="card-content">
+                      <div class="icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="12" cy="12" r="10" stroke="#111" stroke-width="1.5" fill="none"/>
+                          <path d="M12 6V12L16 14" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                      </div>
+                      <h2>Total de Horas Alocadas</h2>
+                      <div class="value" id="kpi-total-hours">0h</div>
+                      <div class="subtitle">Somatório das horas destinadas às atividades dos projetos dentro do período analisado.</div>
+                    </div>
+                  </div>
                 </div>
-                <h2 data-i18n="dashboard.total_hours"></h2>
-                <div class="value">2.506h</div>
-                <div
-                  class="subtitle"
-                  data-i18n="dashboard.allocated_hours"
-                ></div>
+
+                <div class="cards">
+                  <div class="card laranja">
+                    <div class="card-content">
+                      <div class="icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M9 21H15" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M12 3C8.13 3 5 6.13 5 10C5 12.38 6.19 14.47 8 15.74V17C8 17.5523 8.44772 18 9 18H15C15.5523 18 16 17.5523 16 17V15.74C17.81 14.47 19 12.38 19 10C19 6.13 15.87 3 12 3Z" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M9 12L11 10L13 12L15 10" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M8 8L10 6" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M16 8L14 6" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                      </div>
+                      <div class="kpi-header">
+                        <h2>% Sobrecarga Operacional</h2>
+                        <div class="info-icon" data-kpi="overload-percentage" data-metrics='{"ok": "Até 10%", "warning": "10,1% - 20%", "above": "Acima de 20%"}'>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="12" cy="8" r="1" fill="currentColor"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="value" id="kpi-overload-percentage">0%</div>
+                      <div class="subtitle">Percentual que mostra quanto a equipe está trabalhando acima da capacidade planejada, indicando possível excesso de demanda ou risco de sobrecarga.</div>
+                    </div>
+                  </div>
+                  <div class="card verde-agua">
+                    <div class="card-content">
+                      <div class="icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                      </div>
+                      <div class="kpi-header">
+                        <h2>% Ociosidade Operacional</h2>
+                        <div class="info-icon" data-kpi="idle-percentage" data-metrics='{"ok": "Até 5%", "warning": "5,1% - 15%", "above": "Acima de 15%"}'>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="12" cy="8" r="1" fill="currentColor"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="value" id="kpi-idle-percentage">0%</div>
+                      <div class="subtitle">Percentual que representa o tempo em que a equipe está abaixo da capacidade prevista, indicando períodos com pouca demanda ou recursos subutilizados.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="section-group">
+                <h2 class="section-title">Alocação e Carga de Trabalho</h2>
+                <div class="content">
+                  <div class="chart-card">
+                    <div class="chart-header">
+                      <h3>Distribuição de % Colaboradores por Nível de Alocação</h3>
+                      <div class="chart-filters">
+                        <select id="allocationLevelFilter">
+                          <option value="all">Todos os Níveis</option>
+                          <option value="0-50">0-50%</option>
+                          <option value="50-80">50-80%</option>
+                          <option value="80-100">80-100%</option>
+                          <option value="100-120">100-120%</option>
+                          <option value="120+">>120%</option>
+                        </select>
+                      </div>
+                    </div>
+                    <canvas id="allocationDistributionChart"></canvas>
+                    <div id="allocationDetails" class="allocation-details hidden"></div>
+                  </div>
+                  <div class="chart-card">
+                    <div class="chart-header">
+                      <h3>Comparação de Sobrecarga e Ociosidade</h3>
+                    </div>
+                    <canvas id="overloadIdleComparisonChart"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="section-group">
+                <h2 class="section-title">Distribuição de Carga de Trabalho</h2>
+                <div class="content">
+                  <div class="chart-card full-width">
+                    <div class="chart-header">
+                      <h3>Distribuição de Carga de Trabalho por Squad</h3>
+                    </div>
+                    <canvas id="workloadDistributionChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Aba: Competências -->
+            <div class="tab-content" id="tab-competencies">
+              <!-- KPIs de Certificados -->
+              <div class="kpi-section">
+                <h2 class="section-title">Indicadores de Certificações</h2>
+                <div class="cards">
+                  <div class="card roxo clickable" id="kpi-certificates-expiring">
+                    <div class="card-content">
+                      <div class="icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M14 2V8H20" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <circle cx="12" cy="12" r="3" stroke="#111" stroke-width="1.5" fill="none"/>
+                          <path d="M12 9V12L14 13" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                      </div>
+                      <h2>Certificados Próximos ao Vencimento</h2>
+                      <div class="value" id="kpi-certificates-count">0</div>
+                      <div class="subtitle">Quantidade de certificados que estão prestes a expirar e/ou requerem renovação em breve.</div>
+                    </div>
+                  </div>
+                  <div class="card azul">
+                    <div class="card-content">
+                      <div class="icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M14 2V8H20" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                          <path d="M9 12L11 14L15 10" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                      </div>
+                      <h2>Certificados Anexados</h2>
+                      <div class="value" id="kpi-certificates-month">0</div>
+                      <div class="subtitle">Total de certificados adicionados ao sistema dentro do período analisado</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="section-group">
+                <h2 class="section-title">Competências e Talentos</h2>
+                <div class="content">
+                  <div class="chart-card">
+                    <div class="chart-header">
+                      <h3>Skills dos Colaboradores da Empresa</h3>
+                      <div class="chart-filters">
+                        <select id="skillsFilter">
+                          <option value="all">Todas as Skills</option>
+                        </select>
+                      </div>
+                    </div>
+                    <canvas id="skillsChart"></canvas>
+                  </div>
+                  <div class="chart-card">
+                    <div class="chart-header">
+                      <h3>Níveis de Senioridade por Squad</h3>
+                      <div class="chart-filters">
+                        <select id="seniorityFilter">
+                          <option value="all">Todos os Cargos</option>
+                        </select>
+                      </div>
+                    </div>
+                    <canvas id="seniorityChart"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="section-group">
+                <h2 class="section-title">Heatmap de Skills x Squad</h2>
+                <div class="content">
+                  <div class="chart-card full-width">
+                    <canvas id="skillsHeatmapChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Aba: Análises -->
+            <div class="tab-content" id="tab-analysis">
+              <div class="section-group">
+                <h2 class="section-title">Visão Estratégica</h2>
+                <div class="content">
+                  <div class="chart-card full-width">
+                    <div class="chart-header">
+                      <h3>Visão Estratégica Completa por Squad</h3>
+                      <div class="chart-filters">
+                        <select id="strategicSquadFilter">
+                          <option value="all">Todos os Squads</option>
+                        </select>
+                      </div>
+                    </div>
+                    <canvas id="strategicViewChart"></canvas>
+                    <p class="chart-description">Gráfico dimensional mostrando métricas estratégicas por squad: Custos, Alocação de Horas e Número de Pessoas. Cada eixo representa uma dimensão estratégica, permitindo visualizar o perfil de cada squad.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="section-group">
+                <h2 class="section-title">Análises Detalhadas</h2>
+                <div class="content">
+                  <div class="table-card">
+                    <div class="table-header-with-controls">
+                      <h3>Lista de Colaboradores</h3>
+                      <div class="table-controls">
+                        <select id="collaboratorSortBy">
+                          <option value="name">Ordenar por Nome</option>
+                          <option value="overload-desc">Mais Sobrecarga</option>
+                          <option value="overload-asc">Menos Sobrecarga</option>
+                          <option value="idle-desc">Mais Ociosidade</option>
+                          <option value="idle-asc">Menos Ociosidade</option>
+                        </select>
+                      </div>
+                    </div>
+                    <table class="dashboard-table">
+                      <thead>
+                        <tr>
+                          <th>Nome</th>
+                          <th>Cargo</th>
+                          <th>Squads</th>
+                          <th>% Horas Alocadas</th>
+                          <th>% Horas Disponíveis</th>
+                          <th>% Sobrecarga</th>
+                          <th>% Ociosidade</th>
+                        </tr>
+                      </thead>
+                      <tbody id="collaboratorsTableBody">
+                      </tbody>
+                    </table>
+                    <div class="pagination-controls">
+                      <button id="collaboratorsPrevPage" class="pagination-btn">Anterior</button>
+                      <span id="collaboratorsPageInfo" class="page-info">Página 1 de 1</span>
+                      <button id="collaboratorsNextPage" class="pagination-btn">Próxima</button>
+                    </div>
+                  </div>
+                  <div class="top-squads-tables-wrapper">
+                    <div class="table-card">
+                      <h3>Squads Mais Ociosos</h3>
+                      <table class="dashboard-table">
+                        <thead>
+                          <tr>
+                            <th>Rank</th>
+                            <th>Squad</th>
+                            <th>% Ociosidade</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody id="topIdleSquadsTableBody">
+                        </tbody>
+                      </table>
+                      <div class="pagination-controls">
+                        <button id="idleSquadsPrevPage" class="pagination-btn">Anterior</button>
+                        <span id="idleSquadsPageInfo" class="page-info">Página 1 de 1</span>
+                        <button id="idleSquadsNextPage" class="pagination-btn">Próxima</button>
+                      </div>
+                    </div>
+                    <div class="table-card">
+                      <h3>Squads Mais Sobrecarregados</h3>
+                      <table class="dashboard-table">
+                        <thead>
+                          <tr>
+                            <th>Rank</th>
+                            <th>Squad</th>
+                            <th>% Sobrecarga</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody id="topOverloadSquadsTableBody">
+                        </tbody>
+                      </table>
+                      <div class="pagination-controls">
+                        <button id="overloadSquadsPrevPage" class="pagination-btn">Anterior</button>
+                        <span id="overloadSquadsPageInfo" class="page-info">Página 1 de 1</span>
+                        <button id="overloadSquadsNextPage" class="pagination-btn">Próxima</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="top-squads-tables-wrapper">
+                    <div class="table-card">
+                      <h3>Skills Mais Frequentes no Mercado</h3>
+                      <table class="dashboard-table">
+                        <thead>
+                          <tr>
+                            <th>Rank</th>
+                            <th>Skill</th>
+                            <th>Frequência</th>
+                          </tr>
+                        </thead>
+                        <tbody id="marketSkillsTableBody">
+                        </tbody>
+                      </table>
+                      <div class="pagination-controls">
+                        <button id="marketSkillsPrevPage" class="pagination-btn">Anterior</button>
+                        <span id="marketSkillsPageInfo" class="page-info">Página 1 de 1</span>
+                        <button id="marketSkillsNextPage" class="pagination-btn">Próxima</button>
+                      </div>
+                    </div>
+                    <div class="table-card">
+                      <h3>Skills Mais Comuns entre os Funcionários</h3>
+                      <table class="dashboard-table">
+                        <thead>
+                          <tr>
+                            <th>Rank</th>
+                            <th>Skill</th>
+                            <th>Colaboradores</th>
+                          </tr>
+                        </thead>
+                        <tbody id="employeeSkillsTableBody">
+                        </tbody>
+                      </table>
+                      <div class="pagination-controls">
+                        <button id="employeeSkillsPrevPage" class="pagination-btn">Anterior</button>
+                        <span id="employeeSkillsPageInfo" class="page-info">Página 1 de 1</span>
+                        <button id="employeeSkillsNextPage" class="pagination-btn">Próxima</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="cards">
-            <div class="card vermelho">
-              <div class="card-content">
-                <div class="icon">
-                  <img
-                    src="../../../assets/svg/money-icon.svg"
-                    alt="Desvio de Custo"
-                  />
+          <!-- Dashboard do Colaborador -->
+          <div id="collaborator-dashboard" class="hidden">
+            <div class="kpi-section">
+              <h2 class="section-title">Meus Dados</h2>
+              <div class="cards">
+                <div class="card azul">
+                  <div class="card-content">
+                    <div class="icon">
+                      <img src="../../../assets/svg/time-icon.svg" alt="Horas" />
+                    </div>
+                    <h2>Minhas Horas Alocadas</h2>
+                    <div class="value" id="my-allocated-hours">0h</div>
+                    <div class="subtitle">Horas alocadas nesta semana</div>
+                  </div>
                 </div>
-                <h2 data-i18n="dashboard.cost_deviation"></h2>
+                <div class="card roxo">
+                  <div class="card-content">
+                    <div class="icon">
+                      <img src="../../../assets/svg/people-icon.svg" alt="Squads" />
+                    </div>
+                    <h2>Meus Squads</h2>
+                    <div class="value" id="my-squads-count">0</div>
+                    <div class="subtitle">Squads em que estou alocado</div>
+                  </div>
+                </div>
+                <div class="card rosa">
+                  <div class="card-content">
+                    <div class="icon">
+                      <img src="../../../assets/svg/file-icon.svg" alt="Projetos" />
+                    </div>
+                    <h2>Meus Projetos</h2>
+                    <div class="value" id="my-projects-count">0</div>
+                    <div class="subtitle">Projetos em que trabalho</div>
+                  </div>
+                </div>
               </div>
-              <div class="value">80%</div>
-              <div
-                class="subtitle"
-                data-i18n="dashboard.budget_variation"
-              ></div>
-              <div class="tag vermelho">71%</div>
+              <div class="cards">
+                <div class="card verde">
+                  <div class="card-content">
+                    <div class="icon">
+                      <img src="../../../assets/svg/energy-icon.svg" alt="Alocação" />
+                    </div>
+                    <h2>% de Alocação</h2>
+                    <div class="value" id="my-allocation-percentage">0%</div>
+                    <div class="subtitle">Percentual de horas alocadas</div>
+                  </div>
+                </div>
+                <div class="card vermelho">
+                  <div class="card-content">
+                    <div class="icon">
+                      <img src="../../../assets/svg/warning-icon.svg" alt="Sobrecarga" />
+                    </div>
+                    <h2>% Sobrecarga</h2>
+                    <div class="value" id="my-overload-percentage">0%</div>
+                    <div class="subtitle">Percentual de sobrecarga</div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="card verde">
-              <div class="card-content">
-                <div class="icon">
-                  <img
-                    src="../../../assets/svg/energy-icon.svg"
-                    alt="Índice de Ociosidade"
-                  />
+            <div class="section-group">
+              <h2 class="section-title">Minha Distribuição de Carga</h2>
+              <div class="content">
+                <div class="chart-card">
+                  <canvas id="myWorkloadChart"></canvas>
                 </div>
-                <h2 data-i18n="dashboard.idle_index"></h2>
               </div>
-              <div class="value">2%</div>
-              <div
-                class="subtitle"
-                data-i18n="dashboard.underutilized_capacity"
-              ></div>
-              <div class="tag verde">-2%</div>
-            </div>
-            <div class="card vermelho">
-              <div class="card-content">
-                <div class="icon">
-                  <img
-                    src="../../../assets/svg/warning-icon.svg"
-                    alt="Taxa de Sobrecarga"
-                  />
-                </div>
-                <h2 data-i18n="dashboard.overload_rate"></h2>
-              </div>
-              <div class="value">12</div>
-              <div
-                class="subtitle"
-                data-i18n="dashboard.active_capacities"
-              ></div>
-              <div class="tag vermelho">+2%</div>
             </div>
           </div>
-          <section class="content">
-            <div class="chart-card">
-              <h3 data-i18n="dashboard.workload_distribution"></h3>
-              <canvas id="workloadChart" height="180"></canvas>
-              <p>
-                <strong
-                  class="pink-action"
-                  data-i18n="dashboard.insight"
-                ></strong>
-                <span class="insight" data-i18n="dashboard.insightText"></span>
-              </p>
-            </div>
 
-            <div class="alert-card">
-              <div class="alert-header">
-                <h3 data-i18n="dashboard.critical_squads_alert"></h3>
-                <span
-                  class="alert-count"
-                  data-i18n="dashboard.teams_count"
-                ></span>
+          <!-- Modal para Certificados -->
+          <div id="certificatesModal" class="modal hidden">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3>Certificados Próximos ao Vencimento</h3>
+                <button class="modal-close" id="closeCertificatesModal">&times;</button>
               </div>
-
-              <ul class="alert-list">
-                <li>
-                  <div class="alert-squad">
-                    <div class="alert-info">
-                      <strong>Backend Team Alpha</strong>
-                      <span
-                        ><span data-i18n="dashboard.area_label"></span
-                        >Desenvolvimento</span
-                      >
-                    </div>
-                    <div class="alert-right">
-                      <strong class="alert-percentage">97%</strong>
-                      <span data-i18n="dashboard.overload_rate_label"></span>
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div class="alert-squad">
-                    <div class="alert-info">
-                      <strong>Backend Team Alpha</strong>
-                      <span
-                        ><span data-i18n="dashboard.area_label"></span
-                        >Desenvolvimento</span
-                      >
-                    </div>
-                    <div class="alert-right">
-                      <strong class="alert-percentage">97%</strong>
-                      <span data-i18n="dashboard.overload_rate_label"></span>
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div class="alert-squad">
-                    <div class="alert-info">
-                      <strong>Backend Team Alpha</strong>
-                      <span
-                        ><span data-i18n="dashboard.area_label"></span
-                        >Desenvolvimento</span
-                      >
-                    </div>
-                    <div class="alert-right">
-                      <strong class="alert-percentage">97%</strong>
-                      <span data-i18n="dashboard.overload_rate_label"></span>
-                    </div>
-                  </div>
-                </li>
-              </ul>
-
-              <p class="alert-action">
-                <strong
-                  class="pink-action"
-                  data-i18n="dashboard.alert_action"
-                ></strong>
-                <span data-i18n="dashboard.alert_action_text"></span>
-              </p>
+              <div class="modal-body">
+                <table class="dashboard-table">
+                  <thead>
+                    <tr>
+                      <th>Colaborador</th>
+                      <th>Certificado</th>
+                      <th>Data de Vencimento</th>
+                      <th>Dias Restantes</th>
+                    </tr>
+                  </thead>
+                  <tbody id="certificatesTableBody">
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </section>
+          </div>
         </div>
       </main>
     </div>
-    <script src="dashboard.js"></script>
+    <script type="module" src="dashboard.js"></script>
     <script src="../../../assets/js/app.js"></script>
-    <script src="../../../assets/js/i18nService.js"></script>
-    <script>
-      // Redireciona para o perfil com userId na query string
-      document.addEventListener("DOMContentLoaded", function () {
-        var profileLink = document.getElementById("profile-link");
-        if (profileLink) {
-          profileLink.addEventListener("click", function (e) {
-            e.preventDefault();
-            var userId = localStorage.getItem("userId");
-            if (userId) {
-              window.location.href = `../collaborators/collaborators-detail/collaborators-detail.html?id=${userId}`;
-            } else {
-              window.location.href =
-                "../collaborators/collaborators-detail/collaborators-detail.html";
-            }
-          });
-        }
-      });
-    </script>
-</body>
+    <script src="../../../assets/js/i18nService.js" defer></script>
+  </body>
 </html>

@@ -1,8 +1,6 @@
-/* Cursor pointer para linhas clicáveis da tabela */
-.collaborator-row {
-  cursor: pointer;
-}
-/* 1. LAYOUT PRINCIPAL */
+/* =========================
+   LAYOUT PRINCIPAL
+========================= */
 .container.collaborators-page {
   display: flex;
   flex-direction: column;
@@ -10,7 +8,9 @@
   gap: 16px;
 }
 
-/* 2. CABEÇALHO */
+/* =========================
+   CABEÇALHO
+========================= */
 .page-header {
   display: flex;
   align-items: center;
@@ -18,37 +18,18 @@
   gap: 16px;
   margin-bottom: 24px;
 }
-.collaborator-btn {
-  background-color: #7d1bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  min-height: 32px;
-  height: max-content;
-  min-width: 133px;
-  width: fit-content;
-  font-size: 16px !important;
-  font-weight: 500 !important;
-  padding: 4px !important;
-  letter-spacing: 0 !important;
-  font-family: "Poppins", sans-serif;
+
+.page-header h2 {
+  font-size: 24px;
+  color: #7d1bff;
 }
-.search-btn {
-  background-color: #7d1bff !important;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  height: 32px;
-  min-width: 133px;
-  width: fit-content;
-  font-size: 16px !important;
-  font-weight: 500 !important;
-  padding: 4px !important;
-  letter-spacing: 0 !important;
-  font-family: "Poppins", sans-serif;
+
+.page-description {
+  flex: 1;
+  font-size: 14px;
+  color: #555;
 }
+
 .collaborators-header {
   display: flex;
   justify-content: space-between;
@@ -67,25 +48,50 @@
   gap: 8px;
   align-items: flex-start;
 }
-.page-header h2 {
-  font-size: 24px;
-  color: #7d1bff;
-}
-.page-description {
-  flex: 1;
-  font-size: 14px;
-  color: #555;
-}
-.actions {
-  display: flex;
-  gap: 8px;
+
+/* =========================
+   BOTÕES
+========================= */
+.collaborator-btn {
+  background-color: #7d1bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  min-height: 32px;
+  height: max-content;
+  min-width: 133px;
+  width: fit-content;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 4px;
+  letter-spacing: 0;
+  font-family: "Poppins", sans-serif;
 }
 
-/* 3. BUSCA */
+.search-btn {
+  background-color: #7d1bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 32px;
+  min-width: 133px;
+  width: fit-content;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 4px;
+  letter-spacing: 0;
+  font-family: "Poppins", sans-serif;
+}
+
+/* =========================
+   BUSCA
+========================= */
 .search-bar {
   display: flex;
   gap: 8px;
-  margin-top: -32px !important;
+  margin-top: -32px;
 }
 
 .search-input-wrapper {
@@ -102,7 +108,7 @@
   border-radius: 6px;
   font-size: 14px;
   background: transparent;
-  height: 32px !important;
+  height: 32px;
 }
 
 .search-icon {
@@ -119,7 +125,9 @@
   white-space: nowrap;
 }
 
-/* 4. FILTROS */
+/* =========================
+   FILTROS
+========================= */
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -127,6 +135,7 @@
   align-items: flex-end;
   margin-bottom: 16px;
 }
+
 .filters select {
   padding: 8px 12px;
   border: 1px solid #ccc;
@@ -147,13 +156,15 @@
   gap: 10px;
 }
 
-/* 5. TABELA */
+/* =========================
+   TABELA
+========================= */
 .table-container h3 {
   margin: 0 0 8px;
   font-size: 16px;
   font-weight: 500;
 }
-/* TABELA - igual position */
+
 .collaborators-table {
   width: 100%;
   border-collapse: collapse;
@@ -175,10 +186,20 @@
 .collaborators-table tbody tr:hover {
   background-color: #f9f9f9;
 }
+
+/* Cursor pointer para linhas clicáveis da tabela */
+.collaborator-row {
+  cursor: pointer;
+}
+
+/* =========================
+   SKELETON LOADING
+========================= */
 .skeleton-row {
   animation: skeleton-loading 1.2s infinite linear alternate;
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
 }
+
 .skeleton-cell {
   height: 18px;
   border-radius: 4px;
@@ -186,6 +207,7 @@
   width: 100%;
   display: block;
 }
+
 @keyframes skeleton-loading {
   0% {
     background-position: -200px 0;
@@ -194,9 +216,14 @@
     background-position: calc(200px + 100%) 0;
   }
 }
+
+/* =========================
+   AVATARS
+========================= */
 .avatars-group {
   display: flex;
 }
+
 .avatar-sm {
   width: 28px;
   height: 28px;
@@ -212,10 +239,12 @@
 }
 
 .width-22 {
-  width: 22% !important;
+  width: 22%;
 }
 
-/* 6. STATUS */
+/* =========================
+   STATUS
+========================= */
 .status-badge.active {
   background-color: #2f7d32;
   color: #fff;
@@ -225,38 +254,9 @@
   display: inline-block;
 }
 
-/* 7. BOTOES */
-.btn {
-  border-radius: 4px;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  font-size: 14px;
-}
-.btn.primary {
-  background-color: #7d1bff;
-  color: #fff;
-  border: none;
-  padding: 0 12px;
-  height: 32px;
-}
-.btn.outline {
-  background: none;
-  border: 2px solid #7d1bff;
-  color: #7d1bff;
-  padding: 0 12px;
-  height: 32px;
-}
-.btn.small {
-  height: 28px;
-  font-size: 12px;
-  padding: 0 8px;
-}
-
-/* 8. RESPONSIVIDADE */
+/* =========================
+   RESPONSIVIDADE
+========================= */
 @media (max-width: 800px) {
   .page-header {
     flex-direction: column;
@@ -268,7 +268,9 @@
   }
 }
 
-/* 9. DARK MODE */
+/* =========================
+   DARK MODE
+========================= */
 body.dark .page-header h2 {
   color: #a259ff;
 }
@@ -310,9 +312,12 @@ body.dark .status-badge.active {
   background-color: #388e3c;
 }
 
+/* =========================
+   GRADIENT TITLE
+========================= */
 .gradient-title {
-  background: linear-gradient(90deg, #fa12e2, #fed700) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
+  background: linear-gradient(90deg, #fa12e2, #fed700);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

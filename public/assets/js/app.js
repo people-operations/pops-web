@@ -115,16 +115,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Adiciona evento de clique no botão de alternância de tema
-  document.getElementById("theme-toggle").addEventListener("click", () => {
-    const currentTheme = document.body.classList.contains("dark") ? "dark" : "light";
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
-    localStorage.setItem("theme", newTheme);
-    applyTheme(newTheme);
-    // Atualiza o select de aparência
-    if (appearanceSelect) {
-      appearanceSelect.value = newTheme === "dark" ? "Modo escuro" : "Modo claro";
-    }
-  });
+  const themeToggle = document.getElementById("theme-toggle");
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      const currentTheme = document.body.classList.contains("dark") ? "dark" : "light";
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", newTheme);
+      applyTheme(newTheme);
+      // Atualiza o select de aparência
+      if (appearanceSelect) {
+        appearanceSelect.value = newTheme === "dark" ? "Modo escuro" : "Modo claro";
+      }
+    });
+  }
 });
 
 window.pop = {
@@ -244,4 +247,64 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
   tryShowContent();
+});
+
+// =========================
+// FUNÇÕES REUTILIZÁVEIS
+// =========================
+
+/**
+ * Inicializa o avatar do usuário com a primeira letra do email
+ */
+window.initAvatar = function() {
+  const avatar = document.querySelector(".avatar");
+  const email = localStorage.getItem("userEmail");
+  if (avatar && email && typeof email === "string" && email.length > 0) {
+    avatar.textContent = email[0].toUpperCase();
+  }
+};
+
+/**
+ * Configura o link de perfil para redirecionar com userId
+ */
+window.initProfileLink = function() {
+  const profileLink = document.getElementById("profile-link");
+  if (profileLink) {
+    profileLink.addEventListener("click", function (e) {
+      e.preventDefault();
+      const userId = localStorage.getItem("userId");
+      // Determina o caminho base baseado na localização atual
+      const currentPath = window.location.pathname;
+      let basePath = "../collaborators/collaborators-detail/collaborators-detail.html";
+      
+      // Ajusta o caminho baseado na profundidade da página
+      if (currentPath.includes("/collaborators-detail/")) {
+        basePath = "collaborators-detail.html";
+      } else if (currentPath.includes("/collaborators/") && !currentPath.includes("/collaborators-detail/")) {
+        basePath = "collaborators-detail/collaborators-detail.html";
+      } else if (currentPath.includes("/squads-detail/") || currentPath.includes("/projects-detail/")) {
+        basePath = "../../collaborators/collaborators-detail/collaborators-detail.html";
+      } else if (currentPath.includes("/squads-form/") || currentPath.includes("/projects-form/")) {
+        basePath = "../../collaborators/collaborators-detail/collaborators-detail.html";
+      } else if (currentPath.includes("/configurations/")) {
+        basePath = "../../collaborators/collaborators-detail/collaborators-detail.html";
+      } else if (currentPath.includes("/dashboard/")) {
+        basePath = "../collaborators/collaborators-detail/collaborators-detail.html";
+      } else if (currentPath.includes("/inbox/")) {
+        basePath = "../collaborators/collaborators-detail/collaborators-detail.html";
+      }
+      
+      if (userId) {
+        window.location.href = `${basePath}?id=${userId}`;
+      } else {
+        window.location.href = basePath;
+      }
+    });
+  }
+};
+
+// Inicializa automaticamente quando o DOM estiver pronto
+document.addEventListener("DOMContentLoaded", function () {
+  window.initAvatar();
+  window.initProfileLink();
 });

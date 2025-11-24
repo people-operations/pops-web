@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,21 +10,13 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
   </head>
-<body>   <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const avatar = document.querySelector(".avatar");
-        const email = localStorage.getItem("userEmail");
-        if (avatar && email && typeof email === "string" && email.length > 0) {
-          avatar.textContent = email[0].toUpperCase();
-        }
-      });
-    </script>
+  <body>
     <!-- Cabeçalho -->
     <header class="header">
       <nav class="navbar">
         <div class="logo">
           <i class="fas fa-users icon"></i>
-          <spam class="people">People</spam>
+          <span class="people">People</span>
           <span class="operations">Operations</span>
         </div>
       </nav>
@@ -48,6 +40,7 @@
           height="580"
           src="https://app.pipefy.com/public/form/pq4JpEGD?embedded=true"
           frameborder="0"
+          title="Formulário de solicitação de certificado"
         ></iframe>
       </section>
     </div>
@@ -56,24 +49,7 @@
     <footer class="footer">
       <p>People Operations © 2025</p>
     </footer>
-    <script>
-      // Redireciona para o perfil com userId na query string
-      document.addEventListener("DOMContentLoaded", function () {
-        var profileLink = document.getElementById("profile-link");
-        if (profileLink) {
-          profileLink.addEventListener("click", function (e) {
-            e.preventDefault();
-            var userId = localStorage.getItem("userId");
-            if (userId) {
-              window.location.href = `../collaborators/collaborators-detail/collaborators-detail.html?id=${userId}`;
-            } else {
-              window.location.href =
-                "../collaborators/collaborators-detail/collaborators-detail.html";
-            }
-          });
-        }
-      });
-    </script>
-</body>
+    <script src="../../../assets/js/app.js"></script>
+    <script src="../../../assets/js/i18nService.js" defer></script>
+  </body>
 </html>
-<script src="../../../assets/js/i18nService.js" defer></script>
