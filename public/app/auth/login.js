@@ -1,4 +1,4 @@
-import { apiService } from "../../assets/js/apiService.js";
+import { apiService, getTokenPayload } from "../../assets/js/apiService.js";
 
 // =====================
 // Utilidades de Senha
@@ -108,9 +108,30 @@ document.getElementById("login-form").addEventListener("submit", (e) => {
             localStorage.setItem("userId", match[1]);
           }
         }
+        // Extrai e salva o access_level do token JWT (como número)
+        const tokenPayload = getTokenPayload();
+        let accessLevel = null;
+        if (tokenPayload && tokenPayload.access_level !== undefined) {
+          accessLevel = Number(tokenPayload.access_level);
+          if (!isNaN(accessLevel)) {
+            localStorage.setItem("accessLevel", accessLevel);
+          }
+        }
         window.showNotification("success", "Login realizado com sucesso!");
+        
+        // Redireciona baseado no access_level
         setTimeout(() => {
-          window.location.href = "../pages/dashboard/dashboard.html";
+          // Se for colaborador (3), redireciona para o perfil
+          if (accessLevel === 3) {
+            const userId = localStorage.getItem("userId");
+            const redirectUrl = userId 
+              ? `../pages/collaborators/collaborators-detail/collaborators-detail.html?id=${userId}`
+              : "../pages/collaborators/collaborators-detail/collaborators-detail.html";
+            window.location.href = redirectUrl;
+          } else {
+            // Manager (1 ou 2) vai para o dashboard
+            window.location.href = "../pages/dashboard/dashboard.html";
+          }
         }, 1200);
       } else {
         window.showNotification(

@@ -1,4 +1,5 @@
 import { apiService } from "../../../../assets/js/apiService.js";
+import { hasAccess, hasAnyAccess, applyAccessControl, protectFunction } from "../../../../assets/js/permissions.js";
 
 // Salva o HTML original da sidebar para restaurar depois do skeleton
 let originalSidebarHTML = null;
@@ -87,11 +88,21 @@ function formatDate(date) {
 }
 
 function addSidebarActionListeners() {
-  // Modal delete
+  // Aplicar controle de acesso aos botões
+  applyAccessControl();
+  
+  // Modal delete - apenas manager (1 ou 2) pode deletar
   const deleteBtn = document.querySelector(".delete-project-btn");
-  if (deleteBtn) deleteBtn.addEventListener("click", showDeleteModal);
+  if (deleteBtn) {
+    // Ocultar se não tiver permissão (já feito pelo applyAccessControl via data-require-access)
+    // Mas adicionamos proteção adicional na função
+    deleteBtn.addEventListener("click", protectFunction([1, 2], showDeleteModal));
+  }
+  
+  // Botão editar - manager (1 ou 2) pode editar
   const editBtn = document.querySelector(".edit-project-btn");
   if (editBtn) {
+    // Ocultar se não tiver permissão (já feito pelo applyAccessControl via data-require-access)
     editBtn.addEventListener("click", () => {
       const id = getProjectIdFromUrl();
       if (id) {

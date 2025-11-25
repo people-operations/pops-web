@@ -307,4 +307,8 @@ window.initProfileLink = function() {
 document.addEventListener("DOMContentLoaded", function () {
   window.initAvatar();
   window.initProfileLink();
+  
+  // Dashboard agora está disponível para todos os níveis (1, 2 e 3)
+  // Níveis 1 e 2 veem dashboard de gestão, nível 3 vê dashboard de colaborador
+  // Removido código que ocultava link do dashboard para colaboradores
 });
