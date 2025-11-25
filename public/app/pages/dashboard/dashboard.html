@@ -655,9 +655,29 @@
           <!-- Dashboard do Colaborador -->
           <div id="collaborator-dashboard" class="hidden">
 
-            <!-- KPIs do Colaborador -->
-            <div class="kpi-section">
-              <h2 class="section-title">Meus Indicadores</h2>
+            <!-- Abas -->
+            <div class="tabs-container">
+              <div class="tabs">
+                <button class="tab-button" data-tab="indicators">
+                  <span>📊</span> Indicadores
+                </button>
+                <button class="tab-button" data-tab="workload">
+                  <span>⏱️</span> Carga Horária
+                </button>
+                <button class="tab-button" data-tab="projects">
+                  <span>📁</span> Projetos
+                </button>
+                <button class="tab-button" data-tab="squads">
+                  <span>👥</span> Squads
+                </button>
+              </div>
+            </div>
+
+            <!-- Aba: Indicadores -->
+            <div class="tab-content" id="tab-indicators">
+              <!-- KPIs do Colaborador -->
+              <div class="kpi-section">
+                <h2 class="section-title">Meus Indicadores</h2>
               <div class="cards">
                 <div class="card rosa">
                   <div class="card-content">
@@ -732,10 +752,12 @@
                 </div>
               </div>
             </div>
+            </div>
 
-            <!-- Gráfico de Distribuição de Carga Horária -->
-            <div class="section-group">
-              <h2 class="section-title">Distribuição de Carga Horária</h2>
+            <!-- Aba: Carga Horária -->
+            <div class="tab-content" id="tab-workload">
+              <div class="section-group">
+                <h2 class="section-title">Distribuição de Carga Horária</h2>
               <div class="content">
                 <div class="chart-card full-width">
                   <div class="chart-header">
@@ -753,10 +775,12 @@
                 </div>
               </div>
             </div>
+            </div>
 
-            <!-- Tabela de Projetos Alocados -->
-            <div class="section-group">
-              <h2 class="section-title">Meus Projetos Alocados</h2>
+            <!-- Aba: Projetos -->
+            <div class="tab-content" id="tab-projects">
+              <div class="section-group">
+                <h2 class="section-title">Meus Projetos Alocados</h2>
               <div class="content">
                 <div class="chart-card full-width">
                   <div class="chart-header">
@@ -788,10 +812,12 @@
                 </div>
               </div>
             </div>
+            </div>
 
-            <!-- Tabela de Squads -->
-            <div class="section-group">
-              <h2 class="section-title">Squads em que Atuo</h2>
+            <!-- Aba: Squads -->
+            <div class="tab-content" id="tab-squads">
+              <div class="section-group">
+                <h2 class="section-title">Squads em que Atuo</h2>
               <div class="content">
                 <div class="chart-card full-width">
                   <div class="chart-header">
@@ -821,6 +847,7 @@
                   </div>
                 </div>
               </div>
+            </div>
             </div>
           </div>
 

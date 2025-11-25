@@ -183,8 +183,19 @@ function setupTabs() {
   // Inicializar a primeira aba se nenhuma estiver ativa
   let activeTab = document.querySelector(".tab-button.active");
   if (!activeTab && tabButtons.length > 0) {
-    console.log("Nenhuma aba ativa, ativando a primeira");
-    activeTab = tabButtons[0];
+    // Se for dashboard do colaborador, ativar a aba "Indicadores"
+    const collaboratorDashboard = document.getElementById("collaborator-dashboard");
+    if (collaboratorDashboard && !collaboratorDashboard.classList.contains("hidden")) {
+      const indicatorsTab = Array.from(tabButtons).find(btn => btn.getAttribute("data-tab") === "indicators");
+      if (indicatorsTab) {
+        console.log("Dashboard do colaborador detectado, ativando aba Indicadores");
+        activeTab = indicatorsTab;
+      } else {
+        activeTab = tabButtons[0];
+      }
+    } else {
+      activeTab = tabButtons[0];
+    }
     activeTab.classList.add("active");
     const firstTab = activeTab.getAttribute("data-tab");
     const firstContent = document.getElementById(`tab-${firstTab}`);
@@ -287,6 +298,31 @@ function updateChartsForTab(tabName) {
       setTimeout(() => {
         updateStrategicViewChart();
         updateAllTables();
+      }, 50);
+      break;
+    // Abas do Dashboard do Colaborador
+    case "indicators":
+      console.log("Atualizando aba de Indicadores do Colaborador");
+      updateCollaboratorKPIs();
+      break;
+    case "workload":
+      console.log("Atualizando aba de Carga Horária");
+      setTimeout(() => {
+        updateCollaboratorWorkloadCharts();
+      }, 50);
+      break;
+    case "projects":
+      console.log("Atualizando aba de Projetos");
+      setTimeout(() => {
+        updateCollaboratorProjectsComparisonChart();
+        updateCollaboratorProjectsTable();
+      }, 50);
+      break;
+    case "squads":
+      console.log("Atualizando aba de Squads");
+      setTimeout(() => {
+        updateCollaboratorSquadsComparisonChart();
+        updateCollaboratorSquadsTable();
       }, 50);
       break;
   }
@@ -1308,9 +1344,26 @@ function renderCollaboratorDashboard() {
     // Aguardar um pouco para garantir que os elementos estão no DOM
     setTimeout(() => {
       console.log("🔄 Atualizando KPIs, gráficos e tabelas do colaborador...");
-  updateCollaboratorKPIs();
-  updateCollaboratorCharts();
-      updateCollaboratorTables();
+      // Ativar a aba "Indicadores" por padrão
+      const indicatorsTab = document.querySelector('#collaborator-dashboard .tab-button[data-tab="indicators"]');
+      const indicatorsContent = document.getElementById("tab-indicators");
+      
+      // Remover active de todas as tabs do colaborador
+      document.querySelectorAll('#collaborator-dashboard .tab-button').forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll('#collaborator-dashboard .tab-content').forEach(content => content.classList.remove("active"));
+      
+      // Ativar a aba Indicadores
+      if (indicatorsTab && indicatorsContent) {
+        indicatorsTab.classList.add("active");
+        indicatorsContent.classList.add("active");
+        console.log("✅ Aba Indicadores ativada automaticamente");
+      }
+      
+      // Configurar tabs do colaborador
+      setupTabs();
+      // Atualizar KPIs (sempre visíveis na primeira aba)
+      updateCollaboratorKPIs();
+      // Os gráficos serão atualizados quando as abas forem clicadas
     }, 200);
   }
 }
@@ -3075,6 +3128,12 @@ function updateCollaboratorCharts() {
   updateCollaboratorHoursEvolutionChart();
   updateCollaboratorSquadsComparisonChart();
   updateCollaboratorProjectsComparisonChart();
+}
+
+// Função para atualizar apenas os gráficos de carga horária
+function updateCollaboratorWorkloadCharts() {
+  updateCollaboratorWorkloadChart();
+  updateCollaboratorHoursEvolutionChart();
 }
 
 function updateCollaboratorWorkloadChart() {
