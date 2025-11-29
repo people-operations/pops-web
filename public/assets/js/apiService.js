@@ -6,6 +6,78 @@ function getAuthTokenOrThrow() {
   return token;
 }
 
+/**
+ * Decodifica um JWT token e retorna o payload
+ * @param {string} token - O token JWT
+ * @returns {object|null} - O payload decodificado ou null se inválido
+ */
+function decodeJWT(token) {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Token JWT inválido');
+    }
+    
+    // Decodifica o payload (segunda parte do token)
+    const payload = parts[1];
+    // Substitui caracteres base64url para base64 padrão
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    // Adiciona padding se necessário
+    const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+    // Decodifica
+    const decoded = JSON.parse(atob(padded));
+    return decoded;
+  } catch (error) {
+    console.error('Erro ao decodificar token JWT:', error);
+    return null;
+  }
+}
+
+/**
+ * Obtém o access_level do token JWT armazenado
+ * @returns {number|null} - O access_level como número ou null se não encontrado
+ */
+export function getAccessLevel() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      return null;
+    }
+    
+    const payload = decodeJWT(token);
+    const accessLevel = payload?.access_level;
+    
+    // Converte para número se existir
+    if (accessLevel !== undefined && accessLevel !== null) {
+      const numLevel = Number(accessLevel);
+      return isNaN(numLevel) ? null : numLevel;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Erro ao obter access_level:', error);
+    return null;
+  }
+}
+
+/**
+ * Obtém todas as informações do payload do token JWT
+ * @returns {object|null} - O payload completo ou null se não encontrado
+ */
+export function getTokenPayload() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      return null;
+    }
+    
+    return decodeJWT(token);
+  } catch (error) {
+    console.error('Erro ao obter payload do token:', error);
+    return null;
+  }
+}
+
 export const apiService = {
   async login(email, password) {
     const response = await fetch(

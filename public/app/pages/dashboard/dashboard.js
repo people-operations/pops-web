@@ -1,4 +1,5 @@
 import { apiService } from "../../../assets/js/apiService.js";
+import { getCurrentAccessLevel, applyAccessControl, requireAuth, requireAccess } from "../../../assets/js/permissions.js";
 
 // Estado global
 let dashboardData = {
@@ -21,6 +22,8 @@ let paginationState = {
   collaborators: { currentPage: 1, itemsPerPage: 5 },
   marketSkills: { currentPage: 1, itemsPerPage: 5 },
   employeeSkills: { currentPage: 1, itemsPerPage: 5 },
+  collabProjects: { currentPage: 1, itemsPerPage: 5 },
+  collabSquads: { currentPage: 1, itemsPerPage: 10 },
 };
 
 // Verificar se Chart.js está carregado
@@ -33,6 +36,17 @@ if (typeof Chart === 'undefined') {
 // Inicialização
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM Carregado - Iniciando dashboard");
+  
+  // Verificar autenticação
+  if (!requireAuth()) {
+    return; // Redireciona para login
+  }
+  
+  // Verificar acesso ao dashboard
+  // Níveis 1 e 2: dashboard de gestão
+  // Nível 3: dashboard de colaborador
+  const accessLevel = getCurrentAccessLevel();
+  // Removido redirecionamento - agora nível 3 tem acesso à dashboard de colaborador
   
   // Verificar novamente se Chart.js está disponível
   if (typeof Chart === 'undefined') {
@@ -59,13 +73,34 @@ window.addEventListener("load", () => {
 
 async function initializeDashboard() {
   try {
-    // Detectar tipo de usuário (por enquanto, assumimos gestor)
-    // TODO: Implementar lógica real de detecção de role
+    // Detectar tipo de usuário baseado no access_level do token
+    const accessLevel = getCurrentAccessLevel();
+    
+    // DEFINIR userId ANTES de qualquer coisa
     dashboardData.userId = localStorage.getItem("userId");
-    dashboardData.userRole = determineUserRole(); // Por enquanto sempre manager
+    console.log("🔑 userId definido:", dashboardData.userId);
+    
+    // Se não houver userId, tentar usar o primeiro colaborador disponível (para testes)
+    if (!dashboardData.userId && accessLevel === 3) {
+      console.warn("⚠️ userId não encontrado no localStorage, será definido após carregar dados");
+    }
+    
+    // Usa o access_level do token para determinar o role
+    dashboardData.userRole = determineUserRole(accessLevel);
+    console.log("👤 userRole:", dashboardData.userRole);
+
+    // Aplicar controle de acesso aos elementos da página
+    applyAccessControl();
 
     // Carregar dados
     await loadAllData();
+    
+    // Se ainda não tiver userId e for colaborador, usar o primeiro colaborador
+    if (!dashboardData.userId && dashboardData.userRole === "collaborator" && dashboardData.collaborators.length > 0) {
+      dashboardData.userId = dashboardData.collaborators[0].id;
+      localStorage.setItem("userId", dashboardData.userId);
+      console.log("✅ userId definido como primeiro colaborador:", dashboardData.userId);
+    }
 
     // Configurar filtros
     setupFilters();
@@ -75,6 +110,14 @@ async function initializeDashboard() {
       renderManagerDashboard();
     } else {
       renderCollaboratorDashboard();
+    }
+    
+    // Garantir que o filtro de squad esteja oculto para colaboradores na inicialização
+    if (dashboardData.userRole === "collaborator") {
+      const squadFilterGroup = document.getElementById("squadFilterGroup");
+      if (squadFilterGroup) {
+        squadFilterGroup.style.display = "none";
+      }
     }
 
     // Configurar eventos
@@ -140,8 +183,19 @@ function setupTabs() {
   // Inicializar a primeira aba se nenhuma estiver ativa
   let activeTab = document.querySelector(".tab-button.active");
   if (!activeTab && tabButtons.length > 0) {
-    console.log("Nenhuma aba ativa, ativando a primeira");
-    activeTab = tabButtons[0];
+    // Se for dashboard do colaborador, ativar a aba "Indicadores"
+    const collaboratorDashboard = document.getElementById("collaborator-dashboard");
+    if (collaboratorDashboard && !collaboratorDashboard.classList.contains("hidden")) {
+      const indicatorsTab = Array.from(tabButtons).find(btn => btn.getAttribute("data-tab") === "indicators");
+      if (indicatorsTab) {
+        console.log("Dashboard do colaborador detectado, ativando aba Indicadores");
+        activeTab = indicatorsTab;
+      } else {
+        activeTab = tabButtons[0];
+      }
+    } else {
+      activeTab = tabButtons[0];
+    }
     activeTab.classList.add("active");
     const firstTab = activeTab.getAttribute("data-tab");
     const firstContent = document.getElementById(`tab-${firstTab}`);
@@ -246,17 +300,63 @@ function updateChartsForTab(tabName) {
         updateAllTables();
       }, 50);
       break;
+    // Abas do Dashboard do Colaborador
+    case "indicators":
+      console.log("Atualizando aba de Indicadores do Colaborador");
+      updateCollaboratorKPIs();
+      break;
+    case "workload":
+      console.log("Atualizando aba de Carga Horária");
+      setTimeout(() => {
+        updateCollaboratorWorkloadCharts();
+      }, 50);
+      break;
+    case "projects":
+      console.log("Atualizando aba de Projetos");
+      setTimeout(() => {
+        updateCollaboratorProjectsComparisonChart();
+        updateCollaboratorProjectsTable();
+      }, 50);
+      break;
+    case "squads":
+      console.log("Atualizando aba de Squads");
+      setTimeout(() => {
+        updateCollaboratorSquadsComparisonChart();
+        updateCollaboratorSquadsTable();
+      }, 50);
+      break;
   }
 }
 
-function determineUserRole() {
-  // TODO: Implementar lógica real de detecção de role
-  // Por enquanto, sempre retorna manager
-  return "manager";
+function determineUserRole(accessLevel = null) {
+  // Se não foi passado, tenta obter do token
+  if (!accessLevel) {
+    accessLevel = getCurrentAccessLevel();
+  }
+  
+  // Converte para número se necessário
+  const numLevel = Number(accessLevel);
+  
+  // Mapeia access_level numérico para role do dashboard
+  // 1 ou 2 = manager, 3 = collaborator
+  if (numLevel === 1 || numLevel === 2) {
+    return 'manager';
+  } else if (numLevel === 3) {
+    return 'collaborator';
+  }
+  
+  // Padrão: collaborator se não reconhecer o nível
+  return 'collaborator';
 }
 
 // Função para gerar dados mockados
 function generateMockData() {
+  // Obter userId ANTES de gerar dados
+  const currentUserId = localStorage.getItem("userId");
+  const targetUserId = currentUserId ? parseInt(currentUserId) : 1; // Usar ID 1 como padrão se não houver
+  
+  console.log("🎲 Gerando dados mockados para userId:", targetUserId);
+  
   const mockSquads = [
     { id: 1, name: "Backend Team Alpha" },
     { id: 2, name: "Frontend Squad Beta" },
@@ -357,20 +457,24 @@ function generateMockData() {
     "App de Turismo",
   ];
 
+  // REGRA DE NEGÓCIO: Um projeto pode ter vários squads, mas um squad só pode ter um projeto
+  // Primeiro criar os projetos
   const mockProjects = [];
   const now = Date.now();
-  for (let i = 1; i <= 12; i++) {
+  const numProjects = 6; // Criar menos projetos para que cada um tenha vários squads
+  
+  for (let i = 1; i <= numProjects; i++) {
     const budget = 50000 + Math.random() * 200000;
     const spent = budget * (0.7 + Math.random() * 0.4); // 70% a 110% do budget
     const statuses = ["EM_ANDAMENTO", "PLANEJAMENTO", "EM_ANDAMENTO", "EM_ANDAMENTO"];
     
     // Garantir que alguns projetos são recentes (última semana/mês)
     let daysAgo;
-    if (i <= 4) {
-      // Primeiros 4 projetos: nos últimos 7 dias
+    if (i <= 2) {
+      // Primeiros 2 projetos: nos últimos 7 dias
       daysAgo = Math.random() * 7;
-    } else if (i <= 8) {
-      // Próximos 4: no último mês
+    } else if (i <= 4) {
+      // Próximos 2: no último mês
       daysAgo = 7 + Math.random() * 23;
     } else {
       // Restantes: distribuídos nos últimos 6 meses
@@ -387,12 +491,21 @@ function generateMockData() {
       spentCost: spent,
       actualCost: spent,
       status: statuses[Math.floor(Math.random() * statuses.length)],
-      squadId: Math.floor(Math.random() * mockSquads.length) + 1,
-      teamId: Math.floor(Math.random() * mockSquads.length) + 1,
+      // Não definir squadId aqui - será feito depois
       startDate: startDate.toISOString(),
       createdAt: startDate.toISOString(),
     });
   }
+  
+  // Agora atribuir cada squad a um único projeto
+  // Distribuir os squads entre os projetos (alguns projetos terão múltiplos squads)
+  const squadsPerProject = Math.ceil(mockSquads.length / mockProjects.length);
+  mockSquads.forEach((squad, squadIdx) => {
+    // Atribuir cada squad a um projeto (distribuindo de forma equilibrada)
+    const projectIndex = Math.floor(squadIdx / squadsPerProject);
+    const assignedProject = mockProjects[projectIndex] || mockProjects[0];
+    squad.projectId = assignedProject.id;
+  });
 
   const mockAllocations = [];
   // Distribuir colaboradores pelos squads de forma mais realista
@@ -408,8 +521,8 @@ function generateMockData() {
       const allocationFactor = 0.7 + Math.random() * 0.6; // 70% a 130%
       const hours = baseHours * allocationFactor;
       
-      // Garantir que a maioria das alocações são recentes (últimos 7 dias)
-      const daysAgo = Math.random() * 7; // Últimos 7 dias para melhor visibilidade
+      // Garantir que a maioria das alocações são recentes (últimos 30 dias para melhor visibilidade)
+      const daysAgo = Math.random() * 30; // Últimos 30 dias
       const startDate = new Date(now - daysAgo * 24 * 60 * 60 * 1000);
 
       mockAllocations.push({
@@ -424,14 +537,92 @@ function generateMockData() {
     }
   });
 
+  // GARANTIR DADOS SUFICIENTES PARA O COLABORADOR LOGADO
+  // Se o colaborador logado existe, garantir que ele tenha EXATAMENTE 2 squads e 3 projetos
+  const targetCollab = mockCollaborators.find(c => c.id === targetUserId);
+  console.log("🔍 Procurando colaborador com ID:", targetUserId, "Encontrado:", !!targetCollab);
+  
+  if (targetCollab) {
+    // Garantir que o colaborador logado está em EXATAMENTE 2 squads diferentes
+    const selectedSquads = [];
+    const availableSquads = [...mockSquads];
+    
+    // Selecionar exatamente 2 squads
+    while (selectedSquads.length < 2 && availableSquads.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableSquads.length);
+      const randomSquad = availableSquads[randomIndex];
+      selectedSquads.push(randomSquad);
+      availableSquads.splice(randomIndex, 1); // Remover para não repetir
+    }
+
+    console.log(`✅ Selecionados ${selectedSquads.length} squads para o colaborador ${targetUserId}:`, selectedSquads.map(s => s.name));
+
+    // Criar alocações para o colaborador logado nos 2 squads
+    selectedSquads.forEach((squad, idx) => {
+      // Distribuir horas entre os 2 squads (60% no primeiro, 40% no segundo)
+      const hoursPerSquad = idx === 0 
+        ? Math.round(targetCollab.workHoursPerWeek * 0.6) // 60% no primeiro squad (24h)
+        : Math.round(targetCollab.workHoursPerWeek * 0.4); // 40% no segundo squad (16h)
+      
+      // Garantir que as alocações são recentes (últimos 30 dias)
+      const daysAgo = Math.random() * 30;
+      const startDate = new Date(now - daysAgo * 24 * 60 * 60 * 1000);
+
+      const allocation = {
+        id: mockAllocations.length + 1,
+        employeeId: targetUserId,
+        squadId: squad.id,
+        hours: hoursPerSquad,
+        startDate: startDate.toISOString(),
+        date: startDate.toISOString(),
+      };
+      
+      mockAllocations.push(allocation);
+      console.log(`✅ Alocação criada para colaborador ${targetUserId} no squad ${squad.name}: ${hoursPerSquad}h`);
+    });
+
+    // REGRA DE NEGÓCIO: Um squad só pode ter um projeto
+    // Garantir que os squads do colaborador tenham projetos atribuídos
+    // Se os squads selecionados ainda não têm projetos, criar novos projetos para eles
+    selectedSquads.forEach((squad, squadIdx) => {
+      // Verificar se o squad já tem um projeto atribuído
+      if (!squad.projectId) {
+        // Criar um novo projeto para este squad
+        const projectIndex = mockProjects.length + 1;
+        const daysAgo = Math.random() * 30;
+        const startDate = new Date(now - daysAgo * 24 * 60 * 60 * 1000);
+        
+        const projectName = projectNames[(projectIndex - 1) % projectNames.length] || `Projeto ${projectIndex}`;
+        
+        const newProject = {
+          id: projectIndex,
+          name: projectName,
+          budget: 50000 + Math.random() * 200000,
+          estimatedCost: 50000 + Math.random() * 200000,
+          spentCost: (50000 + Math.random() * 200000) * (0.7 + Math.random() * 0.4),
+          actualCost: (50000 + Math.random() * 200000) * (0.7 + Math.random() * 0.4),
+          status: ["EM_ANDAMENTO", "PLANEJAMENTO"][Math.floor(Math.random() * 2)],
+          startDate: startDate.toISOString(),
+          createdAt: startDate.toISOString(),
+        };
+        
+        mockProjects.push(newProject);
+        squad.projectId = newProject.id;
+        console.log(`✅ Projeto criado: ${projectName} atribuído ao squad ${squad.name}`);
+      } else {
+        console.log(`✅ Squad ${squad.name} já tem projeto atribuído (ID: ${squad.projectId})`);
+      }
+    });
+  }
+
   // Adicionar algumas alocações extras (colaboradores em múltiplos squads)
   for (let i = 0; i < 10; i++) {
     const collab = mockCollaborators[Math.floor(Math.random() * mockCollaborators.length)];
     const squad = mockSquads[Math.floor(Math.random() * mockSquads.length)];
     const hours = Math.round(collab.workHoursPerWeek * (0.2 + Math.random() * 0.3)); // 20% a 50% de horas extras
     
-    // Alocações extras também nos últimos 7 dias
-    const daysAgo = Math.random() * 7;
+    // Alocações extras também nos últimos 30 dias
+    const daysAgo = Math.random() * 30;
     const startDate = new Date(now - daysAgo * 24 * 60 * 60 * 1000);
 
     mockAllocations.push({
@@ -455,6 +646,11 @@ function generateMockData() {
 
 async function loadAllData() {
   try {
+    // Garantir que userId está definido antes de gerar dados mockados
+    if (!dashboardData.userId) {
+      dashboardData.userId = localStorage.getItem("userId");
+    }
+    
     let projects, squads, collaborators, skills;
     
     try {
@@ -489,6 +685,98 @@ async function loadAllData() {
       console.log("  - Colaboradores:", dashboardData.collaborators.length);
       console.log("  - Skills:", dashboardData.skills.length);
       console.log("  - Alocações:", dashboardData.allocations.length);
+      
+      // Se não houver userId e for colaborador, usar o primeiro colaborador
+      if (!dashboardData.userId && dashboardData.userRole === "collaborator" && dashboardData.collaborators.length > 0) {
+        dashboardData.userId = dashboardData.collaborators[0].id;
+        localStorage.setItem("userId", dashboardData.userId);
+        console.log("✅ userId definido como primeiro colaborador:", dashboardData.userId);
+      }
+      
+      // Log específico para colaborador logado
+      if (dashboardData.userId) {
+        const userAllocations = dashboardData.allocations.filter(a => 
+          String(a.employeeId) === String(dashboardData.userId)
+        );
+        const userSquads = [...new Set(userAllocations.map(a => a.squadId))];
+        // REGRA DE NEGÓCIO: Buscar projetos através do projectId dos squads
+        const userSquadObjects = dashboardData.squads.filter(s => userSquads.includes(s.id));
+        const userProjectIds = [...new Set(userSquadObjects.map(s => s.projectId).filter(id => id != null))];
+        const userProjects = dashboardData.projects.filter(p => 
+          userProjectIds.includes(p.id)
+        );
+        console.log(`📊 Dados do colaborador (ID: ${dashboardData.userId}):`);
+        console.log("  - Alocações:", userAllocations.length);
+        console.log("  - Squads:", userSquads.length);
+        console.log("  - Projetos:", userProjects.length);
+        console.log("  - Total de horas:", userAllocations.reduce((sum, a) => sum + (a.hours || 0), 0));
+        
+        // Se não houver dados para o colaborador, criar agora (2 squads e 3 projetos)
+        if (userAllocations.length === 0) {
+          console.log("⚠️ Nenhuma alocação encontrada para o colaborador, criando alocações...");
+          const targetCollab = dashboardData.collaborators.find(c => String(c.id) === String(dashboardData.userId));
+          if (targetCollab) {
+            // Selecionar exatamente 2 squads
+            const selectedSquads = dashboardData.squads.slice(0, Math.min(2, dashboardData.squads.length));
+            
+            // Criar alocações nos 2 squads
+            selectedSquads.forEach((squad, idx) => {
+              const hours = idx === 0 ? 24 : 16; // 24h no primeiro, 16h no segundo
+              const daysAgo = Math.random() * 30;
+              const startDate = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+              
+              dashboardData.allocations.push({
+                id: dashboardData.allocations.length + 1,
+                employeeId: dashboardData.userId,
+                squadId: squad.id,
+                hours: hours,
+                startDate: startDate.toISOString(),
+                date: startDate.toISOString(),
+              });
+              console.log(`✅ Alocação criada: ${hours}h no squad ${squad.name}`);
+            });
+            
+            // REGRA DE NEGÓCIO: Um squad só pode ter um projeto
+            // Criar um projeto para cada squad selecionado
+            const projectNames = [
+              "Sistema de Gestão Financeira",
+              "Plataforma E-commerce",
+              "App Mobile de Delivery",
+              "Dashboard Analytics",
+              "API de Integração",
+            ];
+            
+            selectedSquads.forEach((squad, squadIdx) => {
+              // Verificar se o squad já tem um projeto atribuído
+              if (!squad.projectId) {
+                const projectIndex = dashboardData.projects.length + 1;
+                const daysAgo = Math.random() * 30;
+                const startDate = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+                
+                const newProject = {
+                  id: projectIndex,
+                  name: projectNames[(projectIndex - 1) % projectNames.length] || `Projeto ${projectIndex}`,
+                  budget: 50000 + Math.random() * 200000,
+                  estimatedCost: 50000 + Math.random() * 200000,
+                  spentCost: (50000 + Math.random() * 200000) * (0.7 + Math.random() * 0.4),
+                  actualCost: (50000 + Math.random() * 200000) * (0.7 + Math.random() * 0.4),
+                  status: ["EM_ANDAMENTO", "PLANEJAMENTO"][Math.floor(Math.random() * 2)],
+                  startDate: startDate.toISOString(),
+                  createdAt: startDate.toISOString(),
+                };
+                
+                dashboardData.projects.push(newProject);
+                squad.projectId = newProject.id;
+                console.log(`✅ Projeto criado e atribuído ao squad ${squad.name}`);
+              } else {
+                console.log(`✅ Squad ${squad.name} já tem projeto atribuído (ID: ${squad.projectId})`);
+              }
+            });
+            
+            console.log(`✅ Criados projetos para ${selectedSquads.length} squads do colaborador ${dashboardData.userId}`);
+          }
+        }
+      }
     } else {
       dashboardData.projects = Array.isArray(projects) ? projects : [];
       dashboardData.squads = Array.isArray(squads) ? squads : [];
@@ -515,22 +803,65 @@ async function loadAllData() {
       // Se não houver alocações suficientes, usar mockadas
       if (dashboardData.allocations.length < 10) {
         const mockData = generateMockData();
+        const currentUserId = localStorage.getItem("userId");
+        const targetUserId = currentUserId ? parseInt(currentUserId) : null;
+        
+        // Garantir que o colaborador logado tenha alocações
+        if (targetUserId) {
+          const userAllocations = mockData.allocations.filter(a => a.employeeId === targetUserId);
+          if (userAllocations.length === 0) {
+            // Criar alocações para o colaborador logado
+            const selectedSquads = dashboardData.squads.slice(0, Math.min(3, dashboardData.squads.length));
+            selectedSquads.forEach((squad, idx) => {
+              const hours = idx === 0 ? 24 : 8 + Math.floor(Math.random() * 8);
+              const daysAgo = Math.random() * 30;
+              const startDate = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+              
+              mockData.allocations.push({
+                id: mockData.allocations.length + 1,
+                employeeId: targetUserId,
+                squadId: squad.id,
+                hours: hours,
+                startDate: startDate.toISOString(),
+                date: startDate.toISOString(),
+              });
+            });
+          }
+        }
+        
         dashboardData.allocations = mockData.allocations.map(a => ({
           ...a,
-          employeeId: dashboardData.collaborators[Math.floor(Math.random() * dashboardData.collaborators.length)]?.id || a.employeeId,
-          squadId: dashboardData.squads[Math.floor(Math.random() * dashboardData.squads.length)]?.id || a.squadId,
+          employeeId: dashboardData.collaborators.find(c => String(c.id) === String(a.employeeId))?.id || a.employeeId,
+          squadId: dashboardData.squads.find(s => String(s.id) === String(a.squadId))?.id || a.squadId,
         }));
       }
     }
   } catch (error) {
     console.error("Erro ao carregar dados:", error);
     // Em caso de erro, usar dados mockados
+    // Garantir que userId está definido
+    if (!dashboardData.userId) {
+      dashboardData.userId = localStorage.getItem("userId");
+    }
+    
     const mockData = generateMockData();
     dashboardData.projects = mockData.projects;
     dashboardData.squads = mockData.squads;
     dashboardData.collaborators = mockData.collaborators;
     dashboardData.skills = mockData.skills;
     dashboardData.allocations = mockData.allocations;
+    
+    // Log para debug
+    if (dashboardData.userId) {
+      const userAllocations = dashboardData.allocations.filter(a => 
+        String(a.employeeId) === String(dashboardData.userId)
+      );
+      console.log(`📊 Dados mockados do colaborador (ID: ${dashboardData.userId}):`, {
+        allocations: userAllocations.length,
+        totalHours: userAllocations.reduce((sum, a) => sum + (a.hours || 0), 0),
+        squads: [...new Set(userAllocations.map(a => a.squadId))].length
+      });
+    }
   }
 }
 
@@ -809,11 +1140,14 @@ function setupKPIMetricsCards() {
 }
 
 function setupEventListeners() {
-  // Filtro de tempo global
+  // Filtro de tempo global (funciona para manager e colaborador)
   const timeFilter = document.getElementById("timeFilter");
   if (timeFilter) {
     timeFilter.addEventListener("change", (e) => {
       dashboardData.currentTimeFilter = e.target.value;
+      
+      // Se for manager, atualizar dashboard de gestão
+      if (dashboardData.userRole === "manager") {
       // Resetar paginação das tabelas quando o filtro de tempo mudar
       paginationState.idleSquads.currentPage = 1;
       paginationState.overloadSquads.currentPage = 1;
@@ -825,6 +1159,14 @@ function setupEventListeners() {
       const activeTab = document.querySelector('.tab-button.active')?.getAttribute('data-tab');
       if (activeTab === 'analysis') {
         updateAllTables();
+        }
+      } else {
+        // Se for colaborador, atualizar dashboard de colaborador
+        paginationState.collabProjects.currentPage = 1;
+        paginationState.collabSquads.currentPage = 1;
+        updateCollaboratorKPIs();
+        updateCollaboratorCharts();
+        updateCollaboratorTables();
       }
     });
   }
@@ -921,6 +1263,30 @@ function setupEventListeners() {
     updateEmployeeSkillsTable();
   });
 
+  // Paginação - Projetos do Colaborador
+  document.getElementById("collabProjectsPrevPage")?.addEventListener("click", () => {
+    if (paginationState.collabProjects.currentPage > 1) {
+      paginationState.collabProjects.currentPage--;
+      updateCollaboratorProjectsTable();
+    }
+  });
+  document.getElementById("collabProjectsNextPage")?.addEventListener("click", () => {
+    paginationState.collabProjects.currentPage++;
+    updateCollaboratorProjectsTable();
+  });
+
+  // Paginação - Squads do Colaborador
+  document.getElementById("collabSquadsPrevPage")?.addEventListener("click", () => {
+    if (paginationState.collabSquads.currentPage > 1) {
+      paginationState.collabSquads.currentPage--;
+      updateCollaboratorSquadsTable();
+    }
+  });
+  document.getElementById("collabSquadsNextPage")?.addEventListener("click", () => {
+    paginationState.collabSquads.currentPage++;
+    updateCollaboratorSquadsTable();
+  });
+
   // Modal de certificados
   document.getElementById("kpi-certificates-expiring")?.addEventListener("click", () => {
     document.getElementById("certificatesModal")?.classList.remove("hidden");
@@ -935,16 +1301,71 @@ function renderManagerDashboard() {
   document.getElementById("manager-dashboard").classList.remove("hidden");
   document.getElementById("collaborator-dashboard").classList.add("hidden");
   
+  // Mostrar filtro de squad para managers
+  const squadFilterGroup = document.getElementById("squadFilterGroup");
+  if (squadFilterGroup) {
+    squadFilterGroup.style.display = "flex";
+  }
+  
   // Os KPIs e gráficos serão atualizados quando cada aba for aberta
   console.log("Dashboard do gestor renderizado - aguardando ativação das abas");
 }
 
 function renderCollaboratorDashboard() {
-  document.getElementById("manager-dashboard").classList.add("hidden");
-  document.getElementById("collaborator-dashboard").classList.remove("hidden");
+  const managerDashboard = document.getElementById("manager-dashboard");
+  const collaboratorDashboard = document.getElementById("collaborator-dashboard");
   
-  updateCollaboratorKPIs();
-  updateCollaboratorCharts();
+  if (managerDashboard) managerDashboard.classList.add("hidden");
+  
+  // Ocultar filtro de squad para colaboradores
+  const squadFilterGroup = document.getElementById("squadFilterGroup");
+  if (squadFilterGroup) {
+    squadFilterGroup.style.display = "none";
+  }
+  
+  if (collaboratorDashboard) {
+    collaboratorDashboard.classList.remove("hidden");
+    
+    // Garantir que userId está definido
+    if (!dashboardData.userId && dashboardData.collaborators.length > 0) {
+      dashboardData.userId = dashboardData.collaborators[0].id;
+      localStorage.setItem("userId", dashboardData.userId);
+      console.log("✅ userId definido como primeiro colaborador:", dashboardData.userId);
+    }
+    
+    console.log("🔄 Renderizando dashboard de colaborador com userId:", dashboardData.userId);
+    console.log("📊 Dados disponíveis:", {
+      collaborators: dashboardData.collaborators.length,
+      allocations: dashboardData.allocations.length,
+      projects: dashboardData.projects.length,
+      squads: dashboardData.squads.length
+    });
+    
+    // Aguardar um pouco para garantir que os elementos estão no DOM
+    setTimeout(() => {
+      console.log("🔄 Atualizando KPIs, gráficos e tabelas do colaborador...");
+      // Ativar a aba "Indicadores" por padrão
+      const indicatorsTab = document.querySelector('#collaborator-dashboard .tab-button[data-tab="indicators"]');
+      const indicatorsContent = document.getElementById("tab-indicators");
+      
+      // Remover active de todas as tabs do colaborador
+      document.querySelectorAll('#collaborator-dashboard .tab-button').forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll('#collaborator-dashboard .tab-content').forEach(content => content.classList.remove("active"));
+      
+      // Ativar a aba Indicadores
+      if (indicatorsTab && indicatorsContent) {
+        indicatorsTab.classList.add("active");
+        indicatorsContent.classList.add("active");
+        console.log("✅ Aba Indicadores ativada automaticamente");
+      }
+      
+      // Configurar tabs do colaborador
+      setupTabs();
+      // Atualizar KPIs (sempre visíveis na primeira aba)
+      updateCollaboratorKPIs();
+      // Os gráficos serão atualizados quando as abas forem clicadas
+    }, 200);
+  }
 }
 
 // ==================== CÁLCULOS DE KPIs ====================
@@ -1448,23 +1869,20 @@ function updateCostDeviationChart() {
     ? filteredData.squads 
     : filteredData.squads.filter(s => s.id == squadFilter);
 
+  // REGRA DE NEGÓCIO: Um squad só pode ter um projeto (através de squad.projectId)
   // Calcular valores previstos (budget) e realizados (spent) por squad
   const previsto = squads.map(squad => {
-    const squadProjects = filteredData.projects.filter(p => 
-      p.squadId === squad.id || p.teamId === squad.id
+    const squadProject = filteredData.projects.find(p => 
+      String(p.id) === String(squad.projectId)
     );
-    return squadProjects.reduce((total, project) => {
-      return total + (project.budget || project.estimatedCost || 0);
-    }, 0);
+    return squadProject ? (squadProject.budget || squadProject.estimatedCost || 0) : 0;
   });
 
   const realizado = squads.map(squad => {
-    const squadProjects = filteredData.projects.filter(p => 
-      p.squadId === squad.id || p.teamId === squad.id
+    const squadProject = filteredData.projects.find(p => 
+      String(p.id) === String(squad.projectId)
     );
-    return squadProjects.reduce((total, project) => {
-      return total + (project.spentCost || project.actualCost || 0);
-    }, 0);
+    return squadProject ? (squadProject.spentCost || squadProject.actualCost || 0) : 0;
   });
 
   if (chartInstances.costDeviation) {
@@ -2547,70 +2965,1117 @@ function updateEmployeeSkillsTable() {
 
 // ==================== DASHBOARD DO COLABORADOR ====================
 
-function updateCollaboratorKPIs() {
-  if (!dashboardData.userId) return;
+function getCollaboratorData() {
+  if (!dashboardData.userId) {
+    console.warn("⚠️ userId não definido");
+    // Tentar usar o primeiro colaborador como fallback
+    if (dashboardData.collaborators.length > 0) {
+      dashboardData.userId = dashboardData.collaborators[0].id;
+      localStorage.setItem("userId", dashboardData.userId);
+      console.log("✅ userId definido como primeiro colaborador:", dashboardData.userId);
+    } else {
+      return null;
+    }
+  }
 
-  const collab = dashboardData.collaborators.find(c => c.id == dashboardData.userId);
-  if (!collab) return;
+  // Comparar IDs de forma flexível (string ou número)
+  const collab = dashboardData.collaborators.find(c => {
+    const collabId = String(c.id);
+    const userId = String(dashboardData.userId);
+    return collabId === userId;
+  });
+  
+  if (!collab) {
+    console.warn(`⚠️ Colaborador com ID ${dashboardData.userId} não encontrado`);
+    console.log("Colaboradores disponíveis:", dashboardData.collaborators.map(c => ({ id: c.id, name: c.name })));
+    // Tentar usar o primeiro colaborador como fallback
+    if (dashboardData.collaborators.length > 0) {
+      const firstCollab = dashboardData.collaborators[0];
+      dashboardData.userId = firstCollab.id;
+      localStorage.setItem("userId", dashboardData.userId);
+      console.log("✅ Usando primeiro colaborador como fallback:", firstCollab.id);
+      return getCollaboratorData(); // Recursão para tentar novamente
+    }
+    return null;
+  }
 
-  const allocations = dashboardData.allocations.filter(a => a.employeeId == dashboardData.userId);
-  const allocatedHours = allocations.reduce((sum, a) => sum + (a.hours || 0), 0);
-  const availableHours = collab.workHoursPerWeek || 40;
-  const allocatedPercentage = (allocatedHours / availableHours) * 100;
-  const overloadPercentage = allocatedHours > availableHours 
-    ? ((allocatedHours - availableHours) / availableHours) * 100 
-    : 0;
+  // Aplicar filtro de período
+  const timeRange = dashboardData.currentTimeFilter;
+  const dateFilter = getDateFilter(timeRange);
 
-  const squads = allocations
-    .map(a => dashboardData.squads.find(s => s.id === a.squadId))
+  // Filtrar alocações por período - comparar IDs de forma flexível
+  let allocations = dashboardData.allocations.filter(a => {
+    const allocEmployeeId = String(a.employeeId || '');
+    const userId = String(dashboardData.userId || '');
+    return allocEmployeeId === userId;
+  });
+  
+  console.log(`🔍 Alocações encontradas para userId ${dashboardData.userId}:`, allocations.length);
+
+  if (dateFilter) {
+    allocations = allocations.filter(a => {
+      const allocDate = a.startDate || a.date;
+      return allocDate && new Date(allocDate) >= dateFilter;
+    });
+  }
+
+  // Obter squads únicos
+  const squadIds = [...new Set(allocations.map(a => a.squadId).filter(id => id != null))];
+  const squads = squadIds
+    .map(id => dashboardData.squads.find(s => String(s.id) === String(id)))
     .filter(Boolean);
 
+  // REGRA DE NEGÓCIO: Buscar projetos através do projectId dos squads
+  const projectIds = [...new Set(squads.map(s => s.projectId).filter(id => id != null))];
   const projects = dashboardData.projects.filter(p => 
-    squads.some(s => p.squadId === s.id || p.teamId === s.id)
+    projectIds.includes(p.id)
   );
 
-  document.getElementById("my-allocated-hours").textContent = `${allocatedHours}h`;
-  document.getElementById("my-squads-count").textContent = squads.length;
-  document.getElementById("my-projects-count").textContent = projects.length;
-  document.getElementById("my-allocation-percentage").textContent = formatPercentage(allocatedPercentage);
-  document.getElementById("my-overload-percentage").textContent = formatPercentage(overloadPercentage);
+  // Filtrar projetos por período se necessário
+  const filteredProjects = dateFilter 
+    ? projects.filter(p => {
+        const projectDate = p.startDate || p.createdAt;
+        return projectDate && new Date(projectDate) >= dateFilter;
+      })
+    : projects;
+
+  const result = {
+    collab,
+    allocations,
+    squads,
+    projects: filteredProjects,
+  };
+  
+  // Log para debug
+  console.log(`📊 Dados do colaborador (ID: ${dashboardData.userId}):`, {
+    allocations: allocations.length,
+    totalHours: allocations.reduce((sum, a) => sum + (a.hours || 0), 0),
+    squads: squads.length,
+    projects: filteredProjects.length,
+    timeFilter: dashboardData.currentTimeFilter
+  });
+
+  return result;
+}
+
+function updateCollaboratorKPIs() {
+  console.log("📊 updateCollaboratorKPIs chamado, userId:", dashboardData.userId);
+  
+  if (!dashboardData.userId) {
+    console.warn("⚠️ userId não definido, tentando usar primeiro colaborador");
+    if (dashboardData.collaborators.length > 0) {
+      dashboardData.userId = dashboardData.collaborators[0].id;
+      localStorage.setItem("userId", dashboardData.userId);
+      console.log("✅ userId definido como:", dashboardData.userId);
+    } else {
+      console.error("❌ Nenhum colaborador disponível");
+      return;
+    }
+  }
+
+  const data = getCollaboratorData();
+  if (!data) {
+    console.error("❌ getCollaboratorData retornou null");
+    return;
+  }
+  
+  console.log("✅ Dados obtidos:", {
+    allocations: data.allocations.length,
+    squads: data.squads.length,
+    projects: data.projects.length
+  });
+
+  const { collab, allocations, squads, projects } = data;
+
+  // Calcular horas totais alocadas
+  const totalHours = allocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+
+  // Contar squads ativas (squads com alocações no período)
+  const activeSquads = squads.length;
+
+  // Contar projetos únicos
+  const uniqueProjects = projects.length;
+
+  // Atualizar elementos (usando IDs novos)
+  const updateElement = (id, value) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.textContent = value;
+    }
+  };
+
+  updateElement("collab-total-projects", uniqueProjects);
+  updateElement("collab-active-squads", activeSquads);
+  updateElement("collab-total-hours", `${totalHours}h`);
+
+  // Calcular % de Alocação
+  const availableHours = collab.workHoursPerWeek || 40;
+  const allocationPercentage = availableHours > 0 ? (totalHours / availableHours) * 100 : 0;
+  updateElement("collab-allocation-percentage", formatPercentage(allocationPercentage));
+
+  // Calcular Média de Horas por Projeto
+  const avgHoursPerProject = uniqueProjects > 0 ? (totalHours / uniqueProjects) : 0;
+  updateElement("collab-avg-hours-project", `${Math.round(avgHoursPerProject)}h`);
+
+  // Manter compatibilidade com IDs antigos se existirem
+  updateElement("my-allocated-hours", `${totalHours}h`);
+  updateElement("my-squads-count", activeSquads);
+  updateElement("my-projects-count", uniqueProjects);
 }
 
 function updateCollaboratorCharts() {
-  const ctx = document.getElementById("myWorkloadChart");
+  updateCollaboratorWorkloadChart();
+  updateCollaboratorHoursEvolutionChart();
+  updateCollaboratorSquadsComparisonChart();
+  updateCollaboratorProjectsComparisonChart();
+}
+
+// Função para atualizar apenas os gráficos de carga horária
+function updateCollaboratorWorkloadCharts() {
+  updateCollaboratorWorkloadChart();
+  updateCollaboratorHoursEvolutionChart();
+}
+
+function updateCollaboratorWorkloadChart() {
+  const ctx = document.getElementById("collabWorkloadDistributionChart");
   if (!ctx || !dashboardData.userId) return;
 
-  const collab = dashboardData.collaborators.find(c => c.id == dashboardData.userId);
-  if (!collab) return;
+  const data = getCollaboratorData();
+  if (!data) return;
 
-  const allocations = dashboardData.allocations.filter(a => a.employeeId == dashboardData.userId);
-  const allocatedHours = allocations.reduce((sum, a) => sum + (a.hours || 0), 0);
-  const availableHours = collab.workHoursPerWeek || 40;
-  const overloadHours = Math.max(0, allocatedHours - availableHours);
-  const normalHours = Math.min(allocatedHours, availableHours);
-  const unallocatedHours = Math.max(0, availableHours - allocatedHours);
+  const { allocations, squads, projects } = data;
 
-  if (chartInstances.myWorkload) {
-    chartInstances.myWorkload.destroy();
+  // Agrupar horas por squad
+  const hoursBySquad = {};
+  allocations.forEach(a => {
+    const squadId = a.squadId;
+    if (!hoursBySquad[squadId]) {
+      hoursBySquad[squadId] = 0;
+    }
+    hoursBySquad[squadId] += (a.hours || 0);
+  });
+
+  // Criar dados para o gráfico: horas por squad
+  const squadNames = [];
+  const hoursData = [];
+  const colors = [
+    "rgba(117, 18, 249, 0.6)",
+    "rgba(64, 221, 254, 0.6)",
+    "rgba(250, 18, 226, 0.6)",
+    "rgba(211, 47, 47, 0.6)",
+    "rgba(46, 125, 50, 0.6)",
+    "rgba(255, 193, 7, 0.6)",
+  ];
+
+  Object.entries(hoursBySquad).forEach(([squadId, hours], idx) => {
+    const squad = squads.find(s => String(s.id) === String(squadId));
+    if (squad) {
+      squadNames.push(squad.name || `Squad ${squadId}`);
+      hoursData.push(hours);
+    }
+  });
+
+  // Se não houver dados por squad, tentar agrupar por projeto
+  if (squadNames.length === 0 && projects.length > 0) {
+    const hoursByProject = {};
+    allocations.forEach(a => {
+      const squadId = a.squadId;
+      const squad = squads.find(s => String(s.id) === String(squadId));
+      if (squad && squad.projectId) {
+        // REGRA DE NEGÓCIO: Um squad só pode ter um projeto
+        const relatedProject = projects.find(p => String(p.id) === String(squad.projectId));
+        if (relatedProject) {
+          if (!hoursByProject[relatedProject.id]) {
+            hoursByProject[relatedProject.id] = 0;
+          }
+          hoursByProject[relatedProject.id] += (a.hours || 0);
+        }
+      }
+    });
+
+    Object.entries(hoursByProject).forEach(([projectId, hours], idx) => {
+      const project = projects.find(p => String(p.id) === String(projectId));
+      if (project) {
+        squadNames.push(project.name || `Projeto ${projectId}`);
+        hoursData.push(Math.round(hours));
+      }
+    });
   }
 
-  chartInstances.myWorkload = new Chart(ctx, {
-    type: "doughnut",
+  if (chartInstances.collabWorkloadDistribution) {
+    chartInstances.collabWorkloadDistribution.destroy();
+  }
+
+  if (squadNames.length === 0) {
+    // Gráfico vazio
+    chartInstances.collabWorkloadDistribution = new Chart(ctx, {
+      type: "bar",
     data: {
-      labels: ["Horas Alocadas", "Horas Disponíveis", "Sobrecarga"],
+        labels: ["Sem dados"],
       datasets: [{
-        data: [normalHours, unallocatedHours, overloadHours],
+          label: "Horas Alocadas",
+          data: [0],
+          backgroundColor: "rgba(200, 200, 200, 0.6)",
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: "Horas",
+            },
+          },
+        },
+      },
+    });
+    return;
+  }
+
+  chartInstances.collabWorkloadDistribution = new Chart(ctx, {
+    type: "bar",
+    indexAxis: "y",
+    data: {
+      labels: squads,
+      datasets: seniorities.map((seniority, idx) => ({
+        label: seniority,
+        data: squads.map(squad => seniorityBySquad[squad][seniority] || 0),
         backgroundColor: [
           "rgba(64, 221, 254, 0.6)",
-          "rgba(200, 200, 200, 0.6)",
-          "rgba(211, 47, 47, 0.6)",
-        ],
+          "rgba(117, 18, 249, 0.6)",
+          "rgba(250, 18, 226, 0.6)",
+          "rgba(255, 252, 54, 0.6)",
+        ][idx],
+      })),
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: "y",
+      scales: {
+        x: {
+          stacked: true,
+          beginAtZero: true,
+        },
+        y: {
+          stacked: true,
+        },
+      },
+    },
+  });
+}
+
+function updateStrategicViewChart() {
+  const ctx = document.getElementById("strategicViewChart");
+  if (!ctx) return;
+
+  const squadFilter = document.getElementById("strategicSquadFilter")?.value || "all";
+  
+  // Usar getFilteredData() para aplicar filtros de período e squad principal
+  // Depois aplicar o filtro específico do gráfico estratégico
+  let data = getFilteredData();
+  
+  // Filtrar squads pelo filtro específico do gráfico estratégico (sobrescreve o filtro principal se necessário)
+  const squads = squadFilter === "all" 
+    ? data.squads 
+    : data.squads.filter(s => String(s.id) === String(squadFilter));
+
+  if (squads.length === 0) return;
+
+  // Calcular métricas para cada squad
+  const squadMetrics = squads.map(squad => {
+    const squadAllocations = data.allocations.filter(a => String(a.squadId) === String(squad.id));
+    
+    // Custo total
+    const cost = squadAllocations.reduce((sum, a) => {
+      const collab = data.collaborators.find(c => c.id === a.employeeId);
+      const hourlyCost = collab?.hourlyCost || collab?.salary / (40 * 4.33) || 0;
+      return sum + (a.hours || 0) * hourlyCost;
+    }, 0);
+    
+    // Alocação total (horas)
+    const totalAllocation = squadAllocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+    
+    // Número de pessoas
+    const peopleCount = new Set(squadAllocations.map(a => a.employeeId)).size;
+
+    return {
+      squadId: squad.id,
+      label: squad.name || `Squad ${squad.id}`,
+      cost,
+      allocation: totalAllocation,
+      people: peopleCount,
+    };
+  });
+
+  // Normalizar valores para escala 0-100 (para o gráfico radar)
+  const maxValues = {
+    cost: Math.max(...squadMetrics.map(m => m.cost), 1),
+    allocation: Math.max(...squadMetrics.map(m => m.allocation), 1),
+    people: Math.max(...squadMetrics.map(m => m.people), 1),
+  };
+
+  // Definir cores fixas para cada squad baseado no ID
+  const colors = [
+    { bg: 'rgba(117, 18, 249, 0.2)', border: 'rgba(117, 18, 249, 1)' },
+    { bg: 'rgba(64, 221, 254, 0.2)', border: 'rgba(64, 221, 254, 1)' },
+    { bg: 'rgba(250, 18, 226, 0.2)', border: 'rgba(250, 18, 226, 1)' },
+    { bg: 'rgba(211, 47, 46, 0.2)', border: 'rgba(211, 47, 46, 1)' },
+    { bg: 'rgba(47, 125, 50, 0.2)', border: 'rgba(47, 125, 50, 1)' },
+  ];
+
+  // Criar datasets para o gráfico radar
+  const datasets = squadMetrics.map((metrics) => {
+    // Usar o ID do squad para determinar a cor de forma consistente
+    // Subtrair 1 porque os IDs geralmente começam em 1
+    const colorIndex = (metrics.squadId - 1) % colors.length;
+    const color = colors[colorIndex];
+
+    return {
+      label: metrics.label,
+      data: [
+        (metrics.cost / maxValues.cost) * 100,
+        (metrics.allocation / maxValues.allocation) * 100,
+        (metrics.people / maxValues.people) * 100,
+      ],
+      backgroundColor: color.bg,
+      borderColor: color.border,
+      borderWidth: 2,
+      pointBackgroundColor: color.border,
+      pointBorderColor: '#fff',
+      pointHoverBackgroundColor: '#fff',
+      pointHoverBorderColor: color.border,
+    };
+  });
+
+  if (chartInstances.strategicView) {
+    chartInstances.strategicView.destroy();
+  }
+
+  chartInstances.strategicView = new Chart(ctx, {
+    type: "radar",
+    data: {
+      labels: squadNames,
+      datasets: [{
+        label: "Horas Alocadas",
+        data: hoursData,
+        backgroundColor: hoursData.map((_, idx) => colors[idx % colors.length]),
+        borderColor: hoursData.map((_, idx) => colors[idx % colors.length].replace('0.6', '1')),
+        borderWidth: 1,
       }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "Horas",
+          },
+        },
+        x: {
+          ticks: {
+            maxRotation: 0,
+            minRotation: 0,
+            autoSkip: false,
+            callback: function(value, index) {
+              const label = squadNames[index];
+              if (!label) return '';
+              
+              // Quebrar linha se o nome for muito longo (mais de 12 caracteres)
+              if (label.length > 12) {
+                // Tentar quebrar em espaços primeiro
+                const words = label.split(' ');
+                if (words.length > 1) {
+                  // Se tiver múltiplas palavras, tentar dividir de forma equilibrada
+                  let firstLine = '';
+                  let secondLine = '';
+                  const midPoint = Math.ceil(words.length / 2);
+                  
+                  firstLine = words.slice(0, midPoint).join(' ');
+                  secondLine = words.slice(midPoint).join(' ');
+                  
+                  // Se a primeira linha ainda for muito longa, quebrar no meio
+                  if (firstLine.length > 15) {
+                    const mid = Math.floor(label.length / 2);
+                    const spaceIndex = label.lastIndexOf(' ', mid);
+                    if (spaceIndex > 0) {
+                      return label.substring(0, spaceIndex) + '\n' + label.substring(spaceIndex + 1);
+                    }
+                    return label.substring(0, mid) + '\n' + label.substring(mid);
+                  }
+                  
+                  return firstLine + '\n' + secondLine;
+                } else {
+                  // Se não tiver espaços, quebrar no meio
+                  const mid = Math.floor(label.length / 2);
+                  return label.substring(0, mid) + '\n' + label.substring(mid);
+                }
+              }
+              return label;
+            },
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: true,
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const total = hoursData.reduce((a, b) => a + b, 0);
+              const percentage = total > 0 ? ((context.parsed.y / total) * 100).toFixed(1) : 0;
+              return `${context.dataset.label}: ${context.parsed.y}h (${percentage}%)`;
+            },
+          },
+        },
+      },
     },
+  });
+}
+
+function updateCollaboratorHoursEvolutionChart() {
+  const ctx = document.getElementById("collabHoursEvolutionChart");
+  if (!ctx || !dashboardData.userId) return;
+
+  const data = getCollaboratorData();
+  if (!data) return;
+
+  const { allocations } = data;
+  const timeRange = dashboardData.currentTimeFilter;
+
+  // Determinar período e intervalo baseado no filtro
+  let periodDays, intervalDays, labels = [];
+  const now = new Date();
+
+  switch (timeRange) {
+    case "week":
+      periodDays = 7;
+      intervalDays = 1; // Diário
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        labels.push(date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }));
+      }
+      break;
+    case "month":
+      periodDays = 30;
+      intervalDays = 7; // Semanal
+      for (let i = 3; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - (i * 7));
+        labels.push(`Semana ${4 - i}`);
+      }
+      break;
+    case "quarter":
+      periodDays = 90;
+      intervalDays = 30; // Mensal
+      for (let i = 2; i >= 0; i--) {
+        const date = new Date(now);
+        date.setMonth(date.getMonth() - i);
+        labels.push(date.toLocaleDateString("pt-BR", { month: "short", year: "numeric" }));
+      }
+      break;
+    case "semester":
+      periodDays = 180;
+      intervalDays = 30; // Mensal
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date(now);
+        date.setMonth(date.getMonth() - i);
+        labels.push(date.toLocaleDateString("pt-BR", { month: "short" }));
+      }
+      break;
+    case "year":
+      periodDays = 365;
+      intervalDays = 90; // Trimestral
+      for (let i = 3; i >= 0; i--) {
+        const date = new Date(now);
+        date.setMonth(date.getMonth() - (i * 3));
+        labels.push(`T${4 - i} ${date.getFullYear()}`);
+      }
+      break;
+    default:
+      periodDays = 30;
+      intervalDays = 7;
+      labels = ["Semana 1", "Semana 2", "Semana 3", "Semana 4"];
+  }
+
+  // Agrupar alocações por período
+  const hoursByPeriod = new Array(labels.length).fill(0);
+  
+  allocations.forEach(alloc => {
+    const allocDate = new Date(alloc.startDate || alloc.date);
+    const daysAgo = Math.floor((now - allocDate) / (1000 * 60 * 60 * 24));
+    
+    if (daysAgo >= 0 && daysAgo < periodDays) {
+      const periodIndex = Math.floor(daysAgo / intervalDays);
+      if (periodIndex < hoursByPeriod.length) {
+        hoursByPeriod[periodIndex] += (alloc.hours || 0);
+      }
+    }
+  });
+
+  if (chartInstances.collabHoursEvolution) {
+    chartInstances.collabHoursEvolution.destroy();
+  }
+
+  chartInstances.collabHoursEvolution = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Horas Alocadas",
+        data: hoursByPeriod,
+        borderColor: "rgba(117, 18, 249, 1)",
+        backgroundColor: "rgba(117, 18, 249, 0.1)",
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: "rgba(117, 18, 249, 1)",
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "Horas",
+          },
+        },
+        x: {
+          title: {
+            display: true,
+            text: "Período",
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: true,
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `${context.dataset.label}: ${context.parsed.y}h`;
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+function updateCollaboratorSquadsComparisonChart() {
+  const ctx = document.getElementById("collabSquadsComparisonChart");
+  if (!ctx || !dashboardData.userId) return;
+
+  const data = getCollaboratorData();
+  if (!data) return;
+
+  const { allocations, squads } = data;
+
+  // Agrupar horas por squad
+  const hoursBySquad = {};
+  allocations.forEach(a => {
+    const squadId = a.squadId;
+    if (!hoursBySquad[squadId]) {
+      hoursBySquad[squadId] = 0;
+    }
+    hoursBySquad[squadId] += (a.hours || 0);
+  });
+
+  // Criar dados para o gráfico
+  const squadNames = [];
+  const hoursData = [];
+  const colors = [
+    "rgba(117, 18, 249, 0.6)",
+          "rgba(64, 221, 254, 0.6)",
+    "rgba(250, 18, 226, 0.6)",
+          "rgba(211, 47, 47, 0.6)",
+    "rgba(46, 125, 50, 0.6)",
+  ];
+
+  Object.entries(hoursBySquad).forEach(([squadId, hours], idx) => {
+    const squad = squads.find(s => String(s.id) === String(squadId));
+    if (squad) {
+      squadNames.push(squad.name || `Squad ${squadId}`);
+      hoursData.push(hours);
+    }
+  });
+
+  if (chartInstances.collabSquadsComparison) {
+    chartInstances.collabSquadsComparison.destroy();
+  }
+
+  if (squadNames.length === 0) {
+    chartInstances.collabSquadsComparison = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Sem dados"],
+        datasets: [{
+          label: "Horas Alocadas",
+          data: [0],
+          backgroundColor: "rgba(200, 200, 200, 0.6)",
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: "Horas",
+            },
+          },
+        },
+      },
+    });
+    return;
+  }
+
+  chartInstances.collabSquadsComparison = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: squadNames,
+      datasets: [{
+        label: "Horas Alocadas",
+        data: hoursData,
+        backgroundColor: hoursData.map((_, idx) => colors[idx % colors.length]),
+        borderColor: hoursData.map((_, idx) => colors[idx % colors.length].replace('0.6', '1')),
+        borderWidth: 1,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "Horas",
+          },
+        },
+        x: {
+          ticks: {
+            maxRotation: 0,
+            minRotation: 0,
+            autoSkip: false,
+            callback: function(value, index) {
+              const label = squadNames[index];
+              if (!label) return '';
+              
+              // Quebrar linha se o nome for muito longo (mais de 12 caracteres)
+              if (label.length > 12) {
+                // Tentar quebrar em espaços primeiro
+                const words = label.split(' ');
+                if (words.length > 1) {
+                  // Se tiver múltiplas palavras, tentar dividir de forma equilibrada
+                  let firstLine = '';
+                  let secondLine = '';
+                  const midPoint = Math.ceil(words.length / 2);
+                  
+                  firstLine = words.slice(0, midPoint).join(' ');
+                  secondLine = words.slice(midPoint).join(' ');
+                  
+                  // Se a primeira linha ainda for muito longa, quebrar no meio
+                  if (firstLine.length > 15) {
+                    const mid = Math.floor(label.length / 2);
+                    const spaceIndex = label.lastIndexOf(' ', mid);
+                    if (spaceIndex > 0) {
+                      return label.substring(0, spaceIndex) + '\n' + label.substring(spaceIndex + 1);
+                    }
+                    return label.substring(0, mid) + '\n' + label.substring(mid);
+                  }
+                  
+                  return firstLine + '\n' + secondLine;
+                } else {
+                  // Se não tiver espaços, quebrar no meio
+                  const mid = Math.floor(label.length / 2);
+                  return label.substring(0, mid) + '\n' + label.substring(mid);
+                }
+              }
+              return label;
+            },
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: true,
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const total = hoursData.reduce((a, b) => a + b, 0);
+              const percentage = total > 0 ? ((context.parsed.y / total) * 100).toFixed(1) : 0;
+              return `${context.dataset.label}: ${context.parsed.y}h (${percentage}%)`;
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+function updateCollaboratorProjectsComparisonChart() {
+  const ctx = document.getElementById("collabProjectsComparisonChart");
+  if (!ctx || !dashboardData.userId) return;
+
+  const data = getCollaboratorData();
+  if (!data) return;
+
+  const { allocations, squads, projects } = data;
+
+  // Calcular horas totais
+  const totalHours = allocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+
+  // REGRA DE NEGÓCIO: Um projeto pode ter vários squads, mas um squad só pode ter um projeto
+  // Agrupar projetos com suas horas baseado nos squads vinculados
+  const projectData = [];
+  const projectMap = new Map(); // Para agrupar squads por projeto
+  
+  // Primeiro, agrupar squads por projeto
+  squads.forEach(squad => {
+    if (squad.projectId) {
+      if (!projectMap.has(squad.projectId)) {
+        projectMap.set(squad.projectId, []);
+      }
+      projectMap.get(squad.projectId).push(squad);
+    }
+  });
+  
+  // Para cada projeto, calcular horas totais de todos os squads vinculados
+  projects.forEach(project => {
+    const squadsInProject = projectMap.get(project.id) || [];
+    let totalProjectHours = 0;
+    
+    squadsInProject.forEach(squad => {
+      const squadAllocations = allocations.filter(a => 
+        String(a.squadId) === String(squad.id)
+      );
+      const squadHours = squadAllocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+      totalProjectHours += squadHours;
+    });
+    
+    projectData.push({
+      project,
+      hours: totalProjectHours,
+    });
+  });
+
+  // Ordenar por horas e pegar os principais
+  projectData.sort((a, b) => b.hours - a.hours);
+
+  const projectNames = projectData.map(p => p.project.name || `Projeto ${p.project.id}`);
+  const hoursData = projectData.map(p => p.hours);
+  const colors = [
+    "rgba(117, 18, 249, 0.6)",
+    "rgba(64, 221, 254, 0.6)",
+    "rgba(250, 18, 226, 0.6)",
+    "rgba(211, 47, 47, 0.6)",
+    "rgba(46, 125, 50, 0.6)",
+    "rgba(255, 193, 7, 0.6)",
+  ];
+
+  if (chartInstances.collabProjectsComparison) {
+    chartInstances.collabProjectsComparison.destroy();
+  }
+
+  if (projectNames.length === 0) {
+    chartInstances.collabProjectsComparison = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Sem dados"],
+        datasets: [{
+          label: "Horas Alocadas",
+          data: [0],
+          backgroundColor: "rgba(200, 200, 200, 0.6)",
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: "Horas",
+            },
+          },
+          x: {
+            title: {
+              display: true,
+              text: "Projetos",
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+      },
+    });
+    return;
+  }
+
+  chartInstances.collabProjectsComparison = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: projectNames,
+      datasets: [{
+        label: "Horas Alocadas",
+        data: hoursData,
+        backgroundColor: hoursData.map((_, idx) => colors[idx % colors.length]),
+        borderColor: hoursData.map((_, idx) => colors[idx % colors.length].replace('0.6', '1')),
+        borderWidth: 1,
+        categoryPercentage: 0.6,
+        barPercentage: 0.8,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 20,
+          bottom: 80, // Espaço extra na parte inferior para os labels
+          left: 10,
+          right: 10
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "Horas",
+          },
+          ticks: {
+            padding: 15,
+          },
+        },
+        x: {
+          title: {
+            display: true,
+            text: "Projetos",
+          },
+          ticks: {
+            maxRotation: 0,
+            minRotation: 0,
+            autoSkip: false,
+            font: {
+              size: 12
+            },
+            padding: 15,
+            maxTicksLimit: 20,
+          },
+          afterFit: function(scale) {
+            // Altura padrão para labels horizontais
+            scale.height = scale.height + 20;
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const percentage = totalHours > 0 ? ((context.parsed.y / totalHours) * 100).toFixed(1) : 0;
+              return `Horas Alocadas: ${context.parsed.y}h (${percentage}%)`;
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+function updateCollaboratorTables() {
+  updateCollaboratorProjectsTable();
+  updateCollaboratorSquadsTable();
+}
+
+function updateCollaboratorProjectsTable() {
+  const tbody = document.getElementById("collabProjectsTableBody");
+  if (!tbody) return;
+
+  const data = getCollaboratorData();
+  if (!data) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dado disponível</td></tr>';
+    return;
+  }
+
+  const { allocations, squads, projects } = data;
+
+  console.log("📊 updateCollaboratorProjectsTable - Dados recebidos:", {
+    allocations: allocations.length,
+    squads: squads.length,
+    projects: projects.length
+  });
+
+  // Calcular horas totais
+  const totalHours = allocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+
+  // REGRA DE NEGÓCIO: Um projeto pode ter vários squads, mas um squad só pode ter um projeto
+  // Agrupar projetos com suas horas baseado nos squads vinculados
+  const projectData = [];
+  const projectMap = new Map(); // Para agrupar squads por projeto
+  
+  // Primeiro, agrupar squads por projeto
+  squads.forEach(squad => {
+    if (squad.projectId) {
+      if (!projectMap.has(squad.projectId)) {
+        projectMap.set(squad.projectId, []);
+      }
+      projectMap.get(squad.projectId).push(squad);
+    }
+  });
+  
+  // Para cada projeto, calcular horas totais de todos os squads vinculados
+  projects.forEach(project => {
+    const squadsInProject = projectMap.get(project.id) || [];
+    let totalProjectHours = 0;
+    
+    squadsInProject.forEach(squad => {
+      const squadAllocations = allocations.filter(a => 
+        String(a.squadId) === String(squad.id)
+      );
+      const squadHours = squadAllocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+      totalProjectHours += squadHours;
+    });
+    
+    const percentage = totalHours > 0 ? (totalProjectHours / totalHours) * 100 : 0;
+
+    projectData.push({
+      project,
+      squad: squadsInProject[0] || null, // Usar o primeiro squad do projeto
+      hours: totalProjectHours,
+      percentage,
+    });
+  });
+
+  console.log("📊 Projetos processados:", projectData.length);
+
+  // Ordenar por horas (maior primeiro)
+  projectData.sort((a, b) => b.hours - a.hours);
+
+  // Aplicar paginação
+  const { currentPage, itemsPerPage } = paginationState.collabProjects;
+  const paginatedData = paginateData(projectData, currentPage, itemsPerPage);
+  updatePaginationControls('collabProjects', currentPage, projectData.length, itemsPerPage);
+  
+  console.log("📊 Dados paginados:", paginatedData.length);
+
+  tbody.innerHTML = "";
+  if (paginatedData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum projeto encontrado no período selecionado</td></tr>';
+    return;
+  }
+
+  paginatedData.forEach(item => {
+    const row = document.createElement("tr");
+    const status = item.project.status || "N/A";
+    const statusText = status === "EM_ANDAMENTO" ? "Em Andamento" : 
+                       status === "PLANEJAMENTO" ? "Planejamento" :
+                       status === "CONCLUÍDO" ? "Concluído" :
+                       status === "CANCELADO" ? "Cancelado" : status;
+    
+    row.innerHTML = `
+      <td>${item.project.name || "—"}</td>
+      <td>${item.squad?.name || "—"}</td>
+      <td><span class="status-badge ${status === "EM_ANDAMENTO" ? "active" : status === "CONCLUÍDO" ? "inactive" : ""}">${statusText}</span></td>
+      <td>${item.hours}h</td>
+      <td>${formatPercentage(item.percentage)}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function updateCollaboratorSquadsTable() {
+  const tbody = document.getElementById("collabSquadsTableBody");
+  if (!tbody) return;
+
+  const data = getCollaboratorData();
+  if (!data) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Nenhum dado disponível</td></tr>';
+    return;
+  }
+
+  const { allocations, squads, projects } = data;
+
+  // Calcular horas totais
+  const totalHours = allocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+
+  // Agrupar horas por squad
+  const squadData = squads.map(squad => {
+    const squadAllocations = allocations.filter(a => String(a.squadId) === String(squad.id));
+    const squadHours = squadAllocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+    const percentage = totalHours > 0 ? (squadHours / totalHours) * 100 : 0;
+
+    // REGRA DE NEGÓCIO: Um squad só pode ter um projeto
+    const relatedProject = squad.projectId ? projects.find(p => String(p.id) === String(squad.projectId)) : null;
+    const relatedProjects = relatedProject ? [relatedProject] : [];
+
+    return {
+      squad,
+      hours: squadHours,
+      percentage,
+      projects: relatedProjects,
+    };
+  });
+
+  // Ordenar por horas (maior primeiro)
+  squadData.sort((a, b) => b.hours - a.hours);
+
+  // Aplicar paginação
+  const { currentPage, itemsPerPage } = paginationState.collabSquads;
+  const paginatedData = paginateData(squadData, currentPage, itemsPerPage);
+  updatePaginationControls('collabSquads', currentPage, squadData.length, itemsPerPage);
+
+  tbody.innerHTML = "";
+  if (paginatedData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Nenhum squad encontrado no período selecionado</td></tr>';
+    return;
+  }
+
+  paginatedData.forEach(item => {
+    const row = document.createElement("tr");
+    // Formatar projetos com quebra de linha (usando vírgula e espaço)
+    const projectNames = item.projects.length > 0 
+      ? item.projects.map(p => p.name || `Projeto ${p.id}`).join(", ")
+      : "—";
+    
+    row.innerHTML = `
+      <td>${item.squad.name || "—"}</td>
+      <td>${item.hours}h</td>
+      <td>${formatPercentage(item.percentage)}</td>
+      <td style="white-space: normal; word-wrap: break-word; max-width: 300px;">${projectNames}</td>
+    `;
+    tbody.appendChild(row);
   });
 }
 
@@ -2659,9 +4124,15 @@ function getFilteredData() {
   // Filtrar por squad se necessário
   if (dashboardData.currentSquadFilter !== "all") {
     const squadId = dashboardData.currentSquadFilter;
+    const filteredSquad = data.squads.find(s => s.id == squadId);
     data.squads = data.squads.filter(s => s.id == squadId);
     data.allocations = data.allocations.filter(a => a.squadId == squadId);
-    data.projects = data.projects.filter(p => p.squadId == squadId || p.teamId == squadId);
+    // REGRA DE NEGÓCIO: Filtrar projetos através do projectId do squad
+    if (filteredSquad && filteredSquad.projectId) {
+      data.projects = data.projects.filter(p => String(p.id) === String(filteredSquad.projectId));
+    } else {
+      data.projects = [];
+    }
     
     // Filtrar colaboradores: mostrar apenas os que têm alocações no squad filtrado
     const employeeIdsInSquad = [...new Set(data.allocations.map(a => a.employeeId))];
