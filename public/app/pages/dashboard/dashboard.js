@@ -3237,6 +3237,126 @@ function updateCollaboratorWorkloadChart() {
 
   chartInstances.collabWorkloadDistribution = new Chart(ctx, {
     type: "bar",
+    indexAxis: "y",
+    data: {
+      labels: squads,
+      datasets: seniorities.map((seniority, idx) => ({
+        label: seniority,
+        data: squads.map(squad => seniorityBySquad[squad][seniority] || 0),
+        backgroundColor: [
+          "rgba(64, 221, 254, 0.6)",
+          "rgba(117, 18, 249, 0.6)",
+          "rgba(250, 18, 226, 0.6)",
+          "rgba(255, 252, 54, 0.6)",
+        ][idx],
+      })),
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: "y",
+      scales: {
+        x: {
+          stacked: true,
+          beginAtZero: true,
+        },
+        y: {
+          stacked: true,
+        },
+      },
+    },
+  });
+}
+
+function updateStrategicViewChart() {
+  const ctx = document.getElementById("strategicViewChart");
+  if (!ctx) return;
+
+  const squadFilter = document.getElementById("strategicSquadFilter")?.value || "all";
+  
+  // Usar getFilteredData() para aplicar filtros de período e squad principal
+  // Depois aplicar o filtro específico do gráfico estratégico
+  let data = getFilteredData();
+  
+  // Filtrar squads pelo filtro específico do gráfico estratégico (sobrescreve o filtro principal se necessário)
+  const squads = squadFilter === "all" 
+    ? data.squads 
+    : data.squads.filter(s => String(s.id) === String(squadFilter));
+
+  if (squads.length === 0) return;
+
+  // Calcular métricas para cada squad
+  const squadMetrics = squads.map(squad => {
+    const squadAllocations = data.allocations.filter(a => String(a.squadId) === String(squad.id));
+    
+    // Custo total
+    const cost = squadAllocations.reduce((sum, a) => {
+      const collab = data.collaborators.find(c => c.id === a.employeeId);
+      const hourlyCost = collab?.hourlyCost || collab?.salary / (40 * 4.33) || 0;
+      return sum + (a.hours || 0) * hourlyCost;
+    }, 0);
+    
+    // Alocação total (horas)
+    const totalAllocation = squadAllocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+    
+    // Número de pessoas
+    const peopleCount = new Set(squadAllocations.map(a => a.employeeId)).size;
+
+    return {
+      squadId: squad.id,
+      label: squad.name || `Squad ${squad.id}`,
+      cost,
+      allocation: totalAllocation,
+      people: peopleCount,
+    };
+  });
+
+  // Normalizar valores para escala 0-100 (para o gráfico radar)
+  const maxValues = {
+    cost: Math.max(...squadMetrics.map(m => m.cost), 1),
+    allocation: Math.max(...squadMetrics.map(m => m.allocation), 1),
+    people: Math.max(...squadMetrics.map(m => m.people), 1),
+  };
+
+  // Definir cores fixas para cada squad baseado no ID
+  const colors = [
+    { bg: 'rgba(117, 18, 249, 0.2)', border: 'rgba(117, 18, 249, 1)' },
+    { bg: 'rgba(64, 221, 254, 0.2)', border: 'rgba(64, 221, 254, 1)' },
+    { bg: 'rgba(250, 18, 226, 0.2)', border: 'rgba(250, 18, 226, 1)' },
+    { bg: 'rgba(211, 47, 46, 0.2)', border: 'rgba(211, 47, 46, 1)' },
+    { bg: 'rgba(47, 125, 50, 0.2)', border: 'rgba(47, 125, 50, 1)' },
+  ];
+
+  // Criar datasets para o gráfico radar
+  const datasets = squadMetrics.map((metrics) => {
+    // Usar o ID do squad para determinar a cor de forma consistente
+    // Subtrair 1 porque os IDs geralmente começam em 1
+    const colorIndex = (metrics.squadId - 1) % colors.length;
+    const color = colors[colorIndex];
+
+    return {
+      label: metrics.label,
+      data: [
+        (metrics.cost / maxValues.cost) * 100,
+        (metrics.allocation / maxValues.allocation) * 100,
+        (metrics.people / maxValues.people) * 100,
+      ],
+      backgroundColor: color.bg,
+      borderColor: color.border,
+      borderWidth: 2,
+      pointBackgroundColor: color.border,
+      pointBorderColor: '#fff',
+      pointHoverBackgroundColor: '#fff',
+      pointHoverBorderColor: color.border,
+    };
+  });
+
+  if (chartInstances.strategicView) {
+    chartInstances.strategicView.destroy();
+  }
+
+  chartInstances.strategicView = new Chart(ctx, {
+    type: "radar",
     data: {
       labels: squadNames,
       datasets: [{
@@ -3742,7 +3862,11 @@ function updateCollaboratorProjectsComparisonChart() {
         }
       },
       scales: {
+        x: {
+          stacked: true,
+        },
         y: {
+          stacked: true,
           beginAtZero: true,
           title: {
             display: true,
