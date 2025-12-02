@@ -73,6 +73,12 @@ window.addEventListener("load", () => {
 
 async function initializeDashboard() {
   try {
+    // Garantir que o loader seja escondido e o conteúdo principal seja mostrado
+    const loader = document.getElementById("loader");
+    const mainContent = document.getElementById("main-content");
+    if (loader) loader.classList.add("hidden");
+    if (mainContent) mainContent.classList.remove("hidden");
+
     // Detectar tipo de usuário baseado no access_level do token
     const accessLevel = getCurrentAccessLevel();
     
@@ -129,6 +135,11 @@ async function initializeDashboard() {
     }, 200);
   } catch (error) {
     console.error("Erro ao inicializar dashboard:", error);
+    // Mesmo com erro, garantir que o conteúdo seja mostrado
+    const loader = document.getElementById("loader");
+    const mainContent = document.getElementById("main-content");
+    if (loader) loader.classList.add("hidden");
+    if (mainContent) mainContent.classList.remove("hidden");
   } finally {
     // Sempre configurar abas, mesmo se houver erro
     setTimeout(() => {
@@ -1307,8 +1318,31 @@ function renderManagerDashboard() {
     squadFilterGroup.style.display = "flex";
   }
   
-  // Os KPIs e gráficos serão atualizados quando cada aba for aberta
-  console.log("Dashboard do gestor renderizado - aguardando ativação das abas");
+  // Aguardar um pouco para garantir que os elementos estão no DOM
+  setTimeout(() => {
+    console.log("🔄 Atualizando dashboard do gestor...");
+    // Ativar a primeira aba (Custos) por padrão
+    const costsTab = document.querySelector('#manager-dashboard .tab-button[data-tab="costs"]');
+    const costsContent = document.getElementById("tab-costs");
+    
+    // Remover active de todas as tabs do gestor
+    document.querySelectorAll('#manager-dashboard .tab-button').forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll('#manager-dashboard .tab-content').forEach(content => content.classList.remove("active"));
+    
+    // Ativar a aba Custos
+    if (costsTab && costsContent) {
+      costsTab.classList.add("active");
+      costsContent.classList.add("active");
+      console.log("✅ Aba Custos ativada automaticamente");
+    }
+    
+    // Atualizar KPIs e gráficos da aba ativa
+    setTimeout(() => {
+      updateChartsForTab("costs");
+    }, 100);
+  }, 200);
+  
+  console.log("Dashboard do gestor renderizado");
 }
 
 function renderCollaboratorDashboard() {
@@ -3262,178 +3296,6 @@ function updateCollaboratorWorkloadChart() {
         },
         y: {
           stacked: true,
-        },
-      },
-    },
-  });
-}
-
-function updateStrategicViewChart() {
-  const ctx = document.getElementById("strategicViewChart");
-  if (!ctx) return;
-
-  const squadFilter = document.getElementById("strategicSquadFilter")?.value || "all";
-  
-  // Usar getFilteredData() para aplicar filtros de período e squad principal
-  // Depois aplicar o filtro específico do gráfico estratégico
-  let data = getFilteredData();
-  
-  // Filtrar squads pelo filtro específico do gráfico estratégico (sobrescreve o filtro principal se necessário)
-  const squads = squadFilter === "all" 
-    ? data.squads 
-    : data.squads.filter(s => String(s.id) === String(squadFilter));
-
-  if (squads.length === 0) return;
-
-  // Calcular métricas para cada squad
-  const squadMetrics = squads.map(squad => {
-    const squadAllocations = data.allocations.filter(a => String(a.squadId) === String(squad.id));
-    
-    // Custo total
-    const cost = squadAllocations.reduce((sum, a) => {
-      const collab = data.collaborators.find(c => c.id === a.employeeId);
-      const hourlyCost = collab?.hourlyCost || collab?.salary / (40 * 4.33) || 0;
-      return sum + (a.hours || 0) * hourlyCost;
-    }, 0);
-    
-    // Alocação total (horas)
-    const totalAllocation = squadAllocations.reduce((sum, a) => sum + (a.hours || 0), 0);
-    
-    // Número de pessoas
-    const peopleCount = new Set(squadAllocations.map(a => a.employeeId)).size;
-
-    return {
-      squadId: squad.id,
-      label: squad.name || `Squad ${squad.id}`,
-      cost,
-      allocation: totalAllocation,
-      people: peopleCount,
-    };
-  });
-
-  // Normalizar valores para escala 0-100 (para o gráfico radar)
-  const maxValues = {
-    cost: Math.max(...squadMetrics.map(m => m.cost), 1),
-    allocation: Math.max(...squadMetrics.map(m => m.allocation), 1),
-    people: Math.max(...squadMetrics.map(m => m.people), 1),
-  };
-
-  // Definir cores fixas para cada squad baseado no ID
-  const colors = [
-    { bg: 'rgba(117, 18, 249, 0.2)', border: 'rgba(117, 18, 249, 1)' },
-    { bg: 'rgba(64, 221, 254, 0.2)', border: 'rgba(64, 221, 254, 1)' },
-    { bg: 'rgba(250, 18, 226, 0.2)', border: 'rgba(250, 18, 226, 1)' },
-    { bg: 'rgba(211, 47, 46, 0.2)', border: 'rgba(211, 47, 46, 1)' },
-    { bg: 'rgba(47, 125, 50, 0.2)', border: 'rgba(47, 125, 50, 1)' },
-  ];
-
-  // Criar datasets para o gráfico radar
-  const datasets = squadMetrics.map((metrics) => {
-    // Usar o ID do squad para determinar a cor de forma consistente
-    // Subtrair 1 porque os IDs geralmente começam em 1
-    const colorIndex = (metrics.squadId - 1) % colors.length;
-    const color = colors[colorIndex];
-
-    return {
-      label: metrics.label,
-      data: [
-        (metrics.cost / maxValues.cost) * 100,
-        (metrics.allocation / maxValues.allocation) * 100,
-        (metrics.people / maxValues.people) * 100,
-      ],
-      backgroundColor: color.bg,
-      borderColor: color.border,
-      borderWidth: 2,
-      pointBackgroundColor: color.border,
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: color.border,
-    };
-  });
-
-  if (chartInstances.strategicView) {
-    chartInstances.strategicView.destroy();
-  }
-
-  chartInstances.strategicView = new Chart(ctx, {
-    type: "radar",
-    data: {
-      labels: squadNames,
-      datasets: [{
-        label: "Horas Alocadas",
-        data: hoursData,
-        backgroundColor: hoursData.map((_, idx) => colors[idx % colors.length]),
-        borderColor: hoursData.map((_, idx) => colors[idx % colors.length].replace('0.6', '1')),
-        borderWidth: 1,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: "Horas",
-          },
-        },
-        x: {
-          ticks: {
-            maxRotation: 0,
-            minRotation: 0,
-            autoSkip: false,
-            callback: function(value, index) {
-              const label = squadNames[index];
-              if (!label) return '';
-              
-              // Quebrar linha se o nome for muito longo (mais de 12 caracteres)
-              if (label.length > 12) {
-                // Tentar quebrar em espaços primeiro
-                const words = label.split(' ');
-                if (words.length > 1) {
-                  // Se tiver múltiplas palavras, tentar dividir de forma equilibrada
-                  let firstLine = '';
-                  let secondLine = '';
-                  const midPoint = Math.ceil(words.length / 2);
-                  
-                  firstLine = words.slice(0, midPoint).join(' ');
-                  secondLine = words.slice(midPoint).join(' ');
-                  
-                  // Se a primeira linha ainda for muito longa, quebrar no meio
-                  if (firstLine.length > 15) {
-                    const mid = Math.floor(label.length / 2);
-                    const spaceIndex = label.lastIndexOf(' ', mid);
-                    if (spaceIndex > 0) {
-                      return label.substring(0, spaceIndex) + '\n' + label.substring(spaceIndex + 1);
-                    }
-                    return label.substring(0, mid) + '\n' + label.substring(mid);
-                  }
-                  
-                  return firstLine + '\n' + secondLine;
-                } else {
-                  // Se não tiver espaços, quebrar no meio
-                  const mid = Math.floor(label.length / 2);
-                  return label.substring(0, mid) + '\n' + label.substring(mid);
-                }
-              }
-              return label;
-            },
-          },
-        },
-      },
-      plugins: {
-        legend: {
-          display: true,
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              const total = hoursData.reduce((a, b) => a + b, 0);
-              const percentage = total > 0 ? ((context.parsed.y / total) * 100).toFixed(1) : 0;
-              return `${context.dataset.label}: ${context.parsed.y}h (${percentage}%)`;
-            },
-          },
         },
       },
     },
