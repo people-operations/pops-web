@@ -328,8 +328,8 @@
       "name": "Nome",
       "role": "Cargo",
       "squad": "Squad",
-      "allocated": "% alocadas",
-      "available": "% disponíveis",
+      "allocated": "Horas Alocadas",
+      "available": "Horas Livres",
       "status": "Status",
       "feedback": "Ação de feedback"
     },

@@ -206,55 +206,36 @@
               <th data-i18n="collaborators.table.name">Nome</th>
               <th data-i18n="collaborators.table.role">Cargo</th>
               <th data-i18n="collaborators.table.squad">Squad</th>
+              <th data-i18n="collaborators.table.allocated">Horas Alocadas</th>
+              <th data-i18n="collaborators.table.available">Horas Disponíveis</th>
+              <th>Sobrecarga (%)</th>
+              <th>Ociosidade (%)</th>
               <th data-i18n="collaborators.table.status">Status</th>
             </tr>
           </thead>
           <tbody>
-            <tr class="collaborator-row">
-              <td>Nome aqui</td>
-              <td>Cargo</td>
-              <td>
-                <div class="avatars-group">
-                  <div class="avatar-sm">K</div>
-                  <div class="avatar-sm">K</div>
-                  <div class="avatar-sm">KK</div>
-                </div>
-              </td>
-              <td>
-                <span
-                  class="status-badge active"
-                  data-i18n="collaborators.status.active"
-                >
-                  Ativo
-                </span>
-              </td>
-            </tr>
-            <tr class="collaborator-row">
-              <td>Nome aqui</td>
-              <td>Cargo</td>
-              <td>
-                <div class="avatars-group">
-                  <div class="avatar-sm">K</div>
-                  <div class="avatar-sm">K</div>
-                  <div class="avatar-sm">KK</div>
-                </div>
-              </td>
-              <td><span class="status-badge active">Ativo</span></td>
-            </tr>
-            <tr class="collaborator-row">
-              <td>Nome aqui</td>
-              <td>Cargo</td>
-              <td>
-                <div class="avatars-group">
-                  <div class="avatar-sm">K</div>
-                  <div class="avatar-sm">K</div>
-                  <div class="avatar-sm">KK</div>
-                </div>
-              </td>
-              <td><span class="status-badge active">Ativo</span></td>
-            </tr>
           </tbody>
         </table>
+        <div class="pagination-container">
+          <div class="pagination-info">
+            <span id="pagination-text">Mostrando 1-10 de <span id="total-count">0</span> resultados</span>
+          </div>
+          <div class="pagination-controls">
+            <button id="prev-page" class="pagination-btn" disabled>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Anterior
+            </button>
+            <div id="pagination-numbers" class="pagination-numbers"></div>
+            <button id="next-page" class="pagination-btn">
+              Próxima
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </main>
     <script type="module" src="collaborators.js"></script>

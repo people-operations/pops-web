@@ -298,6 +298,8 @@ function updateChartsForTab(tabName) {
       console.log("Atualizando aba de Competências");
       // Atualizar KPIs de certificados
       updateCompetenciesKPIs();
+      // Atualizar tabela de Skills Mais Frequentes no Mercado
+      updateMarketSkillsTable();
       setTimeout(() => {
         updateSkillsChart();
         updateSeniorityChart();
