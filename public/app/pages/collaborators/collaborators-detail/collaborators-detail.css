@@ -250,10 +250,119 @@ body.dark .timeline-item.current .timeline-content {
   white-space: nowrap;
 }
 
+/* Skills Container com Paginação */
+.skills-container {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 32px;
+  margin-bottom: 8px;
+}
+
+.skills-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.skills-pagination.hidden {
+  display: none;
+}
+
+.skills-pagination-btn {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: #333;
+  transition: all 0.2s;
+}
+
+.skills-pagination-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+  border-color: #4C6EF5;
+  color: #4C6EF5;
+}
+
+.skills-pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.skills-page-info {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.skills-show-all-btn {
+  background: #4C6EF5;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-left: 8px;
+  font-family: Poppins;
+}
+
+.skills-show-all-btn:hover {
+  background: #364fc7;
+}
+
 .readonly-field {
   background-color: var(--background-light, #f7f7f7);
   color: var(--text-color, #555);
   cursor: not-allowed;
+}
+
+/* Dark mode para skills dropdown */
+/* Dark mode para skills pagination */
+body.dark .skills-pagination {
+  border-top-color: #444;
+}
+
+body.dark .skills-pagination-btn {
+  background: #23232b;
+  border-color: #444;
+  color: #f5f5f5;
+}
+
+body.dark .skills-pagination-btn:hover:not(:disabled) {
+  background: #2d2c3a;
+  border-color: #a97dff;
+  color: #a97dff;
+}
+
+body.dark .skills-page-info {
+  color: #aaa;
+}
+
+body.dark .skills-show-all-btn {
+  background: #4C6EF5;
+  color: #fff;
+}
+
+body.dark .skills-show-all-btn:hover {
+  background: #364fc7;
 }
 
 /* 3. DADOS PESSOAIS & ENDEREÇO */
@@ -296,20 +405,23 @@ body.dark .timeline-item.current .timeline-content {
 .certifications .cert-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   background: #f3e5ff;
-  padding: 8px;
+  padding: 8px 12px;
   border-radius: 6px;
   margin-bottom: 8px;
 }
 .cert-name {
   font-weight: 400;
   font-size: 14px;
+  flex: 1;
 }
 .cert-period {
   font-size: 12px;
   color: #555;
-  margin-top: -4px;
-  width: 30%;
+  width: auto;
+  text-align: right;
+  white-space: nowrap;
 }
 
 /* 4. SECTIONS */
@@ -501,6 +613,10 @@ body.dark .data-block input {
 }
 body.dark .certifications .cert-item {
   background: #2d2c3a;
+}
+
+body.dark .cert-period {
+  color: #aaa;
 }
 body.dark .skill {
   background: #2d3a4a;
