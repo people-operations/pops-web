@@ -274,6 +274,7 @@ form.addEventListener("submit", async function (event) {
     budget: budget,
     startDate: toISODate(startDateInput.value),
     endDate: toISODate(endDateInput.value),
+    area: document.getElementById("area-input").value.trim() || null,
   };
   let result;
   const i18n = window.i18n || {};
@@ -363,6 +364,7 @@ async function patchFormValues(project) {
   document.getElementById("name-input").value = project.name || "";
   document.getElementById("description-input").value =
     project.description || "";
+  document.getElementById("area-input").value = project.area || "";
   // Preenche o campo budget com máscara
   let budget = parseFloat(project.budget);
   const budgetInputEl = document.getElementById("budget-input");
@@ -429,10 +431,31 @@ async function waitForI18nLoaded() {
 async function initForm() {
   showSkeleton(true);
   await waitForI18nLoaded();
+  const id = getProjectIdFromUrl();
+  const formTitle = document.getElementById("form-title");
+  
+  // Atualizar título baseado no modo (criação ou edição)
+  if (id && formTitle) {
+    // Modo edição - remover data-i18n para evitar que i18n.apply() sobrescreva
+    formTitle.removeAttribute("data-i18n");
+  }
+  
+  // Aplicar traduções primeiro
   if (window.i18n && typeof window.i18n.apply === "function") {
     window.i18n.apply();
   }
-  const id = getProjectIdFromUrl();
+  
+  // Depois de aplicar traduções, definir título para edição se necessário
+  if (id && formTitle) {
+    // Verificar se a tradução existe, senão usar texto fixo
+    const i18n = window.i18n || {};
+    const translated = i18n.t ? i18n.t("projects_form.edit_title") : null;
+    // Usar innerHTML para ser consistente com o que i18n.apply() faz
+    formTitle.innerHTML = (translated && translated !== "projects_form.edit_title") 
+      ? translated 
+      : "Edição de projeto";
+  }
+  
   if (id) {
     // Modo edição
     const project = await apiService.getProjectById(id);
@@ -441,8 +464,15 @@ async function initForm() {
       await fillProjectStatuses(project.status?.id);
       await patchFormValues(project);
       validateForm();
-      if (window.i18n && typeof window.i18n.apply === "function")
-        window.i18n.apply();
+      // Garantir que o título não seja sobrescrito após todas as operações
+      if (formTitle) {
+        const i18n = window.i18n || {};
+        const translated = i18n.t ? i18n.t("projects_form.edit_title") : null;
+        // Usar innerHTML para ser consistente com o que i18n.apply() faz
+        formTitle.innerHTML = (translated && translated !== "projects_form.edit_title") 
+          ? translated 
+          : "Edição de projeto";
+      }
       showSkeleton(false);
     } else {
       showSkeleton(false);
@@ -455,9 +485,8 @@ async function initForm() {
         );
     }
   } else {
+    // Modo criação
     await Promise.all([fillProjectTypes(), fillProjectStatuses()]);
-    if (window.i18n && typeof window.i18n.apply === "function")
-      window.i18n.apply();
     showSkeleton(false);
   }
 }

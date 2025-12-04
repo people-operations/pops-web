@@ -223,6 +223,10 @@ async function renderProjectDetail() {
     }
     return;
   }
+  
+  // Debug: verificar se as squads estão vindo na resposta
+  console.log("Projeto carregado:", project);
+  console.log("Squads recebidas:", project.squads);
   // Sidebar: restaura o HTML original antes de preencher
   if (originalSidebarHTML) {
     document.querySelector(".summary").innerHTML = originalSidebarHTML;

@@ -166,7 +166,7 @@
         </div>
       </div>
       <div class="form-container" id="form-container">
-        <h2 data-i18n="projects_form.create_title"></h2>
+        <h2 id="form-title" data-i18n="projects_form.create_title"></h2>
         <form class="form-project">
           <!-- Nome -->
           <label data-i18n="projects_form.name"></label>
@@ -211,6 +211,15 @@
             data-i18n-placeholder="projects_form.description_placeholder"
             required
           ></textarea>
+
+          <!-- Área -->
+          <label data-i18n="projects_form.area">Área</label>
+          <input
+            type="text"
+            id="area-input"
+            data-i18n-placeholder="Área que beneficiária do projeto"
+            placeholder="Ex: Tecnologia, Financeiro, RH..."
+          />
 
           <!-- Budget / Datas -->
           <div class="row">
