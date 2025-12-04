@@ -1,4 +1,4 @@
-function getAuthTokenOrThrow() {
+export function getAuthTokenOrThrow() {
   const token = localStorage.getItem("idToken");
   if (!token) {
     throw new Error("Token não encontrado no localStorage");
@@ -190,6 +190,50 @@ export const apiService = {
     }
   },
 
+  async disableProject(id) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(`http://localhost:8082/api/projects/disable/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Erro ao desativar projeto com ID ${id}:`, error.message);
+      throw error;
+    }
+  },
+
+  async enableProject(id) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(`http://localhost:8082/api/projects/enable/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Erro ao ativar projeto com ID ${id}:`, error.message);
+      throw error;
+    }
+  },
+
   async updateProject(id, project) {
     try {
       const token = getAuthTokenOrThrow();
@@ -226,14 +270,17 @@ export const apiService = {
       });
 
       if (!response.ok) {
+        if (response.status === 204) {
+          return [];
+        }
         const errorText = await response.text();
         throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
       }
       const data = await response.json();
-      return data;
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error("Erro ao buscar project types:", error.message);
-      return null;
+      return [];
     }
   },
 
@@ -249,15 +296,18 @@ export const apiService = {
       });
 
       if (!response.ok) {
+        if (response.status === 204) {
+          return [];
+        }
         const errorText = await response.text();
         throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
-      return data;
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error("Erro ao buscar project statuses:", error.message);
-      return null;
+      return [];
     }
   },
 

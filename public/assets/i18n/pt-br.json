@@ -196,7 +196,7 @@
     "functions": "Funções:",
     "allocated": "Horas alocadas:",
     "available": "Horas disponíveis:",
-    "start": "Começou:",
+    "start": "Início:",
     "end": "Terminar:"
   },
   "projects": {
@@ -208,7 +208,7 @@
     "area": "Área:",
     "members": "Membros:",
     "budget": "Budget:",
-    "startedAt": "Começou:",
+    "startedAt": "Início:",
     "endedAt": "Fim:",
     "skills_needed": "Skills necessários:",
     "allocated_hours": "Horas alocadas",
@@ -300,7 +300,7 @@
     "functions": "Funções:",
     "allocated": "Horas alocadas:",
     "available": "Horas disponíveis:",
-    "start": "Começou:",
+    "start": "Início:",
     "end": "Terminar:"
   },
   "collaborators": {

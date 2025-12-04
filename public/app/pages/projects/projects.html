@@ -160,12 +160,59 @@
             <p class="subtitle" data-i18n="projects.subtitle"></p>
           </div>
           <button
-            class="create-project btn"
+            class="btn btn-purple"
             onclick="window.location.href='projects-form/projects-form.html'"
             data-i18n="projects.create"
           ></button>
         </div>
+        <div class="projects-filters">
+          <div class="filter-group">
+            <label for="name-filter">Nome do Projeto:</label>
+            <input type="text" id="name-filter" class="filter-input" placeholder="Buscar por nome...">
+          </div>
+          <div class="filter-group">
+            <label for="active-filter">Status do Projeto:</label>
+            <select id="active-filter" class="filter-select">
+              <option value="all">Todos</option>
+              <option value="active">Ativos</option>
+              <option value="inactive">Inativos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="status-filter">Status:</label>
+            <select id="status-filter" class="filter-select">
+              <option value="">Todos os status</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="type-filter">Tipo:</label>
+            <select id="type-filter" class="filter-select">
+              <option value="">Todos os tipos</option>
+            </select>
+          </div>
+          <button class="btn outlined" id="clear-filters">Limpar filtros</button>
+        </div>
         <div id="project-list" class="project-cards"></div>
+        <div class="pagination-container" id="pagination-container" style="display: none;">
+          <div class="pagination-info">
+            <span id="pagination-text">Mostrando 1-9 de <span id="total-count">0</span> resultados</span>
+          </div>
+          <div class="pagination-controls">
+            <button id="prev-page" class="pagination-btn" disabled>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Anterior
+            </button>
+            <div id="pagination-numbers" class="pagination-numbers"></div>
+            <button id="next-page" class="pagination-btn">
+              Próxima
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </main>
     </div>
     <script type="module" src="projects.js"></script>

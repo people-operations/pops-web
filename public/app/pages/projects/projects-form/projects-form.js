@@ -4,6 +4,11 @@ const saveBtn = document.getElementById("save-btn");
 const cancelBtn = document.getElementById("cancel-btn");
 const form = document.querySelector(".form-project");
 
+function capitalizeFirst(str) {
+  if (!str || typeof str !== "string") return str;
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 function getProjectIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return params.get("id");
@@ -314,7 +319,7 @@ async function fillProjectTypes(selectedId) {
       if (type.active) {
         const option = document.createElement("option");
         option.value = type.id;
-        option.textContent = type.name;
+        option.textContent = capitalizeFirst(type.name);
         if (selectedId && Number(selectedId) === type.id)
           option.selected = true;
         select.appendChild(option);
@@ -340,10 +345,10 @@ async function fillProjectStatuses(selectedId) {
         option.value = status.id;
         // Traduzir status.name se houver tradução
         const translated = t(`projects_form.${status.name}`);
-        option.textContent =
-          translated !== `projects_form.${status.name}`
-            ? translated
-            : status.name;
+        const statusName = translated !== `projects_form.${status.name}`
+          ? translated
+          : capitalizeFirst(status.name);
+        option.textContent = statusName;
         if (selectedId && Number(selectedId) === status.id)
           option.selected = true;
         statusSelect.appendChild(option);

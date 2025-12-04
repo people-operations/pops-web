@@ -243,16 +243,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           </span>
         </td>
         <td>
-          <span class="percentage-badge ${overloadPercent > 0 ? 'overload' : 'no-overload'}">
-            ${overloadPercent}%
-          </span>
-        </td>
-        <td>
-          <span class="percentage-badge ${idlePercent > 50 ? 'idle' : 'no-idle'}">
-            ${idlePercent}%
-          </span>
-        </td>
-        <td>
           <span class="status-badge ${
             emp.activeEmployee ? "active" : "inactive"
           }">
