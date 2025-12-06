@@ -144,6 +144,16 @@ body.dark .skeleton-btn {
   gap: 8px;
 }
 
+.filter-group-large {
+  flex: 1;
+  min-width: 250px;
+  max-width: 400px;
+}
+
+.filter-group-large .filter-input {
+  min-width: 100%;
+}
+
 .filter-group label {
   font-size: 14px;
   font-weight: 500;

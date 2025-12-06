@@ -130,10 +130,15 @@ function applyFilters() {
   const activeFilter = document.getElementById("active-filter")?.value || "all";
   const statusFilter = document.getElementById("status-filter")?.value;
   const typeFilter = document.getElementById("type-filter")?.value;
+  const areaFilter = document.getElementById("area-filter")?.value || "";
+  const sortBy = document.getElementById("sort-by")?.value || "name";
   
   projects = allProjects.filter((project) => {
-    // Filtro por nome
-    const matchesName = !nameFilter || (project.name || "").toLowerCase().includes(nameFilter);
+    // Filtro por nome ou descrição (busca avançada)
+    const searchText = nameFilter.toLowerCase();
+    const matchesName = !searchText || 
+      (project.name || "").toLowerCase().includes(searchText) ||
+      (project.description || "").toLowerCase().includes(searchText);
     
     // Filtro de ativo/inativo
     let matchesActive = true;
@@ -149,14 +154,38 @@ function applyFilters() {
     // Filtro de tipo
     const matchesType = !typeFilter || project.type?.id == typeFilter;
     
-    return matchesName && matchesActive && matchesStatus && matchesType;
+    // Filtro de área
+    const matchesArea = !areaFilter || (project.area || "").toLowerCase().includes(areaFilter.toLowerCase());
+    
+    return matchesName && matchesActive && matchesStatus && matchesType && matchesArea;
   });
   
-  // Ordenar alfabeticamente por nome
+  // Ordenação
   projects.sort((a, b) => {
-    const nameA = (a.name || "").toLowerCase();
-    const nameB = (b.name || "").toLowerCase();
-    return nameA.localeCompare(nameB, 'pt-BR');
+    switch (sortBy) {
+      case "name":
+        const nameA = (a.name || "").toLowerCase();
+        const nameB = (b.name || "").toLowerCase();
+        return nameA.localeCompare(nameB, 'pt-BR');
+      
+      case "startDate":
+        const dateA = a.startDate ? new Date(a.startDate) : new Date(0);
+        const dateB = b.startDate ? new Date(b.startDate) : new Date(0);
+        return dateB - dateA; // Mais recente primeiro
+      
+      case "endDate":
+        const endDateA = a.endDate ? new Date(a.endDate) : new Date(0);
+        const endDateB = b.endDate ? new Date(b.endDate) : new Date(0);
+        return endDateA - endDateB; // Mais próximo primeiro
+      
+      case "budget":
+        const budgetA = a.budget ? Number(a.budget) : 0;
+        const budgetB = b.budget ? Number(b.budget) : 0;
+        return budgetB - budgetA; // Maior primeiro
+      
+      default:
+        return 0;
+    }
   });
   
   // Resetar para primeira página ao aplicar filtros
@@ -466,11 +495,13 @@ if (typeof window !== "undefined") {
     const activeFilter = document.getElementById("active-filter");
     const statusFilter = document.getElementById("status-filter");
     const typeFilter = document.getElementById("type-filter");
+    const areaFilter = document.getElementById("area-filter");
+    const sortBy = document.getElementById("sort-by");
     const clearFiltersBtn = document.getElementById("clear-filters");
     const prevPageBtn = document.getElementById("prev-page");
     const nextPageBtn = document.getElementById("next-page");
     
-    // Filtro por nome (com debounce)
+    // Filtro por nome/descrição (com debounce)
     let nameFilterTimeout;
     if (nameFilter) {
       nameFilter.addEventListener("input", () => {
@@ -478,6 +509,17 @@ if (typeof window !== "undefined") {
         nameFilterTimeout = setTimeout(() => {
           applyFilters();
         }, 300); // Aguarda 300ms após parar de digitar
+      });
+    }
+    
+    // Filtro por área (com debounce)
+    let areaFilterTimeout;
+    if (areaFilter) {
+      areaFilter.addEventListener("input", () => {
+        clearTimeout(areaFilterTimeout);
+        areaFilterTimeout = setTimeout(() => {
+          applyFilters();
+        }, 300);
       });
     }
     
@@ -493,12 +535,18 @@ if (typeof window !== "undefined") {
       typeFilter.addEventListener("change", applyFilters);
     }
     
+    if (sortBy) {
+      sortBy.addEventListener("change", applyFilters);
+    }
+    
     if (clearFiltersBtn) {
       clearFiltersBtn.addEventListener("click", () => {
         if (nameFilter) nameFilter.value = "";
         if (activeFilter) activeFilter.value = "all";
         if (statusFilter) statusFilter.value = "";
         if (typeFilter) typeFilter.value = "";
+        if (areaFilter) areaFilter.value = "";
+        if (sortBy) sortBy.value = "name";
         applyFilters();
       });
     }

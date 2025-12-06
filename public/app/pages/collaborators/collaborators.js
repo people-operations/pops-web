@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Verificar se já está no cache
         const cached = percentagesCache.get(emp.id);
         const weeklyHours = emp.workHoursPerWeek || 40;
+        const monthlyHours = weeklyHours * 4; // 40h/semana × 4 = 160h/mês
         return {
           ...emp,
           allocatedPercent: cached?.allocatedPercent || 0,
@@ -42,8 +43,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           overloadPercent: cached?.overloadPercent || 0,
           idlePercent: cached?.idlePercent || 100,
           totalAllocatedHours: cached?.totalAllocatedHours || 0,
-          availableHours: cached?.availableHours ?? weeklyHours,
+          availableHours: cached?.availableHours ?? monthlyHours,
           weeklyHours: weeklyHours,
+          monthlyHours: monthlyHours,
           _percentagesLoaded: !!cached,
         };
       });
@@ -102,6 +104,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function calculatePercentages(employee) {
     try {
       const weeklyHours = employee.workHoursPerWeek || 40;
+      // Calcular horas mensais: 40h/semana × 4 semanas = 160h/mês
+      const monthlyHours = weeklyHours * 4;
       let totalAllocatedHours = 0;
 
       // Buscar alocações do colaborador
@@ -117,17 +121,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.warn(`Não foi possível buscar alocações para ${employee.id}:`, allocationError);
       }
 
-      // Calcular porcentagens
-      const allocatedPercent = weeklyHours > 0 
-        ? Math.round((totalAllocatedHours / weeklyHours) * 100)
+      // Calcular porcentagens baseado em horas mensais (160h/mês)
+      const allocatedPercent = monthlyHours > 0 
+        ? Math.round((totalAllocatedHours / monthlyHours) * 100)
         : 0;
       
       const availablePercent = Math.max(0, 100 - allocatedPercent);
       const overloadPercent = allocatedPercent > 100 ? allocatedPercent - 100 : 0;
       const idlePercent = allocatedPercent < 100 ? 100 - allocatedPercent : 0;
 
-      // Calcular horas disponíveis (livres)
-      const availableHours = Math.max(0, weeklyHours - totalAllocatedHours);
+      // Calcular horas disponíveis (livres) - baseado em horas mensais
+      const availableHours = Math.max(0, monthlyHours - totalAllocatedHours);
 
       return {
         allocatedPercent,
@@ -137,17 +141,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         totalAllocatedHours,
         availableHours,
         weeklyHours,
+        monthlyHours, // Adicionar horas mensais ao retorno
       };
     } catch (error) {
       console.error(`Erro ao calcular porcentagens para ${employee.id}:`, error);
+      const weeklyHours = employee.workHoursPerWeek || 40;
+      const monthlyHours = weeklyHours * 4;
       return {
         allocatedPercent: 0,
         availablePercent: 100,
         overloadPercent: 0,
         idlePercent: 100,
         totalAllocatedHours: 0,
-        availableHours: employee.workHoursPerWeek || 40,
-        weeklyHours: employee.workHoursPerWeek || 40,
+        availableHours: monthlyHours,
+        weeklyHours: weeklyHours,
+        monthlyHours: monthlyHours,
       };
     }
   }
@@ -217,7 +225,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const row = document.createElement("tr");
       row.classList.add("collaborator-row");
       const totalAllocatedHours = emp.totalAllocatedHours || 0;
-      const availableHours = emp.availableHours ?? (emp.weeklyHours || 40);
+      const weeklyHours = emp.weeklyHours || emp.workHoursPerWeek || 40;
+      const monthlyHours = emp.monthlyHours || (weeklyHours * 4);
+      const availableHours = emp.availableHours ?? monthlyHours;
       const overloadPercent = emp.overloadPercent || 0;
       const idlePercent = emp.idlePercent || 100;
       const allocatedPercent = emp.allocatedPercent || 0;
@@ -478,6 +488,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     
     const weeklyHours = employee.weeklyHours || employee.workHoursPerWeek || 40;
+    const monthlyHours = weeklyHours * 4; // 40h/semana × 4 = 160h/mês
     
     // Se allocatedHours for fornecido, usar esse valor
     // Caso contrário, calcular baseado na sobrecarga
@@ -486,16 +497,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       totalAllocatedHours = allocatedHours;
     } else {
       // Calcular horas alocadas para gerar a sobrecarga desejada
-      // overloadPercent = (allocatedHours / weeklyHours - 1) * 100
-      // allocatedHours = weeklyHours * (1 + overloadPercent / 100)
-      totalAllocatedHours = weeklyHours * (1 + overloadPercent / 100);
+      // overloadPercent = (allocatedHours / monthlyHours - 1) * 100
+      // allocatedHours = monthlyHours * (1 + overloadPercent / 100)
+      totalAllocatedHours = monthlyHours * (1 + overloadPercent / 100);
     }
     
-    const allocatedPercent = Math.round((totalAllocatedHours / weeklyHours) * 100);
+    // Calcular porcentagens baseado em horas mensais (160h/mês)
+    const allocatedPercent = Math.round((totalAllocatedHours / monthlyHours) * 100);
     const availablePercent = Math.max(0, 100 - allocatedPercent);
     const calculatedOverloadPercent = allocatedPercent > 100 ? allocatedPercent - 100 : 0;
     const idlePercent = allocatedPercent < 100 ? 100 - allocatedPercent : 0;
-    const availableHours = Math.max(0, weeklyHours - totalAllocatedHours);
+    const availableHours = Math.max(0, monthlyHours - totalAllocatedHours);
     
     // Atualizar o objeto do colaborador
     employee.allocatedPercent = allocatedPercent;
@@ -504,6 +516,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     employee.idlePercent = idlePercent;
     employee.totalAllocatedHours = totalAllocatedHours;
     employee.availableHours = availableHours;
+    employee.monthlyHours = monthlyHours;
     
     // Atualizar o cache
     percentagesCache.set(employee.id, {
@@ -513,7 +526,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       idlePercent,
       totalAllocatedHours,
       availableHours,
-      weeklyHours
+      weeklyHours,
+      monthlyHours
     });
     
     // Re-renderizar a tabela

@@ -198,7 +198,24 @@
       <section class="content">
         <!-- Equipes -->
         <div class="teams-section">
-          <h4 data-i18n="projects_detail.teams">Equipes</h4>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h4 data-i18n="projects_detail.teams" style="margin: 0;">Equipes</h4>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input 
+                type="text" 
+                id="team-search" 
+                placeholder="Buscar membros ou skills..." 
+                style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; min-width: 250px;"
+              >
+              <button 
+                id="clear-team-search" 
+                style="padding: 6px 12px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 14px;"
+                title="Limpar busca"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
           <div class="teams-list">
             <div class="team-card pink">
               <h5 class="team-name">Alpha Back-end</h5>
@@ -206,8 +223,8 @@
                 <strong data-i18n="projects_detail.po">PO:</strong> Cassandra
                 Castro • 5 membros
               </p>
-              <p class="team-info" data-i18n="projects_detail.skills_needed">
-                Skills necessários do projeto:
+              <p class="team-info" data-i18n="projects_detail.skills_present">
+                Skills presentes na equipe:
               </p>
               <div class="skills">
                 <span class="skill">Python</span>
@@ -218,9 +235,9 @@
             <div class="team-card cyan">
               <h5 class="team-name">Alpha Back-end</h5>
               <p class="team-info">
-                <strong>PO:</strong> Cassandra Castro • 5 membros
+                <strong>PO:</strong> 5 membros
               </p>
-              <p class="team-info">Skills necessários do projeto:</p>
+              <p class="team-info">Skills presentes na equipe:</p>
               <div class="skills">
                 <span class="skill">Python</span>
                 <span class="skill">Java</span>
@@ -232,7 +249,7 @@
               <p class="team-info">
                 <strong>PO:</strong> Cassandra Castro • 5 membros
               </p>
-              <p class="team-info">Skills necessários do projeto:</p>
+              <p class="team-info">Skills presentes na equipe:</p>
               <div class="skills">
                 <span class="skill">Python</span>
                 <span class="skill">Java</span>

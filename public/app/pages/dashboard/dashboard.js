@@ -3050,7 +3050,8 @@ function getCollaboratorData() {
 
   if (dateFilter) {
     allocations = allocations.filter(a => {
-      const allocDate = a.startDate || a.date;
+      // A API retorna startedAt, mas o código pode usar startDate ou date também
+      const allocDate = a.startedAt || a.startDate || a.date;
       return allocDate && new Date(allocDate) >= dateFilter;
     });
   }
@@ -3124,7 +3125,8 @@ function updateCollaboratorKPIs() {
   const { collab, allocations, squads, projects } = data;
 
   // Calcular horas totais alocadas
-  const totalHours = allocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+  // A API retorna allocatedHours, mas o código pode usar hours também
+  const totalHours = allocations.reduce((sum, a) => sum + (a.allocatedHours || a.hours || 0), 0);
 
   // Contar squads ativas (squads com alocações no período)
   const activeSquads = squads.length;
@@ -3188,7 +3190,8 @@ function updateCollaboratorWorkloadChart() {
     if (!hoursBySquad[squadId]) {
       hoursBySquad[squadId] = 0;
     }
-    hoursBySquad[squadId] += (a.hours || 0);
+    // A API retorna allocatedHours, mas o código pode usar hours também
+    hoursBySquad[squadId] += (a.allocatedHours || a.hours || 0);
   });
 
   // Criar dados para o gráfico: horas por squad
@@ -3224,7 +3227,7 @@ function updateCollaboratorWorkloadChart() {
           if (!hoursByProject[relatedProject.id]) {
             hoursByProject[relatedProject.id] = 0;
           }
-          hoursByProject[relatedProject.id] += (a.hours || 0);
+          hoursByProject[relatedProject.id] += (a.allocatedHours || a.hours || 0);
         }
       }
     });
@@ -3275,29 +3278,41 @@ function updateCollaboratorWorkloadChart() {
     type: "bar",
     indexAxis: "y",
     data: {
-      labels: squads,
-      datasets: seniorities.map((seniority, idx) => ({
-        label: seniority,
-        data: squads.map(squad => seniorityBySquad[squad][seniority] || 0),
-        backgroundColor: [
-          "rgba(64, 221, 254, 0.6)",
-          "rgba(117, 18, 249, 0.6)",
-          "rgba(250, 18, 226, 0.6)",
-          "rgba(255, 252, 54, 0.6)",
-        ][idx],
-      })),
+      labels: squadNames,
+      datasets: [{
+        label: "Horas Alocadas",
+        data: hoursData,
+        backgroundColor: colors.slice(0, hoursData.length),
+      }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      indexAxis: "y",
       scales: {
         x: {
-          stacked: true,
           beginAtZero: true,
+          title: {
+            display: true,
+            text: "Horas",
+          },
         },
         y: {
-          stacked: true,
+          title: {
+            display: true,
+            text: "Squads/Projetos",
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: true,
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `${context.dataset.label}: ${context.parsed.x}h`;
+            },
+          },
         },
       },
     },
@@ -3374,13 +3389,14 @@ function updateCollaboratorHoursEvolutionChart() {
   const hoursByPeriod = new Array(labels.length).fill(0);
   
   allocations.forEach(alloc => {
-    const allocDate = new Date(alloc.startDate || alloc.date);
+    const allocDate = new Date(alloc.startedAt || alloc.startDate || alloc.date);
     const daysAgo = Math.floor((now - allocDate) / (1000 * 60 * 60 * 24));
     
     if (daysAgo >= 0 && daysAgo < periodDays) {
       const periodIndex = Math.floor(daysAgo / intervalDays);
       if (periodIndex < hoursByPeriod.length) {
-        hoursByPeriod[periodIndex] += (alloc.hours || 0);
+        // A API retorna allocatedHours, mas o código pode usar hours também
+        hoursByPeriod[periodIndex] += (alloc.allocatedHours || alloc.hours || 0);
       }
     }
   });
@@ -3458,7 +3474,8 @@ function updateCollaboratorSquadsComparisonChart() {
     if (!hoursBySquad[squadId]) {
       hoursBySquad[squadId] = 0;
     }
-    hoursBySquad[squadId] += (a.hours || 0);
+    // A API retorna allocatedHours, mas o código pode usar hours também
+    hoursBySquad[squadId] += (a.allocatedHours || a.hours || 0);
   });
 
   // Criar dados para o gráfico

@@ -202,27 +202,30 @@ function addSidebarActionListeners() {
 }
 
 async function renderProjectDetail() {
-  const id = getProjectIdFromUrl();
-  if (!id) {
-    window.showNotification &&
-      window.showNotification("error", "ID do projeto não encontrado na URL.");
-    // Remove skeleton e restaura sidebar
-    if (originalSidebarHTML) {
-      document.querySelector(".summary").innerHTML = originalSidebarHTML;
-      addSidebarActionListeners();
+  return new Promise(async (resolve) => {
+    const id = getProjectIdFromUrl();
+    if (!id) {
+      window.showNotification &&
+        window.showNotification("error", "ID do projeto não encontrado na URL.");
+      // Remove skeleton e restaura sidebar
+      if (originalSidebarHTML) {
+        document.querySelector(".summary").innerHTML = originalSidebarHTML;
+        addSidebarActionListeners();
+      }
+      resolve();
+      return;
     }
-    return;
-  }
-  const project = await apiService.getProjectById(id);
-  if (!project) {
-    window.showNotification &&
-      window.showNotification("error", "Projeto não encontrado.");
-    if (originalSidebarHTML) {
-      document.querySelector(".summary").innerHTML = originalSidebarHTML;
-      addSidebarActionListeners();
+    const project = await apiService.getProjectById(id);
+    if (!project) {
+      window.showNotification &&
+        window.showNotification("error", "Projeto não encontrado.");
+      if (originalSidebarHTML) {
+        document.querySelector(".summary").innerHTML = originalSidebarHTML;
+        addSidebarActionListeners();
+      }
+      resolve();
+      return;
     }
-    return;
-  }
   
   // Debug: verificar se as squads estão vindo na resposta
   console.log("Projeto carregado:", project);
@@ -297,16 +300,37 @@ async function renderProjectDetail() {
     budgetElement.textContent = formatCurrency(project.budget);
   }
   
-  // Mão de obra aplicada
+  // Mão de obra aplicada - usar total investido das equipes
   const laborCostElement = document.getElementById("project-labor-cost");
   if (laborCostElement) {
-    const laborCost = await calculateLaborCost(project);
-    const laborCostFormatted = laborCost > 0
-      ? `R$ ${Number(laborCost).toLocaleString("pt-BR", {
-          minimumFractionDigits: 2,
-        })}`
-      : "-";
-    laborCostElement.textContent = laborCostFormatted;
+    try {
+      // Buscar detalhes dos teams para obter o total investido
+      const teamDetailsData = await apiService.getProjectTeamDetails(id);
+      if (teamDetailsData && teamDetailsData.teams && teamDetailsData.teams.length > 0) {
+        // Somar todos os totalInvestedValue de todas as equipes
+        const totalInvested = teamDetailsData.teams.reduce((sum, team) => {
+          const teamTotal = team.totalInvestedValue ? Number(team.totalInvestedValue) : 0;
+          return sum + teamTotal;
+        }, 0);
+        
+        const totalInvestedFormatted = totalInvested > 0
+          ? formatCurrency(totalInvested)
+          : "-";
+        laborCostElement.textContent = totalInvestedFormatted;
+      } else {
+        laborCostElement.textContent = "-";
+      }
+    } catch (error) {
+      console.warn("Erro ao buscar total investido das equipes:", error);
+      // Fallback para o cálculo antigo se houver erro
+      const laborCost = await calculateLaborCost(project);
+      const laborCostFormatted = laborCost > 0
+        ? `R$ ${Number(laborCost).toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+          })}`
+        : "-";
+      laborCostElement.textContent = laborCostFormatted;
+    }
   }
   
   // Datas
@@ -314,37 +338,200 @@ async function renderProjectDetail() {
   if (datesElement) {
     datesElement.textContent = `${formatDate(project.startDate)} – ${formatDate(project.endDate)}`;
   }
-  // Equipes (teams)
-  const teamsList = document.querySelector(".teams-list");
-  if (Array.isArray(project.squads) && project.squads.length) {
-    teamsList.innerHTML = project.squads
+    // Equipes (teams) - Buscar informações detalhadas com valores financeiros
+    const teamsList = document.querySelector(".teams-list");
+    if (Array.isArray(project.squads) && project.squads.length) {
+      // Buscar informações detalhadas dos teams com valores financeiros
+      let teamDetailsData = null;
+      try {
+        teamDetailsData = await apiService.getProjectTeamDetails(id);
+      } catch (error) {
+        console.warn("Erro ao buscar detalhes dos teams:", error);
+        // Continua com os dados básicos dos squads
+      }
+      
+      // Salvar referência do project para usar nos event listeners
+      window.currentProject = project;
+      window.teamDetailsData = teamDetailsData; // Salvar também os detalhes
+      
+      teamsList.innerHTML = (teamDetailsData?.teams || project.squads)
       .map(
-        (squad, idx) => `
+        (team, idx) => {
+          // Se temos teamDetailsData, usar os dados detalhados, senão usar squad básico
+          const isDetailed = teamDetailsData && teamDetailsData.teams && teamDetailsData.teams[idx];
+          const teamData = isDetailed ? teamDetailsData.teams[idx] : {
+            teamId: project.squads[idx].id,
+            teamName: project.squads[idx].name,
+            teamDescription: project.squads[idx].description,
+            po: project.squads[idx].po,
+            membersCount: project.squads[idx].members?.length || 0,
+            members: project.squads[idx].members || [],
+            totalInvestedValue: null
+          };
+          
+          // Agregar todas as skills dos membros
+          const allSkills = [];
+          if (teamData.members && teamData.members.length > 0) {
+            const skillsMap = new Map();
+            teamData.members.forEach(member => {
+              if (member.skills && Array.isArray(member.skills)) {
+                member.skills.forEach(skill => {
+                  if (skill.name && !skillsMap.has(skill.name)) {
+                    skillsMap.set(skill.name, skill);
+                  }
+                });
+              }
+            });
+            allSkills.push(...Array.from(skillsMap.values()));
+          }
+          
+          return `
           <div class="team-card ${["pink", "cyan", "purple"][idx % 3]}">
-            <h5 class="team-name">${squad.name || "-"}</h5>
-            <p class="team-info"><strong data-i18n="projects_detail.po">PO:</strong> ${
-              squad.po || "-"
-            } • ${squad.members?.length || 0} membros</p>
-            <p class="team-info" data-i18n="projects_detail.skills_needed">Skills necessários do projeto:</p>
-            <div class="skills">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h5 class="team-name" style="margin: 0;">${teamData.teamName || "-"}</h5>
+              <button class="toggle-team-btn" data-team-idx="${idx}" style="background: none; border: none; cursor: pointer; padding: 4px 8px; font-size: 18px; color: #666; transition: transform 0.2s;" title="Expandir/Recolher">
+                <span class="toggle-icon" data-team-idx="${idx}">▶</span>
+              </button>
+            </div>
+            <p class="team-info">
+              <strong>${teamData.membersCount || 0} membros</strong>
+              ${teamData.po && teamData.po !== "-" ? ` • <strong data-i18n="projects_detail.po">PO:</strong> ${teamData.po}` : ''}
+              ${teamData.totalInvestedValue ? ` • <strong style="color: #28a745;">Total investido: ${formatCurrency(teamData.totalInvestedValue)}</strong>` : ''}
+            </p>
+            
+            <!-- Skills agregadas (sempre visíveis) -->
+            <div class="team-skills-always-visible" style="margin: 12px 0;">
+              <p class="team-info" data-i18n="projects_detail.skills_present" style="margin-bottom: 8px;">
+                <strong>Skills agregadas da equipe:</strong>
+              </p>
+              <div class="skills-container" data-team-idx="${idx}">
+                ${
+                  allSkills.length > 0
+                    ? `
+                      <div class="skills-list" id="skills-list-${idx}">
+                        ${allSkills
+                          .slice(0, 5)
+                          .map(
+                            (skill) => `<span class="skill">${skill.name}</span>`
+                          )
+                          .join("")}
+                      </div>
+                      ${
+                        allSkills.length > 5
+                          ? `
+                            <div class="skills-pagination" style="margin-top: 8px;">
+                              <button class="show-all-skills-btn" data-team-idx="${idx}" data-showing-all="false" style="background: #7d1bff; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-family: poppins;">
+                                Ver todas (${allSkills.length})
+                              </button>
+                              <span style="font-size: 11px; color: #666; margin-left: 8px;">
+                                Mostrando 5 de ${allSkills.length}
+                              </span>
+                            </div>
+                          `
+                          : ''
+                      }
+                    `
+                    : '<span style="color: #888; font-style: italic;">Nenhuma skill cadastrada</span>'
+                }
+              </div>
+            </div>
+            
+            <!-- Membros da equipe (expansível) -->
+            <div class="team-members team-content-${idx}" style="margin: 12px 0; display: none;">
+              <p class="team-info" style="font-weight: 600; margin-bottom: 8px;">
+                <strong>Membros:</strong>
+              </p>
               ${
-                Array.isArray(squad.skills) && squad.skills.length
-                  ? squad.skills
+                teamData.members && teamData.members.length > 0
+                  ? teamData.members
                       .map(
-                        (skill) => `<span class="skill">${skill.name}</span>`
+                        (member) => {
+                          // Formatar valor investido
+                          const investedValueFormatted = member.investedValue 
+                            ? formatCurrency(member.investedValue)
+                            : null;
+                          
+                          return `
+                          <div class="member-item" style="background: rgba(255,255,255,0.5); padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                              <strong style="font-size: 14px;">${member.name || "N/A"}</strong>
+                              <span style="font-size: 12px; color: #666; font-weight: 600;">${member.allocatedHours || 0}h</span>
+                            </div>
+                            <div style="font-size: 11px; color: #555; margin-top: 4px;">
+                              ${member.jobTitle ? `
+                                <div style="margin-bottom: 4px;">
+                                  <strong>Cargo:</strong> ${member.jobTitle}
+                                </div>
+                              ` : ''}
+                              ${member.investedValue ? `
+                                <div style="margin-top: 6px; padding: 6px; background: rgba(255, 255, 255, 0.94); border-radius: 4px; border-left: 3px solid rgba(255, 255, 255, 0.3);">
+                                  <div style="font-size: 11px; color:rgb(0, 0, 0); font-weight: 600; margin-bottom: 2px;">
+                                    <strong>Parte do salário aplicado no projeto:</strong> ${investedValueFormatted}
+                                  </div>
+                                </div>
+                              ` : ''}
+                            </div>
+                          </div>
+                        `;
+                        }
                       )
                       .join("")
-                  : "-"
+                  : '<span style="color: #888; font-style: italic; font-size: 13px;">Nenhum membro alocado</span>'
               }
             </div>
           </div>
-        `
+        `;
+        }
       )
       .join("");
-  } else {
-    teamsList.innerHTML =
-      '<div style="padding:16px; color:#888;">Nenhuma equipe cadastrada.</div>';
-  }
+      
+      // Adicionar event listeners para os botões "Ver todas" após renderizar
+      setTimeout(() => {
+        document.querySelectorAll(".show-all-skills-btn").forEach((btn) => {
+          // Remover listener anterior se existir para evitar duplicação
+          const newBtn = btn.cloneNode(true);
+          btn.parentNode.replaceChild(newBtn, btn);
+          
+          newBtn.addEventListener("click", function() {
+            const teamIdx = parseInt(this.getAttribute("data-team-idx"));
+            // Buscar skills agregadas do team
+            const teamDetails = window.teamDetailsData?.teams?.[teamIdx];
+            if (teamDetails && teamDetails.members) {
+              const allSkills = [];
+              const skillsMap = new Map();
+              teamDetails.members.forEach(member => {
+                if (member.skills && Array.isArray(member.skills)) {
+                  member.skills.forEach(skill => {
+                    if (skill.name && !skillsMap.has(skill.name)) {
+                      skillsMap.set(skill.name, skill);
+                    }
+                  });
+                }
+              });
+              allSkills.push(...Array.from(skillsMap.values()));
+              toggleAllSkills(teamIdx, { skills: allSkills });
+            }
+          });
+        });
+        
+        // Adicionar event listeners para os botões de expandir/recolher equipe
+        document.querySelectorAll(".toggle-team-btn").forEach((btn) => {
+          const newBtn = btn.cloneNode(true);
+          btn.parentNode.replaceChild(newBtn, btn);
+          
+          newBtn.addEventListener("click", function() {
+            const teamIdx = parseInt(this.getAttribute("data-team-idx"));
+            toggleTeamContent(teamIdx);
+          });
+        });
+      }, 100);
+    } else {
+      teamsList.innerHTML =
+        '<div style="padding:16px; color:#888;">Nenhuma equipe cadastrada.</div>';
+    }
+    
+    resolve();
+  });
 }
 
 function showDisableModal() {
@@ -417,9 +604,128 @@ async function handleEnableProject() {
   }
 }
 
+// Função para alternar visualização de todas as skills
+function toggleAllSkills(teamIdx, squadOrSkills) {
+  const skillsList = document.getElementById(`skills-list-${teamIdx}`);
+  const btn = document.querySelector(`button.show-all-skills-btn[data-team-idx="${teamIdx}"]`);
+  const paginationDiv = btn?.parentElement;
+  const countSpan = paginationDiv?.querySelector("span");
+  
+  // Aceitar tanto squad com skills quanto objeto direto com skills
+  const skills = squadOrSkills.skills || squadOrSkills;
+  
+  if (!skillsList || !btn || !skills || !Array.isArray(skills)) return;
+  
+  const showingAll = btn.getAttribute("data-showing-all") === "true";
+  
+  if (showingAll) {
+    // Mostrar apenas 5
+    skillsList.innerHTML = skills
+      .slice(0, 5)
+      .map((skill) => `<span class="skill">${skill.name || skill}</span>`)
+      .join("");
+    btn.textContent = `Ver todas (${skills.length})`;
+    btn.setAttribute("data-showing-all", "false");
+    if (countSpan) {
+      countSpan.textContent = `Mostrando 5 de ${skills.length}`;
+    }
+  } else {
+    // Mostrar todas
+    skillsList.innerHTML = skills
+      .map((skill) => `<span class="skill">${skill.name || skill}</span>`)
+      .join("");
+    btn.textContent = "Ver menos";
+    btn.setAttribute("data-showing-all", "true");
+    if (countSpan) {
+      countSpan.textContent = `Mostrando todas (${skills.length})`;
+    }
+  }
+}
+
+// Função para expandir/recolher conteúdo da equipe
+function toggleTeamContent(teamIdx) {
+  // Apenas os membros devem ser expandidos/recolhidos, não as skills
+  const teamMembers = document.querySelector(`.team-members.team-content-${teamIdx}`);
+  const toggleBtn = document.querySelector(`.toggle-team-btn[data-team-idx="${teamIdx}"]`);
+  const toggleIcon = document.querySelector(`.toggle-icon[data-team-idx="${teamIdx}"]`);
+  
+  if (!teamMembers) return;
+  
+  // Verificar se está expandido (display: block) ou recolhido (display: none)
+  const isExpanded = teamMembers.style.display !== "none";
+  
+  if (isExpanded) {
+    // Recolher - esconder apenas os membros
+    teamMembers.style.display = "none";
+  } else {
+    // Expandir - mostrar os membros
+    teamMembers.style.display = "block";
+  }
+  
+  // Atualizar ícone
+  if (toggleIcon) {
+    toggleIcon.textContent = isExpanded ? "▶" : "▼";
+    toggleIcon.style.transform = isExpanded ? "rotate(-90deg)" : "rotate(0deg)";
+  }
+}
+
+// Função para buscar membros e skills
+function filterTeamsBySearch(searchText) {
+  if (!searchText || searchText.trim() === "") {
+    // Mostrar todos os cards
+    document.querySelectorAll(".team-card").forEach(card => {
+      card.style.display = "block";
+    });
+    document.querySelectorAll(".member-item").forEach(item => {
+      item.style.display = "block";
+    });
+    return;
+  }
+  
+  const searchLower = searchText.toLowerCase().trim();
+  const teamCards = document.querySelectorAll(".team-card");
+  
+  teamCards.forEach(card => {
+    let hasMatch = false;
+    
+    // Buscar nos membros
+    const memberItems = card.querySelectorAll(".member-item");
+    memberItems.forEach(member => {
+      const memberName = member.querySelector("strong")?.textContent?.toLowerCase() || "";
+      const memberJobTitle = member.textContent?.toLowerCase() || "";
+      const matches = memberName.includes(searchLower) || memberJobTitle.includes(searchLower);
+      
+      if (matches) {
+        hasMatch = true;
+        member.style.display = "block";
+      } else {
+        member.style.display = "none";
+      }
+    });
+    
+    // Buscar nas skills
+    const skills = card.querySelectorAll(".skill");
+    skills.forEach(skill => {
+      const skillName = skill.textContent?.toLowerCase() || "";
+      if (skillName.includes(searchLower)) {
+        hasMatch = true;
+      }
+    });
+    
+    // Mostrar/ocultar card baseado em matches
+    if (hasMatch) {
+      card.style.display = "block";
+    } else {
+      card.style.display = "none";
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   showSkeletonDetail();
-  setTimeout(renderProjectDetail, 0);
+  setTimeout(() => {
+    renderProjectDetail();
+  }, 0);
   // Modal disable (fora da sidebar)
   const cancelDisableBtn = document.getElementById("cancel-disable-btn");
   if (cancelDisableBtn) cancelDisableBtn.addEventListener("click", hideDisableModal);
@@ -431,4 +737,25 @@ document.addEventListener("DOMContentLoaded", () => {
   if (cancelEnableBtn) cancelEnableBtn.addEventListener("click", hideEnableModal);
   const confirmEnableBtn = document.getElementById("confirm-enable-btn");
   if (confirmEnableBtn) confirmEnableBtn.addEventListener("click", handleEnableProject);
+  
+  // Busca de membros e skills
+  const teamSearch = document.getElementById("team-search");
+  const clearTeamSearch = document.getElementById("clear-team-search");
+  
+  let searchTimeout;
+  if (teamSearch) {
+    teamSearch.addEventListener("input", () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        filterTeamsBySearch(teamSearch.value);
+      }, 300);
+    });
+  }
+  
+  if (clearTeamSearch) {
+    clearTeamSearch.addEventListener("click", () => {
+      if (teamSearch) teamSearch.value = "";
+      filterTeamsBySearch("");
+    });
+  }
 });

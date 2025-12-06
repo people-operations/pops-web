@@ -106,15 +106,18 @@ body.dark #delete-modal #cancel-delete-btn {
   font-size: 16px;
   margin: 4px 0;
 }
-.skills .skill {
+.skills .skill,
+.skills-list .skill {
   display: inline-block;
-  background: #e0f2ff;
-  color: #0366d6;
-  border-radius: 12px;
-  padding: 4px 8px;
-  font-size: 12px;
+  background: #ffffff;
+  color: #000000;
+  border-radius: 30px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
   margin-right: 6px;
   margin-bottom: 6px;
+  border: 1px solid #e0e0e0;
 }
 
 /* 3. VISÃO GERAL FINANCEIRA */
@@ -187,19 +190,16 @@ body.dark #delete-modal #cancel-delete-btn {
   margin: 4px 0;
 }
 .team-skills .skill {
-  background: rgba(0, 123, 255, 0.1);
-  color: #007bff;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #e0e0e0;
 }
 
-/* cores específicas */
-.team-card.pink {
-  background-color: #d32f2e3b;
-}
-.team-card.cyan {
-  background-color: #40ddfe61;
-}
+/* cores específicas - padronizado */
+.team-card.pink,
+.team-card.cyan,
 .team-card.purple {
-  background-color: #7d1bff33;
+  background-color: rgba(173, 136, 232, 0.2);
 }
 
 /* 5. RESPONSIVIDADE */
@@ -228,9 +228,11 @@ body.dark .project-title {
 body.dark .status-badge {
   background-color: #388e3c;
 }
-body.dark .skills .skill {
-  background: #2d3a4a;
-  color: #7dcfff;
+body.dark .skills .skill,
+body.dark .skills-list .skill {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #e0e0e0;
 }
 body.dark .info-line,
 body.dark .description {
@@ -240,14 +242,173 @@ body.dark .finance-card small {
   color: #aaa;
 }
 body.dark .team-skills .skill {
-  background: rgba(123, 104, 238, 0.1);
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #e0e0e0;
 }
-body.dark .team-card.pink {
-  background-color: #d32f2e3b;
-}
-body.dark .team-card.cyan {
-  background-color: #40ddfe61;
-}
+body.dark .team-card.pink,
+body.dark .team-card.cyan,
 body.dark .team-card.purple {
-  background-color: #7d1bff33;
+  background-color: rgba(173, 136, 232, 0.25);
+}
+
+/* Membros da equipe */
+.team-members {
+  margin: 12px 0;
+}
+
+.member-item {
+  background: rgba(255, 255, 255, 0.5);
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  transition: background 0.2s;
+}
+
+.member-item:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+body.dark .member-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark .member-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Skills com paginação */
+.skills-container {
+  margin-top: 8px;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skills-pagination {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.show-all-skills-btn:hover {
+  background: #ffffff !important;
+  font-family: poppins;
+  color: #7d1bff;
+}
+
+body.dark .show-all-skills-btn {
+  background: #000000 !important;
+}
+
+body.dark .show-all-skills-btn:hover {
+  background: #696969 !important;
+}
+
+/* Estilos para valores financeiros */
+.member-item .invested-value {
+  color: #28a745;
+  font-weight: 600;
+}
+
+body.dark .member-item .invested-value {
+  color: #4caf50;
+}
+
+.member-item .hourly-rate {
+  color: #555;
+}
+
+body.dark .member-item .hourly-rate {
+  color: #aaa;
+}
+
+.team-total-invested {
+  color: #28a745;
+  font-weight: 600;
+}
+
+body.dark .team-total-invested {
+  color: #4caf50;
+}
+
+/* Estilos para cálculo financeiro */
+.member-item .calculation-box {
+  background: rgba(40, 167, 69, 0.1);
+  border-left: 3px solid #28a745;
+}
+
+body.dark .member-item .calculation-box {
+  background: rgba(76, 175, 80, 0.15);
+  border-left-color: #4caf50;
+}
+
+body.dark .member-item .calculation-box {
+  color: #4caf50;
+}
+
+/* Botão de expandir/recolher equipe */
+.toggle-team-btn {
+  transition: transform 0.2s ease;
+}
+
+.toggle-team-btn:hover {
+  opacity: 0.7;
+}
+
+.toggle-icon {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+body.dark .toggle-team-btn {
+  color: #ccc;
+}
+
+body.dark .toggle-team-btn:hover {
+  color: #fff;
+}
+
+/* Card de salário aplicado - dark mode */
+body.dark .member-item div[style*="background: rgba(0, 0, 0, 0.6)"] {
+  background: rgba(0, 0, 0, 0.7) !important;
+  border-left-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Campo de busca na tela de detalhes */
+#team-search {
+  transition: border-color 0.2s;
+}
+
+#team-search:focus {
+  outline: none;
+  border-color: #7d1bff;
+}
+
+#clear-team-search:hover {
+  background: #e0e0e0 !important;
+}
+
+body.dark #team-search {
+  background-color: #23232b;
+  border-color: #444;
+  color: #f3f3f3;
+}
+
+body.dark #team-search:focus {
+  border-color: #b388ff;
+}
+
+body.dark #clear-team-search {
+  background: #444 !important;
+  border-color: #555 !important;
+  color: #f3f3f3 !important;
+}
+
+body.dark #clear-team-search:hover {
+  background: #555 !important;
 }

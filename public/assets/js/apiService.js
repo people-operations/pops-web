@@ -337,7 +337,7 @@ export const apiService = {
   async getAllSquads() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("http://localhost:8083/api/teams", {
+      const response = await fetch("http://localhost:8083/api-squad/teams", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -360,7 +360,7 @@ export const apiService = {
   async insertSquad(squad) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("http://localhost:8083/api/teams", {
+      const response = await fetch("http://localhost:8083/api-squad/teams", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -385,7 +385,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api/teams/${squadId}`,
+        `http://localhost:8083/api-squad/teams/${squadId}`,
         {
           method: "DELETE",
           headers: {
@@ -408,7 +408,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api/teams/${squadId}`,
+        `http://localhost:8083/api-squad/teams/${squadId}`,
         {
           method: "GET",
           headers: {
@@ -432,7 +432,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api/teams/${squadId}/allocations`,
+        `http://localhost:8083/api-squad/teams/${squadId}/allocations`,
         {
           method: "GET",
           headers: {
@@ -456,7 +456,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api/teams/${squadId}/allocations`,
+        `http://localhost:8083/api-squad/teams/${squadId}/allocations`,
         {
           method: "POST",
           headers: {
@@ -505,7 +505,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api/teams/allocations/person/${employeeId}`,
+        `http://localhost:8083/api-squad/teams/allocations/person/${employeeId}`,
         {
           method: "GET",
           headers: {
@@ -570,6 +570,50 @@ export const apiService = {
       return await response.json();
     } catch (error) {
       console.error("Erro ao carregar skills do Odoo:", error);
+      return null;
+    }
+  },
+
+  async getProjectTeamMembers(projectId) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(
+        `http://localhost:8082/api/projects/${projectId}/team-members`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error("Erro ao carregar membros dos teams:", error);
+      return null;
+    }
+  },
+
+  async getProjectTeamDetails(projectId) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(
+        `http://localhost:8082/api/projects/${projectId}/team-details`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error("Erro ao carregar detalhes dos teams:", error);
       return null;
     }
   },

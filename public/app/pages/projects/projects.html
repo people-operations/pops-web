@@ -166,9 +166,9 @@
           ></button>
         </div>
         <div class="projects-filters">
-          <div class="filter-group">
-            <label for="name-filter">Nome do Projeto:</label>
-            <input type="text" id="name-filter" class="filter-input" placeholder="Buscar por nome...">
+          <div class="filter-group filter-group-large">
+            <label for="name-filter">Buscar:</label>
+            <input type="text" id="name-filter" class="filter-input" placeholder="Buscar por nome ou descrição...">
           </div>
           <div class="filter-group">
             <label for="active-filter">Status do Projeto:</label>
@@ -188,6 +188,19 @@
             <label for="type-filter">Tipo:</label>
             <select id="type-filter" class="filter-select">
               <option value="">Todos os tipos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="area-filter">Área:</label>
+            <input type="text" id="area-filter" class="filter-input" placeholder="Ex: Tecnologia">
+          </div>
+          <div class="filter-group">
+            <label for="sort-by">Ordenar por:</label>
+            <select id="sort-by" class="filter-select">
+              <option value="name">Nome (A-Z)</option>
+              <option value="startDate">Data de Início</option>
+              <option value="endDate">Data de Término</option>
+              <option value="budget">Budget (Maior)</option>
             </select>
           </div>
           <button class="btn outlined" id="clear-filters">Limpar filtros</button>
