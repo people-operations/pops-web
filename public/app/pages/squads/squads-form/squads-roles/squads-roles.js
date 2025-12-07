@@ -12,7 +12,6 @@ import { apiService } from "../../../../../assets/js/apiService.js";
   const closeModalBtn = document.getElementById("closeRoleModal");
   const roleForm = document.getElementById("roleForm");
   const roleFunction = document.getElementById("roleFunction");
-  const roleSeniority = document.getElementById("roleSeniority");
   const hardSkillsBox = document.getElementById("hardSkillsBox");
   const softSkillsBox = document.getElementById("softSkillsBox");
 
@@ -28,18 +27,42 @@ import { apiService } from "../../../../../assets/js/apiService.js";
   renderRoles();
   updateNextState();
 
-  // Exemplo de funções e senioridades (pode ser dinâmico depois)
-  const FUNCOES = [
-    "Desenvolvedor(a)",
-    "QA",
-    "Product Owner",
-    "Scrum Master",
-    "Designer",
-    "Analista de Dados",
-  ];
-  const SENIORIDADES = ["Júnior", "Pleno", "Sênior", "Especialista"];
   // Skills agrupadas por tipo (ex: { HARD: [], SOFT: [], ... })
   let SKILLS_BY_TYPE = {};
+  let JOB_TITLES = []; // Cargos completos vindos da API
+
+  // Função para buscar cargos únicos da API
+  async function buscarCargos() {
+    try {
+      console.log("📡 Buscando cargos (jobTitle) dos colaboradores...");
+      const colaboradores = await apiService.getCollaborators();
+      console.log("📦 Colaboradores recebidos:", colaboradores);
+      
+      if (Array.isArray(colaboradores) && colaboradores.length > 0) {
+        // Extrai jobTitle únicos e não vazios
+        const cargosSet = new Set();
+        colaboradores.forEach((colab) => {
+          if (colab && colab.jobTitle && colab.jobTitle.trim()) {
+            cargosSet.add(colab.jobTitle.trim());
+          }
+        });
+        
+        JOB_TITLES = Array.from(cargosSet).sort();
+        console.log("✅ Cargos encontrados:", JOB_TITLES);
+        
+        // Popula o select de função com os cargos completos
+        popularSelect(roleFunction, JOB_TITLES);
+      } else {
+        console.warn("⚠️ Nenhum colaborador encontrado ou resposta inválida");
+        JOB_TITLES = [];
+        popularSelect(roleFunction, []);
+      }
+    } catch (error) {
+      console.error("❌ Erro ao buscar cargos:", error);
+      JOB_TITLES = [];
+      popularSelect(roleFunction, []);
+    }
+  }
 
   function popularSelect(select, options) {
     select.innerHTML = '<option value="" selected disabled>Selecione</option>';
@@ -50,8 +73,9 @@ import { apiService } from "../../../../../assets/js/apiService.js";
       select.appendChild(o);
     });
   }
-  popularSelect(roleFunction, FUNCOES);
-  popularSelect(roleSeniority, SENIORIDADES);
+  
+  // Busca cargos ao carregar a página
+  buscarCargos();
 
   function renderChips(box, skills, tempArr) {
     box.innerHTML = "";
@@ -84,6 +108,11 @@ import { apiService } from "../../../../../assets/js/apiService.js";
   }
 
   async function openModal(isEdit = false, data = null) {
+    // Se ainda não carregou os cargos, carrega agora
+    if (JOB_TITLES.length === 0) {
+      await buscarCargos();
+    }
+    
     // Busca skills reais da API Odoo e agrupa por tipo adaptado
     try {
       const skills = await apiService.getOdooSkills();
@@ -142,8 +171,8 @@ import { apiService } from "../../../../../assets/js/apiService.js";
     const qtyInput = roleForm.querySelector('input[name="quantity"]');
     if (isEdit && data) {
       editingId = data.id;
-      roleFunction.value = data.funcao;
-      roleSeniority.value = data.senioridade;
+      roleFunction.value = data.funcao || data.cargo || "";
+      
       // Preenche skills selecionadas por tipo usando data.skillsByType
       tempSkillsByType = {};
       if (data.skillsByType && typeof data.skillsByType === "object") {
@@ -292,9 +321,7 @@ import { apiService } from "../../../../../assets/js/apiService.js";
       <div class="role-card__header">
         <div>
           <div class="role-card__title">
-            ${r.quantity ?? 1}x ${r.funcao || "Função"} (${
-        r.senioridade || "-"
-      })
+            ${r.quantity ?? 1}x ${r.funcao || r.cargo || "Função"}
           </div>
         </div>
         <div class="role-card__actions">
@@ -330,8 +357,7 @@ import { apiService } from "../../../../../assets/js/apiService.js";
     sessionStorage.setItem("squadRoles", JSON.stringify(roles));
     const rolesForNext = roles.map((r) => ({
       id: r.id,
-      title: `${r.funcao}${r.senioridade ? " " + r.senioridade : ""}`,
-      seniority: r.senioridade,
+      title: r.funcao || r.cargo || "Função",
       skillsByType: r.skillsByType || {},
       quantity: r.quantity || 1,
     }));
@@ -386,12 +412,12 @@ import { apiService } from "../../../../../assets/js/apiService.js";
       <label for="roleQuantity">Quantidade *</label>
       <input id="roleQuantity" name="quantity" type="number" min="1" max="10" value="1" required style="appearance: none; width: 100%; padding: 10px 12px; border: 1px solid #dcdce1; border-radius: 8px; font-size: 14px; background: #fff; margin-top: 4px;" />
     `;
-    // Insere após o campo de senioridade
-    const seniorityField = roleForm
-      .querySelector("#roleSeniority")
+    // Insere após o campo de função
+    const functionField = roleForm
+      .querySelector("#roleFunction")
       .closest(".field");
-    if (seniorityField && seniorityField.nextSibling) {
-      roleForm.insertBefore(qtyDiv, seniorityField.nextSibling);
+    if (functionField && functionField.nextSibling) {
+      roleForm.insertBefore(qtyDiv, functionField.nextSibling);
     } else {
       roleForm.appendChild(qtyDiv);
     }
@@ -450,14 +476,14 @@ import { apiService } from "../../../../../assets/js/apiService.js";
   roleForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const funcao = roleFunction.value;
-    const senioridade = roleSeniority.value;
     let quantity =
       Number(roleForm.querySelector('input[name="quantity"]').value) || 1;
-    if (!funcao || !senioridade) {
+    if (!funcao) {
       roleFunction.focus();
       return;
     }
     if (quantity < 1) quantity = 1;
+    
     // Coleta skills selecionadas por tipo
     const tempSkillsByType = {};
     Array.from(
@@ -470,7 +496,6 @@ import { apiService } from "../../../../../assets/js/apiService.js";
     const payload = {
       id: editingId ?? crypto.randomUUID(),
       funcao,
-      senioridade,
       skillsByType: tempSkillsByType,
       quantity,
     };

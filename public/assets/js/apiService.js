@@ -124,7 +124,15 @@ export const apiService = {
 
   async getAllProjects() {
     try {
+      console.log("🔐 Obtendo token de autenticação...");
       const token = getAuthTokenOrThrow();
+      console.log("✅ Token obtido:", token ? "Token presente" : "Token ausente");
+      
+      console.log("📡 Fazendo requisição para: http://localhost:8082/api/projects");
+      console.log("⏳ Aguardando resposta...");
+      
+      const startTime = Date.now();
+      
       const response = await fetch("http://localhost:8082/api/projects", {
         method: "GET",
         headers: {
@@ -132,16 +140,63 @@ export const apiService = {
           Authorization: `Bearer ${token}`,
         },
       });
+      
+      const endTime = Date.now();
+      console.log(`⏱️ Resposta recebida em ${endTime - startTime}ms`);
+
+      console.log("📥 Status da resposta:", response.status, response.statusText);
+      console.log("📥 Content-Type:", response.headers.get("Content-Type"));
+      console.log("📥 Content-Length:", response.headers.get("Content-Length"));
+
+      if (response.status === 204) {
+        console.log("⚠️ Resposta 204 No Content - retornando array vazio");
+        return [];
+      }
 
       if (!response.ok) {
+        console.log("❌ Resposta não OK, tentando ler texto do erro...");
         const errorText = await response.text();
+        console.error("❌ Erro HTTP:", response.status, errorText);
         throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
       }
+      
+      console.log("📦 Verificando se há conteúdo para parsear...");
+      const contentType = response.headers.get("Content-Type");
+      console.log("📦 Content-Type:", contentType);
+      
+      if (!contentType || !contentType.includes("application/json")) {
+        console.warn("⚠️ Content-Type não é JSON:", contentType);
+        const text = await response.text();
+        console.log("📄 Conteúdo como texto:", text);
+        return [];
+      }
+      
+      console.log("📦 Parseando JSON da resposta...");
       const data = await response.json();
-      return data;
+      console.log("📦 Dados parseados:", data);
+      console.log("📊 Tipo dos dados:", typeof data);
+      console.log("📊 É array?", Array.isArray(data));
+      
+      if (data) {
+        console.log("📊 Estrutura dos dados:", JSON.stringify(data, null, 2));
+      }
+      
+      // Garante que sempre retorna um array
+      const result = Array.isArray(data) ? data : [];
+      console.log("✅ Retornando:", result.length, "projetos");
+      return result;
     } catch (error) {
-      console.error("Erro ao buscar projetos:", error.message);
-      return null;
+      console.error("❌ Erro ao buscar projetos:", error);
+      console.error("❌ Mensagem:", error.message);
+      console.error("❌ Nome:", error.name);
+      if (error.stack) {
+        console.error("❌ Stack trace:", error.stack);
+      }
+      // Mostra notificação para o usuário
+      if (window.showNotification) {
+        window.showNotification("error", "Erro ao buscar projetos: " + error.message);
+      }
+      return [];
     }
   },
 
@@ -337,7 +392,7 @@ export const apiService = {
   async getAllSquads() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("http://localhost:8083/api-squad/teams", {
+      const response = await fetch("http://localhost:8083/api-squad/teams?page=0&size=100", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -350,10 +405,19 @@ export const apiService = {
         throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
       }
       const data = await response.json();
-      return data.content;
+      console.log("Resposta completa da API de squads:", data);
+      // Se for uma página paginada, retorna o content, senão retorna o array direto
+      if (data && data.content && Array.isArray(data.content)) {
+        return data.content;
+      } else if (Array.isArray(data)) {
+        return data;
+      } else {
+        console.warn("Formato de resposta inesperado:", data);
+        return [];
+      }
     } catch (error) {
       console.error("Erro ao buscar squads:", error.message);
-      return null;
+      return [];
     }
   },
 

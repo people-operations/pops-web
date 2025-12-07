@@ -16,7 +16,12 @@ document.addEventListener("DOMContentLoaded", function () {
     );
     if (editBtn) {
       editBtn.addEventListener("click", function () {
-        window.location.href = "../squads-form/squads-form.html";
+        const squadId = getSquadIdFromUrl();
+        if (squadId) {
+          window.location.href = `../squads-form/squads-form.html?id=${squadId}`;
+        } else {
+          window.location.href = "../squads-form/squads-form.html";
+        }
       });
     }
     if (trashBtn) {
@@ -119,9 +124,26 @@ document.addEventListener("DOMContentLoaded", function () {
         apiService.getSquadById(squadId),
         apiService.getSquadAllocations(squadId),
       ]);
+      
+      // Busca projeto associado à squad se houver projectId
+      let project = null;
+      if (squad && squad.projectId) {
+        try {
+          project = await apiService.getProjectById(squad.projectId);
+        } catch (err) {
+          console.warn("Erro ao buscar projeto da squad:", err);
+        }
+      }
+      
+      // Se houver projeto, adiciona à lista de projetos
+      if (project) {
+        squad.projectsList = [project];
+      }
+      
       removeSkeletons();
       renderSquadDetails(squad, allocations);
     } catch (err) {
+      console.error("Erro ao buscar detalhes da squad:", err);
       removeSkeletons();
       renderSquadDetails(null, []);
     }
@@ -236,26 +258,22 @@ document.addEventListener("DOMContentLoaded", function () {
     // Área e membros
     const infoLines = document.querySelectorAll(".info-line");
     if (infoLines && infoLines.length > 0) {
-      // Primeira info-line: área e membros
-      infoLines[0].innerHTML = `<strong data-i18n="squads_detail.area"></strong> ${get(
-        squad,
-        "area"
-      )} • <strong data-i18n="squads_detail.members"></strong> ${
-        allocations && Array.isArray(allocations)
-          ? allocations.length
-          : get(squad, "members")
-      }`;
+      // Primeira info-line: membros
+      const memberCount = allocations && Array.isArray(allocations)
+        ? allocations.length
+        : (squad.memberCount || get(squad, "members", 0));
+      infoLines[0].innerHTML = `<strong data-i18n="squads_detail.members"></strong> ${memberCount}`;
     }
     // Projetos ativos
     const projectsCountEl = document.querySelector(
       '.projects-count[data-i18n="squads_detail.active_projects"]'
     );
     if (projectsCountEl) {
-      projectsCountEl.textContent = get(
-        squad,
-        "activeProjects",
-        get(squad, "projetosAtivos", "-")
-      );
+      // Tenta buscar projetos da squad ou usar contagem
+      const projectCount = squad.projectsList && Array.isArray(squad.projectsList)
+        ? squad.projectsList.length
+        : (squad.activeProjects || get(squad, "projetosAtivos", "0"));
+      projectsCountEl.textContent = `${projectCount} projetos ativos`;
     }
     // Stats e finanças (usa os campos se existirem, senão '-')
     let used, total, percent, score, monthlyValue, budgetValue;
@@ -294,6 +312,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const elAllocatedHoursAvailable = document.getElementById(
         "allocated-hours-available"
       );
+      if (elAllocatedHoursAvailable && total !== "-") {
+        elAllocatedHoursAvailable.textContent = i18n
+          .t("squads_detail.allocated_hours_available")
+          .replace("{total}", total);
+      }
 
       const elOverloadIndex = document.getElementById("overload-index");
       if (elOverloadIndex)
@@ -399,33 +422,80 @@ document.addEventListener("DOMContentLoaded", function () {
     const membersList = document.getElementById("members-list");
     if (!membersList) return;
     if (!Array.isArray(allocations) || allocations.length === 0) {
-      membersList.innerHTML = "<p>-</p>";
+      membersList.innerHTML = "<p style='text-align: center; color: #666;'>Nenhum membro alocado</p>";
       return;
     }
-    membersList.innerHTML = allocations
-      .map((aloc) => {
-        const nome = aloc.employee?.name || "-";
-        const status = aloc.employee?.status || "-";
-        const funcao = aloc.position || "-";
-        const horasAlocadas = aloc.allocatedHours || "-";
-        // Não há campo de horas disponíveis na alocação, então mostra '-'
-        return `
-          <div class="member-card card">
-            <div class="member-header">
-              <strong>${nome}</strong>
-              <span class="status-badge">${status}</span>
-            </div>
-            <p class="custom-p custom-margin function"><span data-i18n="squads_detail.functions"></span></p>
-            <div class="tags">
-              <span>${funcao}</span>
-            </div>
-            <p class="custom-p"><span data-i18n="squads_detail.allocated"></span> ${horasAlocadas}</p>
-            <p class="custom-p"><span data-i18n="squads_detail.available"></span> -</p>
-          </div>
-          `;
+    
+    // Busca dados dos colaboradores para calcular horas disponíveis
+    Promise.all(
+      allocations.map(async (aloc) => {
+        try {
+          const employee = aloc.employee;
+          if (!employee || !employee.id) return aloc;
+          
+          // Busca alocações do colaborador para calcular horas disponíveis
+          const allAllocations = await apiService.getSquadsByCollaboratorId(employee.id);
+          const weeklyHours = employee.workHoursPerWeek || 40;
+          const monthlyHours = weeklyHours * 4;
+          
+          // Calcula horas mensais alocadas (soma todas as alocações × 4)
+          const totalAllocatedMonthly = allAllocations && Array.isArray(allAllocations)
+            ? allAllocations.reduce((sum, alloc) => {
+                const weekly = alloc.allocatedHours || 0;
+                return sum + (weekly * 4); // Converte para mensal
+              }, 0)
+            : 0;
+          
+          const availableMonthly = Math.max(0, monthlyHours - totalAllocatedMonthly);
+          const allocatedWeekly = aloc.allocatedHours || 0;
+          const allocatedMonthly = allocatedWeekly * 4; // Horas mensais desta alocação
+          
+          return {
+            ...aloc,
+            allocatedMonthly,
+            availableMonthly,
+            weeklyHours,
+            monthlyHours
+          };
+        } catch (error) {
+          console.error("Erro ao buscar dados do colaborador:", error);
+          const allocatedWeekly = aloc.allocatedHours || 0;
+          return {
+            ...aloc,
+            allocatedMonthly: allocatedWeekly * 4,
+            availableMonthly: "-",
+            weeklyHours: 40,
+            monthlyHours: 160
+          };
+        }
       })
-      .join("");
-    if (window.i18n) window.i18n.apply();
+    ).then((membersWithHours) => {
+      membersList.innerHTML = membersWithHours
+        .map((aloc) => {
+          const nome = aloc.employee?.name || "-";
+          const status = aloc.employee?.status || "Ativo";
+          const funcao = aloc.position || "-";
+          const horasAlocadasMensais = aloc.allocatedMonthly || 0;
+          const horasDisponiveis = aloc.availableMonthly !== undefined ? aloc.availableMonthly : "-";
+          
+          return `
+            <div class="member-card card">
+              <div class="member-header">
+                <strong>${nome}</strong>
+                <span class="status-badge">${status}</span>
+              </div>
+              <p class="custom-p custom-margin function"><span data-i18n="squads_detail.functions"></span></p>
+              <div class="tags">
+                <span>${funcao}</span>
+              </div>
+              <p class="custom-p"><span data-i18n="squads_detail.allocated"></span> ${horasAlocadasMensais}h/mês</p>
+              <p class="custom-p"><span data-i18n="squads_detail.available"></span> ${horasDisponiveis !== "-" ? horasDisponiveis + "h/mês" : "-"}</p>
+            </div>
+          `;
+        })
+        .join("");
+      if (window.i18n) window.i18n.apply();
+    });
   }
 
   // Função para renderizar projetos
@@ -433,38 +503,52 @@ document.addEventListener("DOMContentLoaded", function () {
     const projectsCards = document.getElementById("projects-cards");
     if (!projectsCards) return;
     if (!Array.isArray(projetos) || projetos.length === 0) {
-      projectsCards.innerHTML = "<p>-</p>";
+      projectsCards.innerHTML = "<p style='text-align: center; color: #666;'>Nenhum projeto associado</p>";
       return;
     }
+    
     projectsCards.innerHTML = projetos
-      .map(
-        (projeto) => `
-        <div class="project-card card">
-          <div class="project-info">
-            <div class="project-title">
-              <strong class="project-title">${
-                projeto.titulo || projeto.title || "-"
-              }</strong>
-              <span class="project-status">${projeto.status || "-"}</span>
-            </div>
-            <div class="dates">
-              <span>
-                <img src="../../../../assets/svg/calendar.svg" style="height: 32px; vertical-align: middle" />
-                <span data-i18n="squads_detail.start"></span> ${
-                  projeto.comeco || projeto.start || "-"
-                }
-              </span>
-              <span>
-                <img src="../../../../assets/svg/calendar.svg" style="height: 32px; vertical-align: middle" />
-                <span data-i18n="squads_detail.end"></span> ${
-                  projeto.fim || projeto.end || "-"
-                }
-              </span>
+      .map((projeto) => {
+        const nome = projeto.name || projeto.titulo || projeto.title || "-";
+        const status = projeto.status || "-";
+        const startedAt = projeto.startedAt || projeto.comeco || projeto.start || "-";
+        const endedAt = projeto.endedAt || projeto.fim || projeto.end || "-";
+        
+        // Formata datas se necessário
+        const formatDate = (dateStr) => {
+          if (!dateStr || dateStr === "-") return "-";
+          try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            return date.toLocaleDateString("pt-BR");
+          } catch {
+            return dateStr;
+          }
+        };
+        
+        return `
+          <div class="project-card card">
+            <div class="project-info">
+              <div class="project-title">
+                <strong class="project-title">${nome}</strong>
+                <span class="project-status">${status}</span>
+              </div>
+              <div class="dates">
+                <span>
+                  <img src="../../../../assets/svg/calendar.svg" style="height: 16px; width: 16px; vertical-align: middle; margin-right: 4px;" />
+                  <span data-i18n="squads_detail.start"></span> ${formatDate(startedAt)}
+                </span>
+                ${endedAt !== "-" ? `
+                <span>
+                  <img src="../../../../assets/svg/calendar.svg" style="height: 16px; width: 16px; vertical-align: middle; margin-right: 4px;" />
+                  <span data-i18n="squads_detail.end"></span> ${formatDate(endedAt)}
+                </span>
+                ` : ""}
+              </div>
             </div>
           </div>
-        </div>
-      `
-      )
+        `;
+      })
       .join("");
     if (window.i18n) window.i18n.apply();
   }

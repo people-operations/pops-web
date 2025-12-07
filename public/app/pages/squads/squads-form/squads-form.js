@@ -4,9 +4,16 @@ const membros = [];
 
 // Função para popular o dropdown de projetos
 async function popularDropdownProjetos() {
+  console.log("=== INICIANDO popularDropdownProjetos ===");
+  
   // Seleciona o select de projetos corretamente (segunda linha, primeira coluna)
   const selectProjeto = document.getElementById("select-project");
-  if (!selectProjeto) return;
+  if (!selectProjeto) {
+    console.error("❌ Select de projeto não encontrado!");
+    return;
+  }
+  console.log("✅ Select de projeto encontrado:", selectProjeto);
+  
   // Limpa todas as opções
   selectProjeto.innerHTML = "";
   // Adiciona placeholder
@@ -18,22 +25,50 @@ async function popularDropdownProjetos() {
         : "Selecione...") +
       "</option>"
   );
+  
   try {
+    console.log("📡 Chamando apiService.getAllProjects()...");
     const projetos = await apiService.getAllProjects();
-    if (Array.isArray(projetos)) {
-      projetos.forEach((proj) => {
-        const opt = document.createElement("option");
-        opt.value = proj.id;
-        opt.textContent = proj.name;
-        selectProjeto.appendChild(opt);
-      });
+    console.log("📦 Resposta recebida:", projetos);
+    console.log("📊 Tipo da resposta:", typeof projetos);
+    console.log("📊 É array?", Array.isArray(projetos));
+    console.log("📊 Tamanho:", projetos ? (Array.isArray(projetos) ? projetos.length : "não é array") : "null/undefined");
+    
+    // Verifica se é um array válido
+    if (projetos && Array.isArray(projetos)) {
+      console.log(`✅ Array válido com ${projetos.length} projetos`);
+      
+      if (projetos.length > 0) {
+        console.log("📋 Projetos encontrados:");
+        projetos.forEach((proj, index) => {
+          console.log(`  [${index}] ID: ${proj?.id}, Nome: ${proj?.name}`, proj);
+          
+          if (proj && proj.id && proj.name) {
+            const opt = document.createElement("option");
+            opt.value = proj.id;
+            opt.textContent = proj.name;
+            selectProjeto.appendChild(opt);
+            console.log(`  ✅ Adicionado: ${proj.name} (ID: ${proj.id})`);
+          } else {
+            console.warn(`  ⚠️ Projeto inválido no índice ${index}:`, proj);
+          }
+        });
+        console.log(`✅ Total de opções adicionadas ao select: ${selectProjeto.options.length - 1}`);
+      } else {
+        console.warn("⚠️ Array vazio - nenhum projeto encontrado");
+      }
+    } else {
+      console.error("❌ Resposta não é um array válido:", projetos);
     }
   } catch (e) {
-    // Silencioso
+    console.error("❌ Erro ao buscar projetos:", e);
+    console.error("Stack trace:", e.stack);
   }
+  
+  console.log("=== FIM popularDropdownProjetos ===");
 }
 
-// Popula o dropdown de aprovador com colaboradores
+// Popula o dropdown de aprovador com colaboradores (apenas gerentes e especialistas)
 async function popularDropdownAprovadores() {
   // Seleciona o select de aprovador corretamente (aprovador é o QUARTO select do form)
   const selectAprovador = document.getElementById("select-approver");
@@ -53,15 +88,25 @@ async function popularDropdownAprovadores() {
     if (Array.isArray(colaboradores)) {
       colaboradores.forEach((colab) => {
         if (colab && colab.id && colab.name) {
-          const opt = document.createElement("option");
-          opt.value = colab.id;
-          opt.textContent = colab.name;
-          selectAprovador.appendChild(opt);
+          // Filtrar apenas gerentes e especialistas
+          const jobTitle = colab.jobTitle || "";
+          const jobTitleLower = jobTitle.toLowerCase();
+          const isGerente = jobTitleLower.includes("gerente");
+          const isEspecialista = jobTitleLower.includes("especialista");
+          
+          if (isGerente || isEspecialista) {
+            const opt = document.createElement("option");
+            opt.value = colab.id;
+            // Mostra nome e cargo
+            const displayText = jobTitle ? `${colab.name} - ${jobTitle}` : colab.name;
+            opt.textContent = displayText;
+            selectAprovador.appendChild(opt);
+          }
         }
       });
     }
   } catch (e) {
-    // Silencioso
+    console.error("Erro ao buscar aprovadores:", e);
   }
 }
 
@@ -131,7 +176,76 @@ function waitForI18nAndRender() {
   }
 }
 
+// Função para carregar dados da squad quando estiver editando
+async function loadSquadData(squadId) {
+  try {
+    const squad = await apiService.getSquadById(squadId);
+    if (!squad) return;
+    
+    const form = document.querySelector(".form-squad");
+    if (!form) return;
+    
+    // Preenche nome
+    const nameInput = form.querySelector('input[type="text"]');
+    if (nameInput && squad.name) {
+      nameInput.value = squad.name;
+    }
+    
+    // Preenche descrição
+    const descTextarea = form.querySelector("textarea");
+    if (descTextarea && squad.description) {
+      descTextarea.value = squad.description;
+    }
+    
+    // Preenche duração da sprint
+    const sprintInput = document.getElementById("sprint-duration");
+    if (sprintInput && squad.sprintDuration) {
+      sprintInput.value = squad.sprintDuration;
+      const sprintMask = document.getElementById("sprint-duration-mask");
+      if (sprintMask) {
+        sprintMask.textContent = squad.sprintDuration === 1 
+          ? "1 semana" 
+          : `${squad.sprintDuration} semanas`;
+      }
+    }
+    
+    // Preenche status
+    const statusSelect = document.getElementById("select-status");
+    if (statusSelect) {
+      statusSelect.value = squad.status === false ? "inactive" : "active";
+    }
+    
+    // Preenche projeto (aguarda dropdown ser populado)
+    setTimeout(() => {
+      const projectSelect = document.getElementById("select-project");
+      if (projectSelect && squad.projectId) {
+        projectSelect.value = squad.projectId;
+      }
+    }, 500);
+    
+    // Preenche aprovador (aguarda dropdown ser populado)
+    setTimeout(() => {
+      const approverSelect = document.getElementById("select-approver");
+      if (approverSelect && squad.approverId) {
+        approverSelect.value = squad.approverId;
+      }
+    }, 500);
+    
+    // Salva squadId no localStorage para uso nas próximas etapas
+    localStorage.setItem("squads.editSquadId", squadId);
+    localStorage.setItem("squads.sprintDuration", squad.sprintDuration?.toString() || "4");
+    
+  } catch (error) {
+    console.error("Erro ao carregar dados da squad:", error);
+  }
+}
+
 function onReady() {
+  // Verifica se é edição ou criação baseado na URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const squadId = urlParams.get('id');
+  const isEdit = !!squadId;
+  
   // Aguarda o i18n estar pronto antes de popular selects e placeholders traduzidos
   function waitForI18nAndPopulateSelects() {
     if (
@@ -140,21 +254,26 @@ function onReady() {
       i18n.messages &&
       Object.keys(i18n.messages).length > 0
     ) {
-      popularDropdownProjetos();
-      popularDropdownAprovadores();
-      // Adiciona placeholder para área (desabilitado)
-      const selectArea = document.getElementById("select-area");
-      if (selectArea) {
-        selectArea.innerHTML = "";
-        selectArea.insertAdjacentHTML(
-          "beforeend",
-          '<option value="" disabled selected hidden>' +
-            (selectArea.getAttribute("data-i18n-placeholder")
-              ? i18n.t(selectArea.getAttribute("data-i18n-placeholder"))
-              : "Selecione...") +
-            "</option>"
-        );
+      // Atualiza o título após o i18n estar pronto
+      const titleElement = document.querySelector('.step-header h2');
+      if (titleElement) {
+        titleElement.textContent = isEdit ? 'Edição de squad' : 'Nova squad';
+        titleElement.removeAttribute('data-i18n'); // Remove o atributo para evitar sobrescrita
       }
+      
+      // Popula dropdowns e depois carrega dados se estiver editando
+      Promise.all([
+        popularDropdownProjetos(),
+        popularDropdownAprovadores()
+      ]).then(() => {
+        // Após popular dropdowns, carrega dados da squad se estiver editando
+        if (isEdit && squadId) {
+          // Aguarda um pouco mais para garantir que os selects foram populados
+          setTimeout(() => {
+            loadSquadData(squadId);
+          }, 800);
+        }
+      });
     } else {
       setTimeout(waitForI18nAndPopulateSelects, 50);
     }
@@ -234,8 +353,8 @@ function showDecisionModal(onBack, onNext) {
     </div>
     <p style="font-size: 16px;" class="d-flex align-self-center">Deseja voltar para a listagem de squads ou prosseguir com a alocação?</p>
     <div class="form-actions" style="display: flex; gap: 12px; justify-content: center;">
-      <button class="cancel" style="min-width: 160px;">Voltar para listagem</button>
-      <button class="save" style="min-width: 160px;">Prosseguir</button>
+      <button class="cancel" style="height: 32px; width: 183px; font-size: 16px !important; font-weight: 500 !important; padding: 0 !important;">Voltar para listagem</button>
+      <button class="save" style="height: 32px; width: 133px; font-size: 16px !important; font-weight: 500 !important; padding: 0 !important;">Prosseguir</button>
     </div>
   `;
   document.body.appendChild(modal);
@@ -272,12 +391,18 @@ async function nextStep(e) {
     form.querySelector("#sprint-duration")?.value?.trim() || "";
   const sprintDuration = parseInt(sprintDurationStr, 10) || 0;
   const description = form.querySelector("textarea")?.value?.trim() || null;
-  // Ordem correta dos selects: 0-status, 1-projeto, 2-área (desabilitado), 3-aprovador
+  // Ordem dos selects: 0-status, 1-projeto, 2-aprovador
   const statusStr = form.querySelectorAll("select")[0]?.value || "active";
   const projectId = form.querySelectorAll("select")[1]?.value || null;
-  // área é [2], mas está desabilitado
-  const approverId = form.querySelectorAll("select")[3]?.value || null;
+  const approverId = form.querySelectorAll("select")[2]?.value || null;
   const status = statusStr === "active";
+
+  // Salva sprintDuration no localStorage para uso nas próximas páginas
+  try {
+    localStorage.setItem("squads.formData", JSON.stringify({ sprintDuration }));
+  } catch (e) {
+    console.warn("Erro ao salvar sprintDuration:", e);
+  }
 
   // Monta o body conforme TeamCreateRequest
   const squadBody = {
@@ -290,6 +415,21 @@ async function nextStep(e) {
   };
 
   try {
+    // Valida se já existe uma squad com o mesmo nome
+    const allSquads = await apiService.getAllSquads();
+    const squadsList = Array.isArray(allSquads) 
+      ? allSquads 
+      : (allSquads?.content || []);
+    
+    const duplicateSquad = squadsList.find(
+      (s) => s.name && s.name.trim().toLowerCase() === name.trim().toLowerCase()
+    );
+    
+    if (duplicateSquad) {
+      showToast("Já existe uma squad com este nome. Por favor, escolha outro nome.", "error");
+      return;
+    }
+    
     const result = await apiService.insertSquad(squadBody);
     if (result && result.id) {
       showToast("Squad criada com sucesso!", "success");
@@ -303,7 +443,12 @@ async function nextStep(e) {
       showToast("Erro ao criar squad.", "error");
     }
   } catch (err) {
-    showToast("Erro ao criar squad.", "error");
+    console.error("Erro ao criar squad:", err);
+    if (err.message && err.message.includes("409")) {
+      showToast("Já existe uma squad com este nome. Por favor, escolha outro nome.", "error");
+    } else {
+      showToast("Erro ao criar squad.", "error");
+    }
   }
 }
 

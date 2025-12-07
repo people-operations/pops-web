@@ -68,6 +68,10 @@ h3 {
   font-size: 20px;
   font-weight: 500;
 }
+h5 {
+  font-size: 16px;
+  font-weight: 500;
+}
 .step-header {
   display: flex;
   align-items: center;
@@ -94,15 +98,18 @@ h3 {
   background: #7d1bff;
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-weight: 600;
+  border-radius: 4px;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  height: 32px;
+  width: 133px;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding: 0 !important;
+  letter-spacing: 0 !important;
+  font-family: "Poppins", sans-serif;
 }
 .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(125, 27, 255, 0.2);
+  background-color: #7b1fa2;
 }
 
 .roles-list {
@@ -169,9 +176,9 @@ h3 {
   color: #7d1bff;
   border-radius: 4px;
   cursor: pointer;
-  height: 40px;
-  width: 123px;
-  font-size: 20px !important;
+  height: 32px;
+  width: 133px;
+  font-size: 16px !important;
   font-weight: 500 !important;
   padding: 0 !important;
   letter-spacing: 0 !important;
@@ -187,11 +194,11 @@ h3 {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  height: 40px;
-  min-width: 95px;
-  padding: 0 16px 0 16px !important;
-  font-size: 20px !important;
+  height: 32px;
+  width: 173px;
+  font-size: 16px !important;
   font-weight: 500 !important;
+  padding: 0 !important;
   letter-spacing: 0 !important;
   font-family: "Poppins", sans-serif;
 }
@@ -259,7 +266,7 @@ h3 {
   font-weight: 700;
 }
 
-/* ===== Modal V2 (Função + Senioridade + Chips) ===== */
+/* ===== Modal V2 (Função + Chips) ===== */
 .form-modal.v2 {
   display: grid;
   gap: 14px;
@@ -280,6 +287,7 @@ h3 {
   border: 1px solid #dcdce1;
   border-radius: 8px;
   font-size: 14px;
+  font-family: "Poppins", sans-serif;
   background: #fff
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='10'><polyline points='1,1 7,7 13,1' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>")
     no-repeat right 12px center;

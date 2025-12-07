@@ -112,8 +112,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       try {
         const allocations = await apiService.getSquadsByCollaboratorId(employee.id);
         if (allocations && Array.isArray(allocations) && allocations.length > 0) {
+          // Soma horas mensais alocadas: calcula a partir de horas semanais (horas semanais × 4)
           totalAllocatedHours = allocations.reduce((sum, allocation) => {
-            return sum + (allocation.allocatedHours || 0);
+            const weeklyHours = allocation.allocatedHours || 0;
+            // Converte horas semanais para mensais (× 4 semanas)
+            const monthlyHours = weeklyHours * 4;
+            return sum + monthlyHours;
           }, 0);
         }
       } catch (allocationError) {

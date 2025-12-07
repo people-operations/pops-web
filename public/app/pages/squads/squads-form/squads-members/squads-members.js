@@ -29,6 +29,9 @@ const selectedRoles = getSelectedRoles();
 // Do passo "weeklyRequirements": [{ id, title, hours }]
 const weeklyReqs = readJSON("squads.weeklyRequirements", []);
 
+// Duração da sprint em semanas (será buscada da squad)
+let sprintDuration = 0;
+
 // Carregamento dinâmico dos colaboradores reais
 let allCandidates = [];
 
@@ -45,6 +48,28 @@ async function fetchAndPrepareCandidates() {
       window.showNotification("error", "API de colaboradores não encontrada!");
     return;
   }
+  
+  // Busca sprintDuration da squad se houver squadId na URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const squadId = urlParams.get("squadId");
+  
+  if (squadId) {
+    try {
+      const squad = await api.getSquadById(squadId);
+      if (squad && squad.sprintDuration) {
+        sprintDuration = squad.sprintDuration;
+        console.log(`✅ Sprint duration carregada: ${sprintDuration} semanas`);
+      }
+    } catch (error) {
+      console.warn("Erro ao buscar sprintDuration da squad:", error);
+      // Usa valor padrão se não conseguir buscar
+      sprintDuration = 4; // padrão: 4 semanas
+    }
+  } else {
+    // Se não houver squadId, usa valor padrão
+    sprintDuration = 4; // padrão: 4 semanas
+  }
+  
   // Exibe skeleton
   showSkeleton();
   let data = await api.getCollaborators();
@@ -53,25 +78,59 @@ async function fetchAndPrepareCandidates() {
       "Erro ao carregar colaboradores.";
     return;
   }
+  
+  // Busca alocações para cada colaborador para calcular horas alocadas
+  const candidatesWithAllocations = await Promise.all(
+    data.map(async (col) => {
+      let totalAllocatedHours = 0;
+      try {
+        const allocations = await api.getSquadsByCollaboratorId(col.id);
+        if (Array.isArray(allocations)) {
+          // Soma horas semanais alocadas (não totais do projeto)
+          totalAllocatedHours = allocations.reduce(
+            (sum, alloc) => sum + (alloc.allocatedHours || 0),
+            0
+          );
+        }
+      } catch (error) {
+        console.warn(`Erro ao buscar alocações para colaborador ${col.id}:`, error);
+      }
+      
+      const workHoursPerWeek = col.workHoursPerWeek || 0;
+      // Horas semanais disponíveis
+      const availableHoursPerWeek = Math.max(0, workHoursPerWeek - totalAllocatedHours);
+      // Horas totais disponíveis para o projeto (semanas * horas semanais disponíveis)
+      const availableHoursTotal = availableHoursPerWeek * sprintDuration;
+      // Horas totais do colaborador para o projeto
+      const totalHoursForProject = workHoursPerWeek * sprintDuration;
+      
+      return {
+        id: col.id,
+        name: col.name,
+        jobTitle: col.jobTitle || "", // Adiciona jobTitle para filtro
+        title: `${col.jobTitle || ""}${
+          col.departament && col.departament.name
+            ? " • " + col.departament.name
+            : ""
+        }`.trim(),
+        skills: Array.isArray(col.skills) ? col.skills.map((s) => s.name) : [],
+        exp: col.jobTitle || "",
+        workHoursPerWeek: workHoursPerWeek,
+        allocatedHoursPerWeek: totalAllocatedHours,
+        availableHoursPerWeek: availableHoursPerWeek,
+        totalHoursForProject: totalHoursForProject,
+        availableHoursTotal: availableHoursTotal,
+      };
+    })
+  );
+  
   // Adapta para o formato esperado pelo front
-  allCandidates = data.map((col) => ({
-    id: col.id,
-    name: col.name,
-    title: `${col.jobTitle || ""}${
-      col.departament && col.departament.name
-        ? " • " + col.departament.name
-        : ""
-    }`.trim(),
-    skills: Array.isArray(col.skills) ? col.skills.map((s) => s.name) : [],
-    exp: col.jobTitle || "",
-    available: col.workHoursPerWeek || 0,
-  }));
+  allCandidates = candidatesWithAllocations;
   currentPage = 1;
-  totalPages =
-    Math.ceil(
-      sortCandidates(allCandidates, state.roleId, state.orderBy).length /
-        PAGE_SIZE
-    ) || 1;
+  // Aplica filtro e ordenação para calcular totalPages
+  const filtered = filterCandidatesByRole(allCandidates, state.roleId);
+  const ordered = sortCandidates(filtered, state.roleId, state.orderBy);
+  totalPages = Math.ceil(ordered.length / PAGE_SIZE) || 1;
   hideSkeleton();
   document.getElementById("loader").style.display = "none";
   document.getElementById("main-content").classList.remove("hidden");
@@ -125,7 +184,7 @@ const state = {
   selectedByRole: readJSON("squads.membersSelection", {}), // { roleId: [candidateIds] }
 };
 
-// --------- Scoring simples por interseção de skills ----------
+// --------- Scoring melhorado: skills + disponibilidade de horas ----------
 function getRequiredSkills(roleId) {
   const role = selectedRoles.find((r) => r.id === roleId);
   if (!role) return [];
@@ -141,33 +200,96 @@ function getRequiredSkills(roleId) {
   // fallback antigo
   return (role?.hardSkills || []).concat(role?.softSkills || []);
 }
+
 function matchPercent(candidate, roleId) {
+  const role = selectedRoles.find((r) => r.id === roleId);
+  if (!role) return 0;
+  
+  // 1. Calcula match de skills (peso: 60%)
   const req = getRequiredSkills(roleId)
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
-  if (!req.length) return 0;
-  let inter = 0;
-  candidate.skills.forEach((skill) => {
-    const skillNorm = skill.trim().toLowerCase();
-    if (req.includes(skillNorm)) inter++;
-    else {
-      // fuzzy: se skill contém parte do nome da requerida
-      if (req.some((r) => skillNorm.includes(r) || r.includes(skillNorm)))
-        inter += 0.5;
+  
+  let skillsMatch = 0;
+  if (req.length > 0) {
+    let inter = 0;
+    candidate.skills.forEach((skill) => {
+      const skillNorm = skill.trim().toLowerCase();
+      if (req.includes(skillNorm)) inter++;
+      else {
+        // fuzzy: se skill contém parte do nome da requerida
+        if (req.some((r) => skillNorm.includes(r) || r.includes(skillNorm)))
+          inter += 0.5;
+      }
+    });
+    skillsMatch = inter > 0 ? Math.round((inter / req.length) * 100) : 0;
+  } else {
+    // Se não há skills requeridas, considera 50% de match base
+    skillsMatch = 50;
+  }
+  
+  // 2. Calcula match de disponibilidade de horas (peso: 40%)
+  // Horas semanais necessárias para a função
+  const requiredHoursPerWeek = weeklyReqs.find((w) => w.id === roleId)?.hours ?? 0;
+  // Horas totais necessárias para o projeto (semanas * horas semanais)
+  const requiredHoursTotal = requiredHoursPerWeek * sprintDuration;
+  
+  let availabilityMatch = 0;
+  
+  if (requiredHoursTotal > 0) {
+    // Usa horas totais disponíveis do colaborador para o projeto
+    const availableHoursTotal = candidate.availableHoursTotal || 0;
+    if (availableHoursTotal >= requiredHoursTotal) {
+      // Tem horas suficientes: 100% de match
+      availabilityMatch = 100;
+    } else if (availableHoursTotal > 0) {
+      // Tem algumas horas, mas não suficientes: proporcional
+      availabilityMatch = Math.round((availableHoursTotal / requiredHoursTotal) * 100);
+      // Limita a 80% se não tiver horas suficientes
+      if (availabilityMatch > 80) availabilityMatch = 80;
+    } else {
+      // Sem horas disponíveis: 0% de match
+      availabilityMatch = 0;
     }
+  } else {
+    // Se não há horas requeridas, considera 50% de match base
+    availabilityMatch = 50;
+  }
+  
+  // 3. Combina os dois scores (60% skills + 40% disponibilidade)
+  const finalMatch = Math.round(skillsMatch * 0.6 + availabilityMatch * 0.4);
+  
+  return finalMatch;
+}
+
+// --------- Filtro por função/cargo ----------
+function filterCandidatesByRole(list, roleId) {
+  const role = selectedRoles.find((r) => r.id === roleId);
+  if (!role || !role.funcao) return list;
+  
+  // Filtra candidatos que têm o mesmo jobTitle da função selecionada
+  const roleJobTitle = role.funcao.trim();
+  return list.filter((candidate) => {
+    const candidateJobTitle = (candidate.jobTitle || "").trim();
+    // Comparação case-insensitive e exata
+    return candidateJobTitle.toLowerCase() === roleJobTitle.toLowerCase();
   });
-  // Se não houver nenhuma interseção, retorna 0
-  if (inter === 0) return 0;
-  return Math.round((inter / req.length) * 100);
 }
 
 // --------- Ordenação ----------
 function sortCandidates(list, roleId, orderBy) {
   const copy = [...list];
   if (orderBy === "best") {
-    copy.sort((a, b) => matchPercent(b, roleId) - matchPercent(a, roleId));
+    // Ordena por match percent (já considera skills + disponibilidade)
+    copy.sort((a, b) => {
+      const matchA = matchPercent(a, roleId);
+      const matchB = matchPercent(b, roleId);
+      if (matchB !== matchA) return matchB - matchA;
+      // Em caso de empate, prioriza quem tem mais horas totais disponíveis
+      return (b.availableHoursTotal || 0) - (a.availableHoursTotal || 0);
+    });
   } else if (orderBy === "availability") {
-    copy.sort((a, b) => b.available - a.available);
+    copy.sort((a, b) => (b.availableHoursTotal || 0) - (a.availableHoursTotal || 0));
   } else if (orderBy === "name") {
     copy.sort((a, b) => a.name.localeCompare(b.name));
   } else if (orderBy === "name-desc") {
@@ -190,7 +312,7 @@ function render() {
       const filled = (state.selectedByRole[r.id] || []).length;
       const needed = r.quantity ?? 2;
       console.log("Role render:", { r, filled, needed }); // DEBUG
-      const label = `${r.funcao} ${r.senioridade}  – ${filled}/${needed} preenchido`;
+      const label = `${r.funcao || "Função"} – ${filled}/${needed} preenchido`;
       return `<option value="${r.id}" ${
         state.roleId === r.id ? "selected" : ""
       }>${label}</option>`;
@@ -206,15 +328,27 @@ function render() {
   // Ordenação
   orderSelect.value = state.orderBy;
 
+  // Filtra candidatos pela função selecionada
+  const filtered = filterCandidatesByRole(allCandidates, state.roleId);
+  
   // Paginação
-  const ordered = sortCandidates(allCandidates, state.roleId, state.orderBy);
+  const ordered = sortCandidates(filtered, state.roleId, state.orderBy);
   totalPages = Math.ceil(ordered.length / PAGE_SIZE) || 1;
   if (currentPage > totalPages) currentPage = totalPages;
   const startIdx = (currentPage - 1) * PAGE_SIZE;
   const paginated = ordered.slice(startIdx, startIdx + PAGE_SIZE);
 
   cards.innerHTML = "";
-  paginated.forEach((c) => cards.appendChild(buildCard(c, currentRole)));
+  if (filtered.length === 0) {
+    const role = selectedRoles.find((r) => r.id === state.roleId);
+    const roleName = role?.funcao || "função selecionada";
+    cards.innerHTML = `<div style="text-align: center; padding: 40px; color: #666;">
+      <p>Nenhum colaborador encontrado com o cargo "${roleName}".</p>
+      <p style="font-size: 14px; margin-top: 8px;">Tente selecionar outra função ou verifique se há colaboradores cadastrados com esse cargo.</p>
+    </div>`;
+  } else {
+    paginated.forEach((c) => cards.appendChild(buildCard(c, currentRole)));
+  }
 
   // Paginação UI
   let pagination = document.getElementById("pagination");
@@ -290,8 +424,10 @@ function buildCard(c, role) {
   body.className = "body";
 
   const match = matchPercent(c, state.roleId);
-  const requiredHours =
-    weeklyReqs.find((w) => w.id === state.roleId)?.hours ?? 0;
+  // Horas semanais necessárias para a função
+  const requiredHoursPerWeek = weeklyReqs.find((w) => w.id === state.roleId)?.hours ?? 0;
+  // Horas totais necessárias para o projeto
+  const requiredHoursTotal = requiredHoursPerWeek * sprintDuration;
 
   // Badge color logic
   let matchClass = "match-low";
@@ -299,18 +435,46 @@ function buildCard(c, role) {
   else if (match >= 75) matchClass = "match-good";
   else if (match >= 50) matchClass = "match-medium";
 
+  // Calcula informações de horas
+  const workHoursPerWeek = c.workHoursPerWeek || 0;
+  const allocatedHoursPerWeek = c.allocatedHoursPerWeek || 0;
+  const availableHoursPerWeek = c.availableHoursPerWeek || 0;
+  const totalHoursForProject = c.totalHoursForProject || 0;
+  const availableHoursTotal = c.availableHoursTotal || 0;
+
   body.innerHTML = `
     <div class="name-row">
       <span class="name">${c.name}</span>
       <span class="badge match ${matchClass}">${match}% Match</span>
-      <span class="badge avail">${c.available}h disponíveis</span>
+    </div>
+    <div class="meta">${c.title}</div>
+    <div class="hours-info" style="margin: 8px 0; font-size: 13px; color: #666;">
+      <div style="margin-bottom: 4px;">
+        <strong>Horas semanais:</strong> ${workHoursPerWeek}h/sem
+        <span style="margin-left: 12px;">
+          <strong>Alocadas:</strong> ${allocatedHoursPerWeek}h/sem
+        </span>
+        <span style="margin-left: 12px;">
+          <strong>Disponíveis:</strong> ${availableHoursPerWeek}h/sem
+        </span>
+      </div>
+      <div style="margin-bottom: 4px; color: #7d1bff;">
+        <strong>Total para o projeto (${sprintDuration} semanas):</strong> ${totalHoursForProject}h
+        <span style="margin-left: 12px;">
+          <strong>Disponíveis:</strong> ${availableHoursTotal}h
+        </span>
+      </div>
       ${
-        requiredHours
-          ? `<span class="small-muted">(${requiredHours}h/sem necessárias)</span>`
+        requiredHoursTotal > 0
+          ? `<div style="color: ${availableHoursTotal >= requiredHoursTotal ? '#2f7d32' : '#d32f2f'};">
+              <strong>Necessárias para esta função (${requiredHoursPerWeek}h/sem × ${sprintDuration} sem):</strong> ${requiredHoursTotal}h
+              ${availableHoursTotal >= requiredHoursTotal 
+                ? ' ✓ (suficiente)' 
+                : ` ⚠ (faltam ${requiredHoursTotal - availableHoursTotal}h)`}
+            </div>`
           : ""
       }
     </div>
-    <div class="meta">${c.title}</div>
     <div class="tags">${c.skills
       .slice(0, 5)
       .map((s) => `<span class="tag">${s}</span>`)
@@ -400,12 +564,13 @@ document.getElementById("saveBtn").addEventListener("click", () => {
   Object.entries(state.selectedByRole).forEach(([roleId, memberIds]) => {
     const role = selectedRoles.find((r) => r.id == roleId);
     const weekly = weeklyReqs.find((w) => w.id == roleId);
+    // Horas semanais alocadas
     const allocatedHours = weekly?.hours || 0;
     const position = role?.title || "";
     (memberIds || []).forEach((personId) => {
       allocations.push({
         startedAt,
-        allocatedHours,
+        allocatedHours, // Horas semanais (backend armazena assim)
         personId: Number(personId),
         position,
         team: Number(squadId),
@@ -420,6 +585,10 @@ document.getElementById("saveBtn").addEventListener("click", () => {
       if (window.showNotification) {
         if (result) {
           window.showNotification("success", "Alocações salvas!");
+          // Redireciona para a página de squads após salvar
+          setTimeout(() => {
+            window.location.href = "../../squads.html";
+          }, 1000);
         } else {
           window.showNotification("error", "Erro ao salvar alocações!");
         }

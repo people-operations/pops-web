@@ -278,6 +278,7 @@ body.dark .ai-hint {
   color: #374151;
   transition: background 0.3s, color 0.3s;
   margin-top: 4px;
+  font-family: "Poppins", sans-serif;
 }
 body.dark .select select {
   background: #232336;
@@ -454,36 +455,33 @@ body.dark .exp {
   background: none;
   border: #7d1bff 2px solid !important;
   color: #7d1bff;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
-  height: 44px;
-  width: 130px;
-  font-size: 20px !important;
-  font-weight: 600 !important;
+  height: 32px;
+  width: 133px;
+  font-size: 16px !important;
+  font-weight: 500 !important;
   padding: 0 !important;
   letter-spacing: 0 !important;
   font-family: "Poppins", sans-serif;
-  transition: background 0.2s, color 0.2s;
 }
 .cancel:hover {
   color: #fff !important;
   background: #7d1bff !important;
 }
 .save {
-  background: linear-gradient(90deg, #7d1bff 60%, #5dade2 100%);
+  background-color: #7d1bff;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
-  height: 44px;
-  min-width: 110px;
-  padding: 0 24px 0 24px !important;
-  font-size: 20px !important;
-  font-weight: 600 !important;
+  height: 32px;
+  width: 133px;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding: 0 !important;
   letter-spacing: 0 !important;
   font-family: "Poppins", sans-serif;
-  box-shadow: 0 2px 8px rgba(125, 27, 255, 0.1);
-  transition: background 0.2s, color 0.2s, opacity 0.2s;
 }
 .save:disabled,
 .save[disabled] {

@@ -139,7 +139,7 @@
     "sprint_duration_placeholder": "Ex: 2 semanas"
   },
   "squads_roles": {
-    "title": "Criar uma nova squad",
+    "title": "Nova squad",
     "subtitle": "Definição de função",
     "add_role": "+ Adicionar função",
     "back": "Voltar",
