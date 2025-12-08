@@ -65,7 +65,7 @@
           />
           <span data-i18n="navbar.projects"></span>
         </a>
-        <a href="../../collaborators/collaborators.html">
+        <a href="../../collaborators/collaborators.html" data-require-access="1,2">
           <img
             src="../../../../assets/svg/colaborator.svg"
             alt="Colaboradores"
@@ -129,9 +129,6 @@
      <a id="profile-link" href="#"
             ><span data-i18n="navbar.profile">Perfil</span></a
           >
-          <a href="../../inbox/inbox.html"
-            ><span data-i18n="navbar.inbox"></span
-          ></a>
           <a href="../../configurations/general/general.html"
             ><span data-i18n="navbar.settings"></span
           ></a>
@@ -156,14 +153,7 @@
               data-require-access="1,2"
               style="vertical-align: middle; width: 34px; height: 34px; cursor:pointer;"
             />
-            <img
-              src="../../../../assets/svg/trash-button.svg"
-              alt="Remover"
-              class="action-icon delete-project-btn"
-              title="Remover"
-              data-require-access="1,2"
-              style="vertical-align: middle; width: 34px; height: 34px; cursor:pointer;"
-            />
+            <div id="project-action-btn" style="display: inline-block; vertical-align: middle;"></div>
           </div>
         </div>
 
@@ -177,52 +167,52 @@
 
         <p class="info-line">
           <strong data-i18n="projects_detail.area">Área:</strong>
-          Desenvolvimento •
-          <strong data-i18n="projects_detail.squads_count">5 squads</strong>
+          <span id="project-area">Desenvolvimento</span>
+        </p>
+        <p class="info-line">
+          <strong>Qtd. Squads:</strong>
+          <span id="project-squads-count">0</span>
+        </p>
+        <p class="info-line">
+          <strong>Tipo do Projeto:</strong>
+          <span id="project-type">-</span>
         </p>
 
         <p class="info-line">
-          <strong data-i18n="projects_detail.budget">Budget:</strong> R$ 0000000
+          <strong data-i18n="projects_detail.budget">Budget:</strong> <span id="project-budget">R$ 0000000</span>
         </p>
 
         <p class="info-line">
-          <strong data-i18n="projects_detail.dates">Datas:</strong> 00/00/0000 –
-          00/00/0000
+          <strong>Mão de obra aplicada:</strong> <span id="project-labor-cost">-</span>
+        </p>
+
+        <p class="info-line">
+          <strong data-i18n="projects_detail.dates">Datas:</strong> <span id="project-dates">00/00/0000 – 00/00/0000</span>
         </p>
       </aside>
 
       <!-- Main content -->
       <section class="content">
-        <!-- Visão Geral Financeira -->
-        <div class="financial-overview">
-          <div class="card finance-card">
-            <h3 data-i18n="squads_detail.financial_overview" class="mb-16"></h3>
-            <div class="finance-card-inside">
-              <div>
-                <p data-i18n="projects_detail.monthly_cost" class="strong">
-                  Custo Mensal
-                </p>
-                <div class="value pink-text">R$ 8.750</div>
-                <small data-i18n="projects_detail.monthly_hint"
-                  >Com base na alocação da equipe</small
-                >
-              </div>
-              <div>
-                <p data-i18n="projects_detail.total_investment">
-                  Investimento Total
-                </p>
-                <div class="value pink-text">R$ 26.250</div>
-                <small data-i18n="projects_detail.total_hint"
-                  >Incluindo custos com salários</small
-                >
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Equipes -->
         <div class="teams-section">
-          <h4 data-i18n="projects_detail.teams">Equipes</h4>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h4 data-i18n="projects_detail.teams" style="margin: 0;">Equipes</h4>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input 
+                type="text" 
+                id="team-search" 
+                placeholder="Buscar membros ou skills..." 
+                style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; min-width: 250px;"
+              >
+              <button 
+                id="clear-team-search" 
+                style="padding: 6px 12px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 14px;"
+                title="Limpar busca"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
           <div class="teams-list">
             <div class="team-card pink">
               <h5 class="team-name">Alpha Back-end</h5>
@@ -230,8 +220,8 @@
                 <strong data-i18n="projects_detail.po">PO:</strong> Cassandra
                 Castro • 5 membros
               </p>
-              <p class="team-info" data-i18n="projects_detail.skills_needed">
-                Skills necessários do projeto:
+              <p class="team-info" data-i18n="projects_detail.skills_present">
+                Skills presentes na equipe:
               </p>
               <div class="skills">
                 <span class="skill">Python</span>
@@ -242,9 +232,9 @@
             <div class="team-card cyan">
               <h5 class="team-name">Alpha Back-end</h5>
               <p class="team-info">
-                <strong>PO:</strong> Cassandra Castro • 5 membros
+                <strong>PO:</strong> 5 membros
               </p>
-              <p class="team-info">Skills necessários do projeto:</p>
+              <p class="team-info">Skills presentes na equipe:</p>
               <div class="skills">
                 <span class="skill">Python</span>
                 <span class="skill">Java</span>
@@ -256,7 +246,7 @@
               <p class="team-info">
                 <strong>PO:</strong> Cassandra Castro • 5 membros
               </p>
-              <p class="team-info">Skills necessários do projeto:</p>
+              <p class="team-info">Skills presentes na equipe:</p>
               <div class="skills">
                 <span class="skill">Python</span>
                 <span class="skill">Java</span>
@@ -267,13 +257,23 @@
         </div>
       </section>
     </main>
-    <!-- Modal de confirmação de exclusão -->
-    <div id="delete-modal" class="modal" style="display:none; position:fixed;  width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
+    <!-- Modal de confirmação de desativação -->
+    <div id="disable-modal" class="modal" style="display:none; position:fixed;  width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
       <div style="background:#fff; padding:32px 24px; border-radius:8px; max-width:90vw; min-width:320px; box-shadow:0 2px 16px #0002; text-align:center;">
-        <h3 style="margin-bottom:16px;">Tem certeza que deseja excluir este projeto?</h3>
-        <p style="color:#888; margin-bottom:24px;">Esta ação não poderá ser desfeita.</p>
-        <button id="confirm-delete-btn" style="background:#e53935; color:#fff; border:none; padding:10px 24px; border-radius:4px; margin-right:12px; cursor:pointer;">Excluir</button>
-        <button id="cancel-delete-btn" style="background:#eee; color:#333; border:none; padding:10px 24px; border-radius:4px; cursor:pointer;">Cancelar</button>
+        <h3 style="margin-bottom:16px;">Tem certeza que deseja desativar este projeto?</h3>
+        <p style="color:#888; margin-bottom:24px;">O projeto será desativado e não aparecerá mais na lista de projetos ativos.</p>
+        <button id="confirm-disable-btn" style="background:#e53935; color:#fff; border:none; padding:10px 24px; border-radius:4px; margin-right:12px; cursor:pointer; font-family: poppins;">Desativar</button>
+        <button id="cancel-disable-btn" style="background:#eee; color:#333; border:none; padding:10px 24px; border-radius:4px; cursor:pointer; font-family: poppins;">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Modal de confirmação de ativação -->
+    <div id="enable-modal" class="modal" style="display:none; position:fixed;  width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:32px 24px; border-radius:8px; max-width:90vw; min-width:320px; box-shadow:0 2px 16px #0002; text-align:center;">
+        <h3 style="margin-bottom:16px;">Tem certeza que deseja ativar este projeto?</h3>
+        <p style="color:#888; margin-bottom:24px;">O projeto será ativado e aparecerá novamente na lista de projetos ativos.</p>
+        <button id="confirm-enable-btn" style="background:#4CAF50; color:#fff; border:none; padding:10px 24px; border-radius:4px; margin-right:12px; cursor:pointer;font-family: poppins;">Ativar</button>
+        <button id="cancel-enable-btn" style="background:#eee; color:#333; border:none; padding:10px 24px; border-radius:4px; cursor:pointer;font-family: poppins;">Cancelar</button>
       </div>
     </div>
     <script type="module" src="projects-detail.js"></script>

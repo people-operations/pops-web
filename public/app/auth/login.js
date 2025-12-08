@@ -119,19 +119,10 @@ document.getElementById("login-form").addEventListener("submit", (e) => {
         }
         window.showNotification("success", "Login realizado com sucesso!");
         
-        // Redireciona baseado no access_level
+        // Redireciona todos os usuários para o dashboard
+        // O dashboard já tem lógica para mostrar diferentes visualizações baseado no nível de acesso
         setTimeout(() => {
-          // Se for colaborador (3), redireciona para o perfil
-          if (accessLevel === 3) {
-            const userId = localStorage.getItem("userId");
-            const redirectUrl = userId 
-              ? `../pages/collaborators/collaborators-detail/collaborators-detail.html?id=${userId}`
-              : "../pages/collaborators/collaborators-detail/collaborators-detail.html";
-            window.location.href = redirectUrl;
-          } else {
-            // Manager (1 ou 2) vai para o dashboard
-            window.location.href = "../pages/dashboard/dashboard.html";
-          }
+          window.location.href = "../pages/dashboard/dashboard.html";
         }, 1200);
       } else {
         window.showNotification(

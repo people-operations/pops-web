@@ -129,9 +129,6 @@
      <a id="profile-link" href="#"
             ><span data-i18n="navbar.profile">Perfil</span></a
           >
-          <a href="../../inbox/inbox.html"
-            ><span data-i18n="navbar.inbox"></span
-          ></a>
           <a href="../../configurations/general/general.html"
             ><span data-i18n="navbar.settings"></span
           ></a>
@@ -154,21 +151,41 @@
           <h2 class="collab-name">Nome do Colaborador</h2>
           <p class="role-area">Cargo | Área</p>
         </div>
+        <p class="info-line manager-info">
+          <strong data-i18n="collaborators_detail.manager">Gestor:</strong>
+          <span class="manager-name">—</span>
+        </p>
+        <p class="info-line salary-info">
+          <strong data-i18n="collaborators_detail.salary">Salário:</strong>
+          <span class="salary-value">—</span>
+        </p>
 
         <p class="info-line">
           <strong data-i18n="collaborators_detail.occupancy"
             >Ocupação de carga horária:</strong
           >
-          100%
+          <span class="occupancy-value">100%</span>
+        </p>
+        <p class="info-line">
+          <strong>Horas semanais:</strong>
+          <span class="weekly-hours-value">—</span>
         </p>
         <div class="skills d-flex flex-column">
           <p class="info-line">
             <strong data-i18n="collaborators_detail.skills">Skills:</strong>
           </p>
-          <div>
-            <span class="skill">Python</span>
-            <span class="skill">Java</span>
-            <span class="skill">Node.js</span>
+          <div class="skills-container">
+            <div class="skills-list">
+              <!-- Skills serão inseridas aqui via JavaScript -->
+            </div>
+            <div class="skills-pagination hidden">
+              <button class="skills-pagination-btn" id="skills-prev" type="button" aria-label="Página anterior">‹</button>
+              <span class="skills-page-info">
+                <span id="skills-current-page">1</span> / <span id="skills-total-pages">1</span>
+              </span>
+              <button class="skills-pagination-btn" id="skills-next" type="button" aria-label="Próxima página">›</button>
+              <button class="skills-show-all-btn" id="skills-show-all" type="button">Exibir todos</button>
+            </div>
           </div>
         </div>
 
@@ -193,31 +210,17 @@
         </h3>
         <div class="data-block">
           <label>CEP</label>
-          <input type="text" placeholder="00000-000" />
-          <label>Bairro</label>
-          <input type="text" placeholder="Digite no campo" />
-          <label>Logradouro</label>
-          <input type="text" placeholder="Digite no campo" />
-          <label>Número</label>
-          <input type="text" placeholder="Digite no campo" />
+          <input type="text" id="cep-field" placeholder="00000-000" />
+          <label>Logradouro e Número</label>
+          <input type="text" id="logradouro-numero-field" placeholder="Digite no campo" />
           <label>Complemento</label>
-          <input type="text" placeholder="Digite no campo" />
+          <input type="text" id="complemento-field" placeholder="Digite no campo" />
           <label>Cidade</label>
-          <input type="text" placeholder="Digite no campo" />
+          <input type="text" id="cidade-field" placeholder="Digite no campo" />
           <label>Estado</label>
-          <input type="text" placeholder="Digite no campo" />
+          <input type="text" id="estado-field" placeholder="Digite no campo" />
         </div>
 
-        <h3 data-i18n="collaborators_detail.education" class="info-line">
-          Educação e certificações
-        </h3>
-        <div class="certifications">
-          <div class="cert-item">
-            <span class="cert-name">Curso aqui</span>
-            <span class="cert-period">2000–2025</span>
-          </div>
-          <!-- repita conforme necessário -->
-        </div>
       </aside>
 
       <!-- CONTENT PANELS -->
@@ -226,7 +229,7 @@
         <div class="section squads-section">
           <div class="section-header">
             <h4 data-i18n="collaborators_detail.current_squads">
-              Squads atuando
+              Squads em que atua:
             </h4>
           </div>
           <div class="cards-list squads-list">
@@ -336,6 +339,22 @@
               </li>
               <!-- Adicione mais <li class="timeline-item"> conforme necessário -->
             </ul>
+          </div>
+        </div>
+
+        <!-- Educação e Certificações -->
+        <div class="section education-section">
+          <div class="section-header">
+            <h4 data-i18n="collaborators_detail.education">
+              Educação e certificações
+            </h4>
+          </div>
+          <div class="certifications">
+            <div class="cert-item">
+              <span class="cert-name">Curso aqui</span>
+              <span class="cert-period">2000–2025</span>
+            </div>
+            <!-- repita conforme necessário -->
           </div>
         </div>
       </section>

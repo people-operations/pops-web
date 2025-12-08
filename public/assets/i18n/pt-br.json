@@ -94,7 +94,7 @@
     "active_projects": "{count} projetos ativos",
     "area": "Área:",
     "members": "Membros:",
-    "capacity": "Capacidade da squad:",
+    "capacity": "Capacidade horária da squad:",
     "allocated_hours": "Horas alocadas",
     "details": "Mais detalhes",
     "per_month": "Por mês:",
@@ -139,7 +139,7 @@
     "sprint_duration_placeholder": "Ex: 2 semanas"
   },
   "squads_roles": {
-    "title": "Criar uma nova squad",
+    "title": "Nova squad",
     "subtitle": "Definição de função",
     "add_role": "+ Adicionar função",
     "back": "Voltar",
@@ -196,8 +196,8 @@
     "functions": "Funções:",
     "allocated": "Horas alocadas:",
     "available": "Horas disponíveis:",
-    "start": "Começou:",
-    "end": "Terminar:"
+    "start": "Início:",
+    "end": "Término:"
   },
   "projects": {
     "page_title": "POPs Projetos",
@@ -208,7 +208,7 @@
     "area": "Área:",
     "members": "Membros:",
     "budget": "Budget:",
-    "startedAt": "Começou:",
+    "startedAt": "Início:",
     "endedAt": "Fim:",
     "skills_needed": "Skills necessários:",
     "allocated_hours": "Horas alocadas",
@@ -300,8 +300,8 @@
     "functions": "Funções:",
     "allocated": "Horas alocadas:",
     "available": "Horas disponíveis:",
-    "start": "Começou:",
-    "end": "Terminar:"
+    "start": "Início:",
+    "end": "Término:"
   },
   "collaborators": {
     "page_title": "Colaboradores",
@@ -328,8 +328,8 @@
       "name": "Nome",
       "role": "Cargo",
       "squad": "Squad",
-      "allocated": "% alocadas",
-      "available": "% disponíveis",
+      "allocated": "Horas Alocadas",
+      "available": "Horas Livres",
       "status": "Status",
       "feedback": "Ação de feedback"
     },
@@ -389,7 +389,7 @@
     "personal_data": "Dados Pessoais",
     "address": "Endereço",
     "education": "Educação e certificações",
-    "current_squads": "Squads atuando",
+    "current_squads": "Squads em que atua:",
     "professional_track": "Trilha profissional",
     "current_role": "Cargo atual",
     "previous_role": "Cargo anterior",

@@ -199,8 +199,14 @@
 }
 .members-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .members-list {
+    grid-template-columns: 1fr;
+  }
 }
 .projects-list {
   background: #fff;
@@ -309,7 +315,6 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   min-height: fit-content;
-  height: 189px;
   background: white;
   display: flex;
   flex-direction: column;
@@ -317,6 +322,14 @@
   gap: 8px;
   padding: 16px;
   height: auto;
+  transition: box-shadow 0.2s ease;
+}
+.member-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.member-item {
+  background: #f5f5f5 !important;
+  border: 1px solid #e0e0e0 !important;
 }
 .member-header {
   display: flex;

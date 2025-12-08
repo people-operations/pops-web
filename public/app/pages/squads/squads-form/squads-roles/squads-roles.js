@@ -1,6 +1,32 @@
 import { apiService } from "../../../../../assets/js/apiService.js";
 
 (() => {
+  // Mostra loader IMEDIATAMENTE se estiver editando (antes de qualquer coisa)
+  const urlParamsCheck = new URLSearchParams(window.location.search);
+  const isEditCheck = !!urlParamsCheck.get("id");
+  if (isEditCheck) {
+    const loader = document.getElementById("loader");
+    const mainContent = document.getElementById("main-content");
+    if (loader) {
+      loader.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+          <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #7d1bff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+          <p style="color: #7d1bff; font-size: 16px;">Carregando funções...</p>
+        </div>
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+      loader.style.display = "flex";
+    }
+    if (mainContent) {
+      mainContent.classList.add("hidden");
+    }
+  }
+  
   const rolesListEl = document.getElementById("rolesList");
   const addRoleBtn = document.getElementById("addRoleBtn");
   const nextBtn = document.getElementById("nextBtn");
@@ -12,7 +38,6 @@ import { apiService } from "../../../../../assets/js/apiService.js";
   const closeModalBtn = document.getElementById("closeRoleModal");
   const roleForm = document.getElementById("roleForm");
   const roleFunction = document.getElementById("roleFunction");
-  const roleSeniority = document.getElementById("roleSeniority");
   const hardSkillsBox = document.getElementById("hardSkillsBox");
   const softSkillsBox = document.getElementById("softSkillsBox");
 
@@ -22,24 +47,165 @@ import { apiService } from "../../../../../assets/js/apiService.js";
 
   // Estado inicial
   let roles = [];
-  try {
-    roles = JSON.parse(sessionStorage.getItem("squadRoles") || "[]");
-  } catch (_) {}
-  renderRoles();
-  updateNextState();
+  
+  // Função para carregar dados existentes quando estiver editando
+  async function loadExistingRoles() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const squadId = urlParams.get("squadId") || urlParams.get("id");
+    const isEdit = !!urlParams.get("id");
+    
+    if (!isEdit || !squadId) {
+      // Se não estiver editando, carrega do sessionStorage
+      try {
+        roles = JSON.parse(sessionStorage.getItem("squadRoles") || "[]");
+      } catch (_) {}
+      hideLoader();
+      renderRoles();
+      updateNextState();
+      return;
+    }
+    
+    // Mostra loader IMEDIATAMENTE
+    showLoader();
+    
+    try {
+      console.log("Carregando roles existentes para squad:", squadId);
+      
+      // Busca detalhes da squad para pegar os membros e suas funções
+      const squadDetails = await apiService.getSquadDetails(squadId);
+      
+      if (squadDetails && squadDetails.members && Array.isArray(squadDetails.members)) {
+        // Agrupa membros por jobTitle (função)
+        const rolesByJobTitle = new Map();
+        let roleIdCounter = 1;
+        
+        squadDetails.members.forEach(member => {
+          const jobTitle = member.jobTitle || "Sem função";
+          const allocatedHours = member.allocatedHours || 0;
+          
+          if (!rolesByJobTitle.has(jobTitle)) {
+            rolesByJobTitle.set(jobTitle, {
+              id: roleIdCounter++, // Gera ID único
+              funcao: jobTitle, // Usa 'funcao' que é o que renderRoles espera
+              cargo: jobTitle, // Também adiciona 'cargo' como fallback
+              quantity: 0,
+              skillsByType: { // Formato esperado por renderRoles
+                HARD: [],
+                SOFT: []
+              },
+              allocatedHours: 0
+            });
+          }
+          
+          const role = rolesByJobTitle.get(jobTitle);
+          role.quantity += 1;
+          role.allocatedHours += allocatedHours;
+          
+          // NÃO adiciona skills - o usuário pediu para trazer funções SEM skills
+          // As skills serão preenchidas pelo usuário se necessário
+        });
+        
+        // Converte Map para Array
+        roles = Array.from(rolesByJobTitle.values());
+        
+        console.log("Roles carregadas e formatadas:", roles);
+        
+        // Salva no sessionStorage
+        sessionStorage.setItem("squadRoles", JSON.stringify(roles));
+      } else {
+        // Tenta carregar do sessionStorage como fallback
+        try {
+          roles = JSON.parse(sessionStorage.getItem("squadRoles") || "[]");
+        } catch (_) {}
+      }
+    } catch (error) {
+      console.error("Erro ao carregar roles existentes:", error);
+      // Fallback: carrega do sessionStorage
+      try {
+        roles = JSON.parse(sessionStorage.getItem("squadRoles") || "[]");
+      } catch (_) {}
+    }
+    
+    hideLoader();
+    renderRoles();
+    updateNextState();
+  }
+  
+  // Função para mostrar loader
+  function showLoader() {
+    const loader = document.getElementById("loader");
+    const mainContent = document.getElementById("main-content");
+    if (loader) {
+      loader.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+          <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #7d1bff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+          <p style="color: #7d1bff; font-size: 16px;">Carregando funções...</p>
+        </div>
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+      loader.style.display = "flex";
+    }
+    if (mainContent) {
+      mainContent.classList.add("hidden");
+    }
+  }
+  
+  // Função para esconder loader
+  function hideLoader() {
+    const loader = document.getElementById("loader");
+    const mainContent = document.getElementById("main-content");
+    if (loader) {
+      loader.style.display = "none";
+    }
+    if (mainContent) {
+      mainContent.classList.remove("hidden");
+    }
+  }
+  
+  // Carrega roles existentes (ou do sessionStorage se não estiver editando)
+  loadExistingRoles();
 
-  // Exemplo de funções e senioridades (pode ser dinâmico depois)
-  const FUNCOES = [
-    "Desenvolvedor(a)",
-    "QA",
-    "Product Owner",
-    "Scrum Master",
-    "Designer",
-    "Analista de Dados",
-  ];
-  const SENIORIDADES = ["Júnior", "Pleno", "Sênior", "Especialista"];
   // Skills agrupadas por tipo (ex: { HARD: [], SOFT: [], ... })
   let SKILLS_BY_TYPE = {};
+  let JOB_TITLES = []; // Cargos completos vindos da API
+
+  // Função para buscar cargos únicos da API
+  async function buscarCargos() {
+    try {
+      console.log("📡 Buscando cargos (jobTitle) dos colaboradores...");
+      const colaboradores = await apiService.getCollaborators();
+      console.log("📦 Colaboradores recebidos:", colaboradores);
+      
+      if (Array.isArray(colaboradores) && colaboradores.length > 0) {
+        // Extrai jobTitle únicos e não vazios
+        const cargosSet = new Set();
+        colaboradores.forEach((colab) => {
+          if (colab && colab.jobTitle && colab.jobTitle.trim()) {
+            cargosSet.add(colab.jobTitle.trim());
+          }
+        });
+        
+        JOB_TITLES = Array.from(cargosSet).sort();
+        console.log("✅ Cargos encontrados:", JOB_TITLES);
+        
+        // Popula o select de função com os cargos completos
+        popularSelect(roleFunction, JOB_TITLES);
+      } else {
+        console.warn("⚠️ Nenhum colaborador encontrado ou resposta inválida");
+        JOB_TITLES = [];
+        popularSelect(roleFunction, []);
+      }
+    } catch (error) {
+      console.error("❌ Erro ao buscar cargos:", error);
+      JOB_TITLES = [];
+      popularSelect(roleFunction, []);
+    }
+  }
 
   function popularSelect(select, options) {
     select.innerHTML = '<option value="" selected disabled>Selecione</option>';
@@ -50,8 +216,9 @@ import { apiService } from "../../../../../assets/js/apiService.js";
       select.appendChild(o);
     });
   }
-  popularSelect(roleFunction, FUNCOES);
-  popularSelect(roleSeniority, SENIORIDADES);
+  
+  // Busca cargos ao carregar a página (aguarda o loader inicial)
+  buscarCargos();
 
   function renderChips(box, skills, tempArr) {
     box.innerHTML = "";
@@ -84,6 +251,11 @@ import { apiService } from "../../../../../assets/js/apiService.js";
   }
 
   async function openModal(isEdit = false, data = null) {
+    // Se ainda não carregou os cargos, carrega agora
+    if (JOB_TITLES.length === 0) {
+      await buscarCargos();
+    }
+    
     // Busca skills reais da API Odoo e agrupa por tipo adaptado
     try {
       const skills = await apiService.getOdooSkills();
@@ -142,8 +314,8 @@ import { apiService } from "../../../../../assets/js/apiService.js";
     const qtyInput = roleForm.querySelector('input[name="quantity"]');
     if (isEdit && data) {
       editingId = data.id;
-      roleFunction.value = data.funcao;
-      roleSeniority.value = data.senioridade;
+      roleFunction.value = data.funcao || data.cargo || "";
+      
       // Preenche skills selecionadas por tipo usando data.skillsByType
       tempSkillsByType = {};
       if (data.skillsByType && typeof data.skillsByType === "object") {
@@ -292,9 +464,7 @@ import { apiService } from "../../../../../assets/js/apiService.js";
       <div class="role-card__header">
         <div>
           <div class="role-card__title">
-            ${r.quantity ?? 1}x ${r.funcao || "Função"} (${
-        r.senioridade || "-"
-      })
+            ${r.quantity ?? 1}x ${r.funcao || r.cargo || "Função"}
           </div>
         </div>
         <div class="role-card__actions">
@@ -330,8 +500,7 @@ import { apiService } from "../../../../../assets/js/apiService.js";
     sessionStorage.setItem("squadRoles", JSON.stringify(roles));
     const rolesForNext = roles.map((r) => ({
       id: r.id,
-      title: `${r.funcao}${r.senioridade ? " " + r.senioridade : ""}`,
-      seniority: r.senioridade,
+      title: r.funcao || r.cargo || "Função",
       skillsByType: r.skillsByType || {},
       quantity: r.quantity || 1,
     }));
@@ -342,7 +511,17 @@ import { apiService } from "../../../../../assets/js/apiService.js";
   }
 
   function updateNextState() {
-    nextBtn.disabled = roles.length === 0;
+    // Habilita o botão se houver pelo menos uma role
+    // Mesmo que as roles venham do backend sem skills, elas são válidas
+    const urlParams = new URLSearchParams(window.location.search);
+    const isEdit = !!urlParams.get("id");
+    
+    // Se estiver editando e tiver roles carregadas (mesmo sem skills), habilita
+    if (isEdit && roles.length > 0) {
+      nextBtn.disabled = false;
+    } else {
+      nextBtn.disabled = roles.length === 0;
+    }
   }
 
   // ===== Eventos gerais =====
@@ -358,22 +537,38 @@ import { apiService } from "../../../../../assets/js/apiService.js";
     if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
   });
 
-  // Back/Next – integre com seu fluxo real
-  // Recupera squadId da URL
+  // Back/Next/Save – integre com seu fluxo real
+  // Recupera squadId ou id da URL (id é usado no modo edição)
   const urlParams = new URLSearchParams(window.location.search);
-  const squadId = urlParams.get("squadId");
+  const squadId = urlParams.get("squadId") || urlParams.get("id");
+  const isEdit = !!urlParams.get("id");
+  
+  // Mostra botão de salvar se estiver editando
+  const saveBtn = document.getElementById("saveBtn");
+  if (saveBtn && isEdit) {
+    saveBtn.style.display = "inline-block";
+    saveBtn.addEventListener("click", async () => {
+      // Salva os roles no sessionStorage
+      sessionStorage.setItem("squadRoles", JSON.stringify(roles));
+      // Mostra mensagem de sucesso
+      if (window.showNotification) {
+        window.showNotification("success", "Roles salvos com sucesso!");
+      }
+    });
+  }
 
   backBtn.addEventListener("click", () => {
     // Voltar para o form, mantendo o id
-    window.location.href = `../squads-form.html${
-      squadId ? `?squadId=${squadId}` : ""
-    }`;
+    const param = isEdit ? `id=${squadId}` : (squadId ? `squadId=${squadId}` : "");
+    window.location.href = `../squads-form.html${param ? `?${param}` : ""}`;
   });
   nextBtn.addEventListener("click", () => {
-    // Avançar para weekly requirements, mantendo o id
-    window.location.href = `../squads-weekly-requirements/squads-weekly-requirements.html${
-      squadId ? `?squadId=${squadId}` : ""
-    }`;
+    // Salva os roles antes de avançar
+    sessionStorage.setItem("squadRoles", JSON.stringify(roles));
+    localStorage.setItem("squads.selectedRoles", JSON.stringify(roles));
+    // Avançar para weekly-requirements, mantendo o id
+    const param = isEdit ? `id=${squadId}` : (squadId ? `squadId=${squadId}` : "");
+    window.location.href = `../squads-weekly-requirements/squads-weekly-requirements.html${param ? `?${param}` : ""}`;
   });
 
   // ===== Form do Modal =====
@@ -386,12 +581,12 @@ import { apiService } from "../../../../../assets/js/apiService.js";
       <label for="roleQuantity">Quantidade *</label>
       <input id="roleQuantity" name="quantity" type="number" min="1" max="10" value="1" required style="appearance: none; width: 100%; padding: 10px 12px; border: 1px solid #dcdce1; border-radius: 8px; font-size: 14px; background: #fff; margin-top: 4px;" />
     `;
-    // Insere após o campo de senioridade
-    const seniorityField = roleForm
-      .querySelector("#roleSeniority")
+    // Insere após o campo de função
+    const functionField = roleForm
+      .querySelector("#roleFunction")
       .closest(".field");
-    if (seniorityField && seniorityField.nextSibling) {
-      roleForm.insertBefore(qtyDiv, seniorityField.nextSibling);
+    if (functionField && functionField.nextSibling) {
+      roleForm.insertBefore(qtyDiv, functionField.nextSibling);
     } else {
       roleForm.appendChild(qtyDiv);
     }
@@ -450,14 +645,14 @@ import { apiService } from "../../../../../assets/js/apiService.js";
   roleForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const funcao = roleFunction.value;
-    const senioridade = roleSeniority.value;
     let quantity =
       Number(roleForm.querySelector('input[name="quantity"]').value) || 1;
-    if (!funcao || !senioridade) {
+    if (!funcao) {
       roleFunction.focus();
       return;
     }
     if (quantity < 1) quantity = 1;
+    
     // Coleta skills selecionadas por tipo
     const tempSkillsByType = {};
     Array.from(
@@ -470,7 +665,6 @@ import { apiService } from "../../../../../assets/js/apiService.js";
     const payload = {
       id: editingId ?? crypto.randomUUID(),
       funcao,
-      senioridade,
       skillsByType: tempSkillsByType,
       quantity,
     };

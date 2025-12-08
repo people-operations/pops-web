@@ -2,19 +2,19 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>POPs Dashboard</title>
+    <title>POPs Tipos de Projeto</title>
     <link rel="stylesheet" href="../../../../assets/css/style.css" />
-    <link rel="stylesheet" href="general.css" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet" href="project-types.css" />
     <link
       rel="icon"
       type="image/svg+xml"
       href="../../../../assets/svg/logo-icon.svg"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <script>
@@ -32,7 +32,7 @@
         alt="Logo POPs"
         class="logo-header"
         style="height: 32px; vertical-align: middle; margin-right: 8px"
-        onclick="window.location.href='../dashboard/dashboard.html'"
+        onclick="window.location.href='../../dashboard/dashboard.html'"
       />
       <nav>
         <a href="../../dashboard/dashboard.html">
@@ -126,28 +126,29 @@
         </span>
         <div id="dropdown" class="dropdown hidden">
           <a id="profile-link" href="#"
-            ><span data-i18n="navbar.profile">Perfil</span></a
-          >
+            ><span data-i18n="navbar.profile"></span
+          ></a>
           <a href="../../../auth/login.html"
             ><span data-i18n="navbar.logout"></span
           ></a>
         </div>
       </div>
     </header>
+
     <main class="container config-page">
-      <h1 class="gradient-title">Configurações Gerais</h1>
+      <h1 class="gradient-title">Tipos de Projeto</h1>
       <p class="subtitle">
-        Ajuste as preferências do sistema conforme sua necessidade.
+        Gerencie os tipos de projeto da sua organização conforme sua necessidade.
       </p>
 
       <div class="config-container">
         <aside class="config-sidebar">
           <ul>
             <a href="../general/general.html"
-              ><li class="active"><span class="aside-span">Geral</span></li></a
+              ><li><span class="aside-span">Geral</span></li></a
             >
             <a href="../project-types/project-types.html" data-require-access="1,2"
-              ><li><span class="aside-span">Tipos de Projeto</span></li></a
+              ><li class="active"><span class="aside-span">Tipos de Projeto</span></li></a
             >
             <a href="../project-status/project-status.html" data-require-access="1,2"
               ><li><span class="aside-span">Status de Projeto</span></li></a
@@ -156,44 +157,91 @@
         </aside>
 
         <section class="config-content">
-          <h2>Preferências do Sistema</h2>
-          <p>Gerencie as opções gerais do sistema abaixo.</p>
-
-          <div class="config-item d-flex justify-between">
-            <div>
-              <label>Aparência</label>
-              <span>Escolha o tema visual do sistema.</span>
-            </div>
-            <div class="form-group floating" style="width: 220px">
-              <select id="appearance-select" required>
-                <option value="" disabled selected hidden></option>
-                <option>Modo claro</option>
-                <option>Modo escuro</option>
+          <h2>Lista de Tipos de Projeto</h2>
+          <p class="mb-16">
+            Adicione, edite ou remova tipos de projeto conforme a necessidade da sua
+            organização.
+          </p>
+          <div
+            class="d-flex justify-between align-center"
+            style="margin-bottom: 1rem; gap: 16px; flex-wrap: wrap;"
+          >
+            <div class="filter-group" style="margin: 0;">
+              <label for="status-filter-type" style="margin-bottom: 4px;">Filtrar por Status:</label>
+              <select id="status-filter-type" class="filter-select" style="min-width: 180px;">
+                <option value="all">Todos</option>
+                <option value="active">Ativos</option>
+                <option value="inactive">Inativos</option>
               </select>
-              <label for="appearance-select">Tema</label>
             </div>
+            <button class="btn btn-purple" id="btn-novo-tipo">
+              + Novo Tipo
+            </button>
           </div>
 
-          <div class="config-item d-flex justify-between">
-            <div>
-              <label>Idioma</label>
-              <span>Selecione o idioma de exibição do sistema.</span>
-            </div>
-            <div class="form-group floating" style="width: 220px">
-              <select id="language-select" required>
-                <option value="" disabled selected hidden></option>
-                <option>Português</option>
-                <option>Inglês</option>
-                <option>Espanhol</option>
-              </select>
-              <label for="language-select">Idioma</label>
-            </div>
-          </div>
+          <table class="skills-table">
+            <thead>
+              <tr>
+                <th>Nome do Tipo</th>
+                <th>Descrição</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="types-table-body">
+              <!-- Dados serão carregados dinamicamente -->
+            </tbody>
+          </table>
         </section>
       </div>
     </main>
+    
+    <!-- Modal de Tipo de Projeto -->
+    <div id="modal-overlay-tipo" class="modal-overlay hidden" onclick="fecharModal('modal-tipo')"></div>
+    <div id="modal-tipo" class="modal-content hidden">
+      <h3 id="modal-titulo">Adicionar Tipo de Projeto</h3>
+      <form id="form-tipo">
+        <div class="form-group">
+          <label for="nome-tipo">Nome</label>
+          <input type="text" id="nome-tipo" name="nome" required />
+        </div>
+        <div class="form-group">
+          <label for="descricao-tipo">Descrição</label>
+          <input type="text" id="descricao-tipo" name="descricao" />
+        </div>
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn secondary"
+            onclick="fecharModal('modal-tipo')"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Modal de Ativar/Inativar Tipo -->
+    <div id="modal-overlay-toggle-tipo" class="modal-overlay hidden" onclick="fecharModal('modal-toggle-tipo')"></div>
+    <div id="modal-toggle-tipo" class="modal-content hidden">
+      <h3 id="modal-toggle-titulo-tipo">Confirmar Alteração</h3>
+      <p id="modal-toggle-mensagem-tipo">Tem certeza que deseja alterar o status deste tipo de projeto?</p>
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn secondary"
+          onclick="fecharModal('modal-toggle-tipo')"
+        >
+          Cancelar
+        </button>
+        <button type="button" class="btn primary" id="btn-confirmar-toggle-tipo">
+          Confirmar
+        </button>
+      </div>
+    </div>
+    
     <script>
-      // Redireciona para o perfil com userId na query string
       document.addEventListener("DOMContentLoaded", function () {
         var profileLink = document.getElementById("profile-link");
         if (profileLink) {
@@ -204,7 +252,7 @@
               window.location.href = `../../collaborators/collaborators-detail/collaborators-detail.html?id=${userId}`;
             } else {
               window.location.href =
-                "../collaborators/collaborators-detail/collaborators-detail.html";
+                "../../collaborators/collaborators-detail/collaborators-detail.html";
             }
           });
         }
@@ -212,7 +260,7 @@
     </script>
   </body>
 </html>
-
-<script src="general.js"></script>
 <script src="../../../../assets/js/i18nService.js"></script>
 <script src="../../../../assets/js/app.js"></script>
+<script type="module" src="project-types.js"></script>
+

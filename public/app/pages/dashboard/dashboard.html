@@ -62,7 +62,7 @@
             />
             <span data-i18n="navbar.projects"></span>
           </a>
-          <a href="../collaborators/collaborators.html">
+          <a href="../collaborators/collaborators.html" data-require-access="1,2">
             <img
               src="../../../assets/svg/colaborator.svg"
               alt="Colaboradores"
@@ -130,9 +130,6 @@
             <a id="profile-link" href="#"
               ><span data-i18n="navbar.profile"></span
             ></a>
-            <a href="../inbox/inbox.html"
-              ><span data-i18n="navbar.inbox"></span
-            ></a>
             <a href="../configurations/general/general.html"
               ><span data-i18n="navbar.settings"></span
             ></a>
@@ -168,7 +165,7 @@
           </div>
 
           <!-- Dashboard do Gestor -->
-          <div id="manager-dashboard">
+          <div id="manager-dashboard" class="hidden">
             <!-- Abas -->
             <div class="tabs-container">
               <div class="tabs">
@@ -181,9 +178,6 @@
                 <button class="tab-button" data-tab="competencies">
                   <span>🎯</span> Competências
                 </button>
-                <button class="tab-button" data-tab="analysis">
-                  <span>📈</span> Análises
-                </button>
               </div>
             </div>
 
@@ -193,7 +187,7 @@
               <div class="kpi-section">
                 <h2 class="section-title">Indicadores de Custos</h2>
                 <div class="cards">
-                  <div class="card roxo">
+                  <div class="card">
                     <div class="card-content">
                       <div class="icon">
                         <img src="../../../assets/svg/projects.svg" alt="Desvio de Custo" />
@@ -213,7 +207,7 @@
                       <div class="tag" id="kpi-cost-deviation-tag">0%</div>
                     </div>
                   </div>
-                  <div class="card azul">
+                  <div class="card">
                     <div class="card-content">
                       <div class="icon">
                         <img src="../../../assets/svg/squads.svg" alt="Custo Médio" />
@@ -225,7 +219,7 @@
                       <div class="subtitle">Calcula a média de investimento financeiro por squad. </div>
                     </div>
                   </div>
-                  <div class="card rosa">
+                  <div class="card">
                     <div class="card-content">
                       <div class="icon">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -297,7 +291,7 @@
               <div class="kpi-section">
                 <h2 class="section-title">Indicadores de Alocação</h2>
                 <div class="cards">
-                  <div class="card azul">
+                  <div class="card">
                     <div class="card-content">
                       <div class="icon">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -313,7 +307,7 @@
                       <div class="subtitle">Quantidade de projetos que estão em andamento no momento.</div>
                     </div>
                   </div>
-                  <div class="card roxo">
+                  <div class="card">
                     <div class="card-content">
                       <div class="icon">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -328,7 +322,7 @@
                       <div class="subtitle">Número de squads atualmente operando e alocados em atividades.</div>
                     </div>
                   </div>
-                  <div class="card rosa">
+                  <div class="card">
                     <div class="card-content">
                       <div class="icon">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -344,7 +338,7 @@
                 </div>
 
                 <div class="cards">
-                  <div class="card laranja">
+                  <div class="card">
                     <div class="card-content">
                       <div class="icon">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -369,7 +363,7 @@
                       <div class="subtitle">Percentual que mostra quanto a equipe está trabalhando acima da capacidade planejada, indicando possível excesso de demanda ou risco de sobrecarga.</div>
                     </div>
                   </div>
-                  <div class="card verde-agua">
+                  <div class="card">
                     <div class="card-content">
                       <div class="icon">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -440,7 +434,7 @@
               <div class="kpi-section">
                 <h2 class="section-title">Indicadores de Certificações</h2>
                 <div class="cards">
-                  <div class="card roxo clickable" id="kpi-certificates-expiring">
+                  <div class="card clickable" id="kpi-certificates-expiring">
                     <div class="card-content">
                       <div class="icon">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -455,7 +449,7 @@
                       <div class="subtitle">Quantidade de certificados que estão prestes a expirar e/ou requerem renovação em breve.</div>
                     </div>
                   </div>
-                  <div class="card azul">
+                  <div class="card">
                     <div class="card-content">
                       <div class="icon">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -486,9 +480,32 @@
                     </div>
                     <canvas id="skillsChart"></canvas>
                   </div>
+                  <div class="table-card">
+                    <h3>Skills Mais Frequentes no Mercado</h3>
+                    <table class="dashboard-table">
+                      <thead>
+                        <tr>
+                          <th>Rank</th>
+                          <th>Skill</th>
+                          <th>Frequência</th>
+                        </tr>
+                      </thead>
+                      <tbody id="marketSkillsTableBody">
+                      </tbody>
+                    </table>
+                    <div class="pagination-controls">
+                      <button id="marketSkillsPrevPage" class="pagination-btn">Anterior</button>
+                      <span id="marketSkillsPageInfo" class="page-info">Página 1 de 1</span>
+                      <button id="marketSkillsNextPage" class="pagination-btn">Próxima</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="section-group">
+                <h2 class="section-title">Níveis de Senioridade por Squad</h2>
+                <div class="content">
                   <div class="chart-card">
                     <div class="chart-header">
-                      <h3>Níveis de Senioridade por Squad</h3>
                       <div class="chart-filters">
                         <select id="seniorityFilter">
                           <option value="all">Todos os Cargos</option>
@@ -509,147 +526,7 @@
               </div>
             </div>
 
-            <!-- Aba: Análises -->
-            <div class="tab-content" id="tab-analysis">
-              <div class="section-group">
-                <h2 class="section-title">Visão Estratégica</h2>
-                <div class="content">
-                  <div class="chart-card full-width">
-                    <div class="chart-header">
-                      <h3>Visão Estratégica Completa por Squad</h3>
-                      <div class="chart-filters">
-                        <select id="strategicSquadFilter">
-                          <option value="all">Todos os Squads</option>
-                        </select>
-                      </div>
-                    </div>
-                    <canvas id="strategicViewChart"></canvas>
-                    <p class="chart-description">Gráfico dimensional mostrando métricas estratégicas por squad: Custos, Alocação de Horas e Número de Pessoas. Cada eixo representa uma dimensão estratégica, permitindo visualizar o perfil de cada squad.</p>
-                  </div>
-                </div>
-              </div>
-              <div class="section-group">
-                <h2 class="section-title">Análises Detalhadas</h2>
-                <div class="content">
-                  <div class="table-card">
-                    <div class="table-header-with-controls">
-                      <h3>Lista de Colaboradores</h3>
-                      <div class="table-controls">
-                        <select id="collaboratorSortBy">
-                          <option value="name">Ordenar por Nome</option>
-                          <option value="overload-desc">Mais Sobrecarga</option>
-                          <option value="overload-asc">Menos Sobrecarga</option>
-                          <option value="idle-desc">Mais Ociosidade</option>
-                          <option value="idle-asc">Menos Ociosidade</option>
-                        </select>
-                      </div>
-                    </div>
-                    <table class="dashboard-table">
-                      <thead>
-                        <tr>
-                          <th>Nome</th>
-                          <th>Cargo</th>
-                          <th>Squads</th>
-                          <th>% Horas Alocadas</th>
-                          <th>% Horas Disponíveis</th>
-                          <th>% Sobrecarga</th>
-                          <th>% Ociosidade</th>
-                        </tr>
-                      </thead>
-                      <tbody id="collaboratorsTableBody">
-                      </tbody>
-                    </table>
-                    <div class="pagination-controls">
-                      <button id="collaboratorsPrevPage" class="pagination-btn">Anterior</button>
-                      <span id="collaboratorsPageInfo" class="page-info">Página 1 de 1</span>
-                      <button id="collaboratorsNextPage" class="pagination-btn">Próxima</button>
-                    </div>
-                  </div>
-                  <div class="top-squads-tables-wrapper">
-                    <div class="table-card">
-                      <h3>Squads Mais Ociosos</h3>
-                      <table class="dashboard-table">
-                        <thead>
-                          <tr>
-                            <th>Rank</th>
-                            <th>Squad</th>
-                            <th>% Ociosidade</th>
-                            <th>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody id="topIdleSquadsTableBody">
-                        </tbody>
-                      </table>
-                      <div class="pagination-controls">
-                        <button id="idleSquadsPrevPage" class="pagination-btn">Anterior</button>
-                        <span id="idleSquadsPageInfo" class="page-info">Página 1 de 1</span>
-                        <button id="idleSquadsNextPage" class="pagination-btn">Próxima</button>
-                      </div>
-                    </div>
-                    <div class="table-card">
-                      <h3>Squads Mais Sobrecarregados</h3>
-                      <table class="dashboard-table">
-                        <thead>
-                          <tr>
-                            <th>Rank</th>
-                            <th>Squad</th>
-                            <th>% Sobrecarga</th>
-                            <th>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody id="topOverloadSquadsTableBody">
-                        </tbody>
-                      </table>
-                      <div class="pagination-controls">
-                        <button id="overloadSquadsPrevPage" class="pagination-btn">Anterior</button>
-                        <span id="overloadSquadsPageInfo" class="page-info">Página 1 de 1</span>
-                        <button id="overloadSquadsNextPage" class="pagination-btn">Próxima</button>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="top-squads-tables-wrapper">
-                    <div class="table-card">
-                      <h3>Skills Mais Frequentes no Mercado</h3>
-                      <table class="dashboard-table">
-                        <thead>
-                          <tr>
-                            <th>Rank</th>
-                            <th>Skill</th>
-                            <th>Frequência</th>
-                          </tr>
-                        </thead>
-                        <tbody id="marketSkillsTableBody">
-                        </tbody>
-                      </table>
-                      <div class="pagination-controls">
-                        <button id="marketSkillsPrevPage" class="pagination-btn">Anterior</button>
-                        <span id="marketSkillsPageInfo" class="page-info">Página 1 de 1</span>
-                        <button id="marketSkillsNextPage" class="pagination-btn">Próxima</button>
-                      </div>
-                    </div>
-                    <div class="table-card">
-                      <h3>Skills Mais Comuns entre os Funcionários</h3>
-                      <table class="dashboard-table">
-                        <thead>
-                          <tr>
-                            <th>Rank</th>
-                            <th>Skill</th>
-                            <th>Colaboradores</th>
-                          </tr>
-                        </thead>
-                        <tbody id="employeeSkillsTableBody">
-                        </tbody>
-                      </table>
-                      <div class="pagination-controls">
-                        <button id="employeeSkillsPrevPage" class="pagination-btn">Anterior</button>
-                        <span id="employeeSkillsPageInfo" class="page-info">Página 1 de 1</span>
-                        <button id="employeeSkillsNextPage" class="pagination-btn">Próxima</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+
           </div>
 
           <!-- Dashboard do Colaborador -->
@@ -679,7 +556,7 @@
               <div class="kpi-section">
                 <h2 class="section-title">Meus Indicadores</h2>
               <div class="cards">
-                <div class="card rosa">
+                <div class="card">
                   <div class="card-content">
                     <div class="icon">
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -692,7 +569,7 @@
                     <div class="subtitle">Projetos em que estou participando e desenvolvendo.</div>
                   </div>
                 </div>
-                <div class="card roxo">
+                <div class="card">
                   <div class="card-content">
                     <div class="icon">
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -707,7 +584,7 @@
                     <div class="subtitle">Squads em que estou atuando.</div>
                   </div>
                 </div>
-                <div class="card azul">
+                <div class="card">
                   <div class="card-content">
                     <div class="icon">
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -722,7 +599,7 @@
                 </div>
               </div>
               <div class="cards">
-                <div class="card verde">
+                <div class="card">
                   <div class="card-content">
                     <div class="icon">
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -735,7 +612,7 @@
                     <div class="subtitle">Percentual de horas disponíveis para alocação, calculado com base na quantidade de horas semanais cadastradas.</div>
                   </div>
                 </div>
-                <div class="card laranja">
+                <div class="card">
                   <div class="card-content">
                     <div class="icon">
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

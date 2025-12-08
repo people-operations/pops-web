@@ -1,4 +1,3 @@
-import { apiService } from "../../../assets/js/apiService.js";
 import { getCurrentAccessLevel, applyAccessControl, requireAuth, requireAccess } from "../../../assets/js/permissions.js";
 
 // Estado global
@@ -10,8 +9,19 @@ let dashboardData = {
   skills: [],
   currentTimeFilter: "month",
   currentSquadFilter: "all",
-  userRole: "manager", // "manager" ou "collaborator"
+  userRole: null, // Será definido baseado no access_level - "manager" ou "collaborator"
   userId: null,
+  costsSummary: null, // Dados do summary de custos da API
+  overloadPercentage: null, // % Sobrecarga Operacional da API
+  idlePercentage: null, // % Ociosidade Operacional da API
+  plannedVsReal: null, // Dados de Custo Previsto vs Realizado da API (para costDeviationChart)
+  costsBySquad: null, // Dados de Custo por Squad da API (para costAllocatedChart)
+  allocationBands: null, // Dados de Distribuição de Alocação da API (para allocationDistributionChart)
+  overloadIdlePerMonth: null, // Dados de Sobrecarga e Ociosidade por Mês da API (para overloadIdleComparisonChart)
+  workloadBySquad: null, // Dados de Carga de Trabalho por Squad da API (para workloadDistributionChart)
+  activeSquads: null, // Número de squads ativos da API (para KPI Total de Squads Ativos)
+  activeProjects: null, // Número de projetos ativos da API (para KPI Total de Projetos)
+  totalAllocatedHours: null, // Total de horas alocadas da API (para KPI Total de Horas)
 };
 
 // Estado de paginação
@@ -26,6 +36,39 @@ let paginationState = {
   collabSquads: { currentPage: 1, itemsPerPage: 10 },
 };
 
+// Flags para prevenir múltiplas inicializações e requisições
+let isInitializing = false;
+let isLoadingData = false;
+let eventListenersSetup = false;
+
+// Armazenar referências aos event handlers para poder removê-los
+const eventHandlers = {
+  timeFilter: null,
+  squadFilter: null,
+  costDeviationSquadFilter: null,
+  costAllocatedSquadFilter: null,
+  allocationLevelFilter: null,
+  skillsFilter: null,
+  strategicSquadFilter: null,
+  collaboratorSortBy: null,
+  idleSquadsPrevPage: null,
+  idleSquadsNextPage: null,
+  overloadSquadsPrevPage: null,
+  overloadSquadsNextPage: null,
+  collaboratorsPrevPage: null,
+  collaboratorsNextPage: null,
+  marketSkillsPrevPage: null,
+  marketSkillsNextPage: null,
+  employeeSkillsPrevPage: null,
+  employeeSkillsNextPage: null,
+  collabProjectsPrevPage: null,
+  collabProjectsNextPage: null,
+  collabSquadsPrevPage: null,
+  collabSquadsNextPage: null,
+  kpiCertificatesExpiring: null,
+  closeCertificatesModal: null,
+};
+
 // Verificar se Chart.js está carregado
 if (typeof Chart === 'undefined') {
   console.error("❌ Chart.js não está carregado!");
@@ -36,6 +79,12 @@ if (typeof Chart === 'undefined') {
 // Inicialização
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM Carregado - Iniciando dashboard");
+  
+  // Prevenir múltiplas inicializações
+  if (isInitializing) {
+    console.warn("⚠️ Dashboard já está sendo inicializado, ignorando chamada duplicada");
+    return;
+  }
   
   // Verificar autenticação
   if (!requireAuth()) {
@@ -72,28 +121,129 @@ window.addEventListener("load", () => {
 });
 
 async function initializeDashboard() {
+  // Prevenir múltiplas inicializações simultâneas
+  if (isInitializing) {
+    console.warn("⚠️ Dashboard já está sendo inicializado, aguardando conclusão...");
+    return;
+  }
+  
+  isInitializing = true;
+  
   try {
+    // Manter o loader visível durante o carregamento
+    const loader = document.getElementById("loader");
+    const mainContent = document.getElementById("main-content");
+    if (loader) {
+      loader.classList.remove("hidden");
+      loader.innerHTML = '<div class="spinner"></div><p>Carregando dados do dashboard...</p>';
+    }
+    if (mainContent) mainContent.classList.add("hidden");
+
+    // Ocultar ambos os dashboards por padrão até determinar qual mostrar
+    const managerDashboard = document.getElementById("manager-dashboard");
+    const collaboratorDashboard = document.getElementById("collaborator-dashboard");
+    if (managerDashboard) managerDashboard.classList.add("hidden");
+    if (collaboratorDashboard) collaboratorDashboard.classList.add("hidden");
+
     // Detectar tipo de usuário baseado no access_level do token
-    const accessLevel = getCurrentAccessLevel();
+    let accessLevel = getCurrentAccessLevel();
+    console.log("🔑 accessLevel obtido:", accessLevel, "tipo:", typeof accessLevel);
+    
+    // Verificar se accessLevel é válido
+    if (accessLevel === null || accessLevel === undefined) {
+      console.error("❌ ERRO CRÍTICO: accessLevel é null ou undefined! Tentando obter do token diretamente...");
+      // Tentar obter do token diretamente
+      try {
+        const token = localStorage.getItem("idToken");
+        if (token) {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const directAccessLevel = payload?.access_level;
+          console.log("🔑 accessLevel obtido diretamente do token:", directAccessLevel);
+          if (directAccessLevel !== null && directAccessLevel !== undefined) {
+            accessLevel = Number(directAccessLevel);
+            console.log("🔑 accessLevel convertido para número:", accessLevel);
+          }
+        }
+      } catch (e) {
+        console.error("❌ ERRO ao decodificar token:", e);
+      }
+    }
+    
+    // Garantir que accessLevel é um número
+    accessLevel = Number(accessLevel);
+    console.log("🔑 accessLevel final (número):", accessLevel);
     
     // DEFINIR userId ANTES de qualquer coisa
     dashboardData.userId = localStorage.getItem("userId");
+    
+    // Se não houver userId e for colaborador, tentar extrair do token
+    if (!dashboardData.userId && accessLevel === 3) {
+      try {
+        const token = localStorage.getItem("idToken");
+        if (token) {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const tokenUserId = payload?.user_id || payload?.userId || payload?.personId || payload?.id;
+          if (tokenUserId) {
+            dashboardData.userId = String(tokenUserId);
+            localStorage.setItem("userId", dashboardData.userId);
+            console.log("✅ userId extraído do token:", dashboardData.userId);
+          }
+        }
+      } catch (e) {
+        console.warn("⚠️ Erro ao extrair userId do token:", e);
+      }
+    }
+    
     console.log("🔑 userId definido:", dashboardData.userId);
     
-    // Se não houver userId, tentar usar o primeiro colaborador disponível (para testes)
+    // Se ainda não houver userId e for colaborador, será definido após carregar dados
     if (!dashboardData.userId && accessLevel === 3) {
-      console.warn("⚠️ userId não encontrado no localStorage, será definido após carregar dados");
+      console.warn("⚠️ userId não encontrado, será definido após carregar dados");
     }
     
     // Usa o access_level do token para determinar o role
     dashboardData.userRole = determineUserRole(accessLevel);
-    console.log("👤 userRole:", dashboardData.userRole);
+    console.log("👤 userRole determinado:", dashboardData.userRole, "baseado em accessLevel:", accessLevel);
+    
+    // Validação adicional: garantir que o role está correto
+    if (accessLevel === 3 && dashboardData.userRole !== "collaborator") {
+      console.error("❌ ERRO: accessLevel é 3 mas userRole não é 'collaborator'! Corrigindo...");
+      dashboardData.userRole = "collaborator";
+    } else if ((accessLevel === 1 || accessLevel === 2) && dashboardData.userRole !== "manager") {
+      console.error("❌ ERRO: accessLevel é 1 ou 2 mas userRole não é 'manager'! Corrigindo...");
+      dashboardData.userRole = "manager";
+    }
+    
+    console.log("✅ userRole final:", dashboardData.userRole, "accessLevel:", accessLevel);
 
     // Aplicar controle de acesso aos elementos da página
     applyAccessControl();
 
-    // Carregar dados
+    // Carregar dados (loader permanece visível)
+    console.log("📊 Carregando dados do dashboard...");
     await loadAllData();
+    console.log("✅ Dados carregados com sucesso");
+    
+    // Buscar dados de custos da API
+    console.log("📊 Carregando dados de custos da API...");
+    await fetchCostsSummary();
+    console.log("✅ Dados de custos carregados");
+    
+    // Buscar % Sobrecarga e Ociosidade da API
+    console.log("📊 Carregando % Sobrecarga e Ociosidade da API...");
+    await Promise.all([
+      fetchOverloadPercentage(),
+      fetchIdlePercentage(),
+      fetchPlannedVsReal(),
+      fetchCostsBySquad(),
+      fetchAllocationBands(),
+      fetchOverloadIdlePerMonth(),
+      fetchWorkloadBySquad(),
+      fetchActiveSquads(),
+      fetchActiveProjects(),
+      fetchTotalAllocatedHours()
+    ]);
+    console.log("✅ % Sobrecarga e Ociosidade carregados");
     
     // Se ainda não tiver userId e for colaborador, usar o primeiro colaborador
     if (!dashboardData.userId && dashboardData.userRole === "collaborator" && dashboardData.collaborators.length > 0) {
@@ -106,10 +256,47 @@ async function initializeDashboard() {
     setupFilters();
 
     // Renderizar dashboard apropriado
+    console.log("🎯 Renderizando dashboard - userRole:", dashboardData.userRole, "accessLevel:", accessLevel);
+    
+    // Garantir que o role está correto antes de renderizar
+    if (!dashboardData.userRole) {
+      console.warn("⚠️ userRole não definido, determinando novamente...");
+      dashboardData.userRole = determineUserRole(accessLevel);
+    }
+    
+    // Forçar correção se necessário
+    if (accessLevel === 3 && dashboardData.userRole !== "collaborator") {
+      console.warn("⚠️ Corrigindo userRole: accessLevel é 3, mas userRole é", dashboardData.userRole);
+      dashboardData.userRole = "collaborator";
+    } else if ((accessLevel === 1 || accessLevel === 2) && dashboardData.userRole !== "manager") {
+      console.warn("⚠️ Corrigindo userRole: accessLevel é", accessLevel, "mas userRole é", dashboardData.userRole);
+      dashboardData.userRole = "manager";
+    }
+    
     if (dashboardData.userRole === "manager") {
+      console.log("✅ Renderizando dashboard GERENCIAL");
       renderManagerDashboard();
+      
+      // Verificação final: garantir que o dashboard gerencial está visível
+      setTimeout(() => {
+        const managerDashboard = document.getElementById("manager-dashboard");
+        if (managerDashboard && managerDashboard.classList.contains("hidden")) {
+          console.error("❌ ERRO: Dashboard gerencial ainda está oculto! Forçando exibição...");
+          managerDashboard.classList.remove("hidden");
+        }
+      }, 500);
     } else {
+      console.log("✅ Renderizando dashboard COLABORADOR");
       renderCollaboratorDashboard();
+      
+      // Verificação final: garantir que o dashboard de colaborador está visível
+      setTimeout(() => {
+        const collaboratorDashboard = document.getElementById("collaborator-dashboard");
+        if (collaboratorDashboard && collaboratorDashboard.classList.contains("hidden")) {
+          console.error("❌ ERRO: Dashboard de colaborador ainda está oculto! Forçando exibição...");
+          collaboratorDashboard.classList.remove("hidden");
+        }
+      }, 500);
     }
     
     // Garantir que o filtro de squad esteja oculto para colaboradores na inicialização
@@ -120,20 +307,44 @@ async function initializeDashboard() {
       }
     }
 
-    // Configurar eventos
-    setupEventListeners();
+    // Configurar eventos (apenas uma vez)
+    if (!eventListenersSetup) {
+      setupEventListeners();
+      eventListenersSetup = true;
+    }
     
     // Configurar tooltips
     setTimeout(() => {
       setupInfoTooltips();
     }, 200);
+    
+    // Ocultar loader e mostrar conteúdo após renderizar completamente
+    setTimeout(() => {
+      const loader = document.getElementById("loader");
+      const mainContent = document.getElementById("main-content");
+      if (loader) {
+        loader.classList.add("hidden");
+        loader.innerHTML = ''; // Limpar conteúdo do loader
+      }
+      if (mainContent) mainContent.classList.remove("hidden");
+      console.log("✅ Dashboard renderizado completamente - loader oculto");
+    }, 1500); // Aguardar um pouco mais para garantir que tudo foi renderizado
   } catch (error) {
     console.error("Erro ao inicializar dashboard:", error);
+    // Mesmo com erro, garantir que o conteúdo seja mostrado
+    const loader = document.getElementById("loader");
+    const mainContent = document.getElementById("main-content");
+    if (loader) {
+      loader.classList.add("hidden");
+      loader.innerHTML = '';
+    }
+    if (mainContent) mainContent.classList.remove("hidden");
   } finally {
     // Sempre configurar abas, mesmo se houver erro
     setTimeout(() => {
       setupTabs();
     }, 100);
+    isInitializing = false;
   }
 }
 
@@ -207,8 +418,8 @@ function setupTabs() {
   if (activeTab) {
     const initialTab = activeTab.getAttribute("data-tab");
     console.log("Inicializando aba ativa:", initialTab);
-    setTimeout(() => {
-      updateChartsForTab(initialTab);
+    setTimeout(async () => {
+      await updateChartsForTab(initialTab);
       setupInfoTooltips(); // Recriar tooltips após atualizar abas
     }, 200);
   }
@@ -256,7 +467,7 @@ function createTestChart() {
 }
 
 // Atualizar gráficos específicos de cada aba
-function updateChartsForTab(tabName) {
+async function updateChartsForTab(tabName) {
   console.log("Atualizando gráficos para aba:", tabName);
   
   switch (tabName) {
@@ -268,25 +479,27 @@ function updateChartsForTab(tabName) {
       console.log("Atualizando aba de Custos");
       // Atualizar KPIs de custos
       updateCostKPIs();
-      setTimeout(() => {
-        updateCostDeviationChart();
-        updateCostAllocatedChart();
+      setTimeout(async () => {
+        await updateCostDeviationChart();
+        await updateCostAllocatedChart();
       }, 50);
       break;
     case "allocation":
       console.log("Atualizando aba de Alocação");
       // Atualizar KPIs de alocação
       updateAllocationKPIs();
-      setTimeout(() => {
-        updateAllocationDistributionChart();
-        updateOverloadIdleComparisonChart();
-        updateWorkloadDistributionChart();
+      setTimeout(async () => {
+        await updateAllocationDistributionChart();
+        await updateOverloadIdleComparisonChart();
+        await updateWorkloadDistributionChart();
       }, 50);
       break;
     case "competencies":
       console.log("Atualizando aba de Competências");
       // Atualizar KPIs de certificados
       updateCompetenciesKPIs();
+      // Atualizar tabela de Skills Mais Frequentes no Mercado
+      updateMarketSkillsTable();
       setTimeout(() => {
         updateSkillsChart();
         updateSeniorityChart();
@@ -530,8 +743,13 @@ function generateMockData() {
         employeeId: collab.id,
         squadId: squad.id,
         hours: Math.round(hours),
+        allocatedHours: Math.round(hours),
         startDate: startDate.toISOString(),
+        startedAt: startDate.toISOString(),
         date: startDate.toISOString(),
+        personId: collab.id,
+        teamId: squad.id,
+        team: { id: squad.id },
       });
       collabIndex++;
     }
@@ -573,8 +791,13 @@ function generateMockData() {
         employeeId: targetUserId,
         squadId: squad.id,
         hours: hoursPerSquad,
+        allocatedHours: hoursPerSquad,
         startDate: startDate.toISOString(),
+        startedAt: startDate.toISOString(),
         date: startDate.toISOString(),
+        personId: targetUserId,
+        teamId: squad.id,
+        team: { id: squad.id },
       };
       
       mockAllocations.push(allocation);
@@ -630,8 +853,13 @@ function generateMockData() {
       employeeId: collab.id,
       squadId: squad.id,
       hours,
+      allocatedHours: hours,
       startDate: startDate.toISOString(),
+      startedAt: startDate.toISOString(),
       date: startDate.toISOString(),
+      personId: collab.id,
+      teamId: squad.id,
+      team: { id: squad.id },
     });
   }
 
@@ -645,195 +873,132 @@ function generateMockData() {
 }
 
 async function loadAllData() {
+  // Prevenir múltiplas execuções simultâneas
+  if (isLoadingData) {
+    console.warn("⚠️ loadAllData já está em execução, aguardando conclusão...");
+    return;
+  }
+  
+  isLoadingData = true;
+  
   try {
+    console.log("📊 Carregando dados mockados para o dashboard");
+    
     // Garantir que userId está definido antes de gerar dados mockados
     if (!dashboardData.userId) {
       dashboardData.userId = localStorage.getItem("userId");
     }
     
-    let projects, squads, collaborators, skills;
+    // Obter access_level para filtrar dados se necessário
+    const accessLevel = getCurrentAccessLevel();
+    const isCollaborator = accessLevel === 3;
     
-    try {
-      [projects, squads, collaborators, skills] = await Promise.all([
-        apiService.getAllProjects(),
-        apiService.getAllSquads(),
-        apiService.getCollaborators(),
-        apiService.getSkills(),
-      ]);
-    } catch (error) {
-      console.warn("Erro ao carregar dados da API, usando dados mockados:", error);
+    // SEMPRE usar dados mockados
+    const mockData = generateMockData();
+    dashboardData.projects = mockData.projects;
+    dashboardData.squads = mockData.squads;
+    dashboardData.collaborators = mockData.collaborators;
+    dashboardData.skills = mockData.skills;
+    dashboardData.allocations = mockData.allocations;
+    
+    console.log("✅ Dados mockados carregados:");
+    console.log("  - Projetos:", dashboardData.projects.length);
+    console.log("  - Squads:", dashboardData.squads.length);
+    console.log("  - Colaboradores:", dashboardData.collaborators.length);
+    console.log("  - Skills:", dashboardData.skills.length);
+    console.log("  - Alocações:", dashboardData.allocations.length);
+    
+    // Se não houver userId e for colaborador, usar o primeiro colaborador
+    if (!dashboardData.userId && dashboardData.userRole === "collaborator" && dashboardData.collaborators.length > 0) {
+      dashboardData.userId = dashboardData.collaborators[0].id;
+      localStorage.setItem("userId", dashboardData.userId);
+      console.log("✅ userId definido como primeiro colaborador:", dashboardData.userId);
     }
-
-    // Se não houver dados suficientes, usar dados mockados
-    const hasEnoughData = 
-      Array.isArray(projects) && projects.length >= 5 &&
-      Array.isArray(squads) && squads.length >= 3 &&
-      Array.isArray(collaborators) && collaborators.length >= 10;
-
-    if (!hasEnoughData) {
-      console.log("Usando dados mockados para demonstração");
-      const mockData = generateMockData();
-      dashboardData.projects = mockData.projects;
-      dashboardData.squads = mockData.squads;
-      dashboardData.collaborators = mockData.collaborators;
-      dashboardData.skills = mockData.skills;
-      dashboardData.allocations = mockData.allocations;
+    
+    // Log específico para colaborador logado
+    if (dashboardData.userId) {
+      const userAllocations = dashboardData.allocations.filter(a => 
+        String(a.employeeId) === String(dashboardData.userId)
+      );
+      const userSquads = [...new Set(userAllocations.map(a => a.squadId))];
+      // REGRA DE NEGÓCIO: Buscar projetos através do projectId dos squads
+      const userSquadObjects = dashboardData.squads.filter(s => userSquads.includes(s.id));
+      const userProjectIds = [...new Set(userSquadObjects.map(s => s.projectId).filter(id => id != null))];
+      const userProjects = dashboardData.projects.filter(p => 
+        userProjectIds.includes(p.id)
+      );
+      console.log(`📊 Dados do colaborador (ID: ${dashboardData.userId}):`);
+      console.log("  - Alocações:", userAllocations.length);
+      console.log("  - Squads:", userSquads.length);
+      console.log("  - Projetos:", userProjects.length);
+      console.log("  - Total de horas:", userAllocations.reduce((sum, a) => sum + (a.hours || 0), 0));
       
-      console.log("✅ Dados mockados carregados:");
-      console.log("  - Projetos:", dashboardData.projects.length);
-      console.log("  - Squads:", dashboardData.squads.length);
-      console.log("  - Colaboradores:", dashboardData.collaborators.length);
-      console.log("  - Skills:", dashboardData.skills.length);
-      console.log("  - Alocações:", dashboardData.allocations.length);
-      
-      // Se não houver userId e for colaborador, usar o primeiro colaborador
-      if (!dashboardData.userId && dashboardData.userRole === "collaborator" && dashboardData.collaborators.length > 0) {
-        dashboardData.userId = dashboardData.collaborators[0].id;
-        localStorage.setItem("userId", dashboardData.userId);
-        console.log("✅ userId definido como primeiro colaborador:", dashboardData.userId);
-      }
-      
-      // Log específico para colaborador logado
-      if (dashboardData.userId) {
-        const userAllocations = dashboardData.allocations.filter(a => 
-          String(a.employeeId) === String(dashboardData.userId)
-        );
-        const userSquads = [...new Set(userAllocations.map(a => a.squadId))];
-        // REGRA DE NEGÓCIO: Buscar projetos através do projectId dos squads
-        const userSquadObjects = dashboardData.squads.filter(s => userSquads.includes(s.id));
-        const userProjectIds = [...new Set(userSquadObjects.map(s => s.projectId).filter(id => id != null))];
-        const userProjects = dashboardData.projects.filter(p => 
-          userProjectIds.includes(p.id)
-        );
-        console.log(`📊 Dados do colaborador (ID: ${dashboardData.userId}):`);
-        console.log("  - Alocações:", userAllocations.length);
-        console.log("  - Squads:", userSquads.length);
-        console.log("  - Projetos:", userProjects.length);
-        console.log("  - Total de horas:", userAllocations.reduce((sum, a) => sum + (a.hours || 0), 0));
-        
-        // Se não houver dados para o colaborador, criar agora (2 squads e 3 projetos)
-        if (userAllocations.length === 0) {
-          console.log("⚠️ Nenhuma alocação encontrada para o colaborador, criando alocações...");
-          const targetCollab = dashboardData.collaborators.find(c => String(c.id) === String(dashboardData.userId));
-          if (targetCollab) {
-            // Selecionar exatamente 2 squads
-            const selectedSquads = dashboardData.squads.slice(0, Math.min(2, dashboardData.squads.length));
+      // Se não houver dados para o colaborador, criar agora (2 squads e 3 projetos)
+      if (userAllocations.length === 0) {
+        console.log("⚠️ Nenhuma alocação encontrada para o colaborador, criando alocações...");
+        const targetCollab = dashboardData.collaborators.find(c => String(c.id) === String(dashboardData.userId));
+        if (targetCollab) {
+          // Selecionar exatamente 2 squads
+          const selectedSquads = dashboardData.squads.slice(0, Math.min(2, dashboardData.squads.length));
+          
+          // Criar alocações nos 2 squads
+          selectedSquads.forEach((squad, idx) => {
+            const hours = idx === 0 ? 24 : 16; // 24h no primeiro, 16h no segundo
+            const daysAgo = Math.random() * 30;
+            const startDate = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
             
-            // Criar alocações nos 2 squads
-            selectedSquads.forEach((squad, idx) => {
-              const hours = idx === 0 ? 24 : 16; // 24h no primeiro, 16h no segundo
+            dashboardData.allocations.push({
+              id: dashboardData.allocations.length + 1,
+              employeeId: dashboardData.userId,
+              squadId: squad.id,
+              hours: hours,
+              allocatedHours: hours,
+              startDate: startDate.toISOString(),
+              date: startDate.toISOString(),
+              startedAt: startDate.toISOString(),
+            });
+            console.log(`✅ Alocação criada: ${hours}h no squad ${squad.name}`);
+          });
+          
+          // REGRA DE NEGÓCIO: Um squad só pode ter um projeto
+          // Criar um projeto para cada squad selecionado
+          const projectNames = [
+            "Sistema de Gestão Financeira",
+            "Plataforma E-commerce",
+            "App Mobile de Delivery",
+            "Dashboard Analytics",
+            "API de Integração",
+          ];
+          
+          selectedSquads.forEach((squad, squadIdx) => {
+            // Verificar se o squad já tem um projeto atribuído
+            if (!squad.projectId) {
+              const projectIndex = dashboardData.projects.length + 1;
               const daysAgo = Math.random() * 30;
               const startDate = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
               
-              dashboardData.allocations.push({
-                id: dashboardData.allocations.length + 1,
-                employeeId: dashboardData.userId,
-                squadId: squad.id,
-                hours: hours,
+              const newProject = {
+                id: projectIndex,
+                name: projectNames[(projectIndex - 1) % projectNames.length] || `Projeto ${projectIndex}`,
+                budget: 50000 + Math.random() * 200000,
+                estimatedCost: 50000 + Math.random() * 200000,
+                spentCost: (50000 + Math.random() * 200000) * (0.7 + Math.random() * 0.4),
+                actualCost: (50000 + Math.random() * 200000) * (0.7 + Math.random() * 0.4),
+                status: ["EM_ANDAMENTO", "PLANEJAMENTO"][Math.floor(Math.random() * 2)],
                 startDate: startDate.toISOString(),
-                date: startDate.toISOString(),
-              });
-              console.log(`✅ Alocação criada: ${hours}h no squad ${squad.name}`);
-            });
-            
-            // REGRA DE NEGÓCIO: Um squad só pode ter um projeto
-            // Criar um projeto para cada squad selecionado
-            const projectNames = [
-              "Sistema de Gestão Financeira",
-              "Plataforma E-commerce",
-              "App Mobile de Delivery",
-              "Dashboard Analytics",
-              "API de Integração",
-            ];
-            
-            selectedSquads.forEach((squad, squadIdx) => {
-              // Verificar se o squad já tem um projeto atribuído
-              if (!squad.projectId) {
-                const projectIndex = dashboardData.projects.length + 1;
-                const daysAgo = Math.random() * 30;
-                const startDate = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
-                
-                const newProject = {
-                  id: projectIndex,
-                  name: projectNames[(projectIndex - 1) % projectNames.length] || `Projeto ${projectIndex}`,
-                  budget: 50000 + Math.random() * 200000,
-                  estimatedCost: 50000 + Math.random() * 200000,
-                  spentCost: (50000 + Math.random() * 200000) * (0.7 + Math.random() * 0.4),
-                  actualCost: (50000 + Math.random() * 200000) * (0.7 + Math.random() * 0.4),
-                  status: ["EM_ANDAMENTO", "PLANEJAMENTO"][Math.floor(Math.random() * 2)],
-                  startDate: startDate.toISOString(),
-                  createdAt: startDate.toISOString(),
-                };
-                
-                dashboardData.projects.push(newProject);
-                squad.projectId = newProject.id;
-                console.log(`✅ Projeto criado e atribuído ao squad ${squad.name}`);
-              } else {
-                console.log(`✅ Squad ${squad.name} já tem projeto atribuído (ID: ${squad.projectId})`);
-              }
-            });
-            
-            console.log(`✅ Criados projetos para ${selectedSquads.length} squads do colaborador ${dashboardData.userId}`);
-          }
-        }
-      }
-    } else {
-      dashboardData.projects = Array.isArray(projects) ? projects : [];
-      dashboardData.squads = Array.isArray(squads) ? squads : [];
-      dashboardData.collaborators = Array.isArray(collaborators) ? collaborators : [];
-      dashboardData.skills = Array.isArray(skills) ? skills : [];
-
-      // Carregar alocações para cada squad
-      dashboardData.allocations = [];
-      if (Array.isArray(dashboardData.squads)) {
-        for (const squad of dashboardData.squads) {
-          try {
-            if (squad && squad.id) {
-              const allocations = await apiService.getSquadAllocations(squad.id);
-              if (allocations && Array.isArray(allocations)) {
-                dashboardData.allocations.push(...allocations.map(a => ({ ...a, squadId: squad.id })));
-              }
+                createdAt: startDate.toISOString(),
+              };
+              
+              dashboardData.projects.push(newProject);
+              squad.projectId = newProject.id;
+              console.log(`✅ Projeto criado e atribuído ao squad ${squad.name}`);
+            } else {
+              console.log(`✅ Squad ${squad.name} já tem projeto atribuído (ID: ${squad.projectId})`);
             }
-          } catch (err) {
-            console.warn(`Erro ao carregar alocações do squad ${squad?.id}:`, err);
-          }
+          });
+          
+          console.log(`✅ Criados projetos para ${selectedSquads.length} squads do colaborador ${dashboardData.userId}`);
         }
-      }
-
-      // Se não houver alocações suficientes, usar mockadas
-      if (dashboardData.allocations.length < 10) {
-        const mockData = generateMockData();
-        const currentUserId = localStorage.getItem("userId");
-        const targetUserId = currentUserId ? parseInt(currentUserId) : null;
-        
-        // Garantir que o colaborador logado tenha alocações
-        if (targetUserId) {
-          const userAllocations = mockData.allocations.filter(a => a.employeeId === targetUserId);
-          if (userAllocations.length === 0) {
-            // Criar alocações para o colaborador logado
-            const selectedSquads = dashboardData.squads.slice(0, Math.min(3, dashboardData.squads.length));
-            selectedSquads.forEach((squad, idx) => {
-              const hours = idx === 0 ? 24 : 8 + Math.floor(Math.random() * 8);
-              const daysAgo = Math.random() * 30;
-              const startDate = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
-              
-              mockData.allocations.push({
-                id: mockData.allocations.length + 1,
-                employeeId: targetUserId,
-                squadId: squad.id,
-                hours: hours,
-                startDate: startDate.toISOString(),
-                date: startDate.toISOString(),
-              });
-            });
-          }
-        }
-        
-        dashboardData.allocations = mockData.allocations.map(a => ({
-          ...a,
-          employeeId: dashboardData.collaborators.find(c => String(c.id) === String(a.employeeId))?.id || a.employeeId,
-          squadId: dashboardData.squads.find(s => String(s.id) === String(a.squadId))?.id || a.squadId,
-        }));
       }
     }
   } catch (error) {
@@ -862,6 +1027,8 @@ async function loadAllData() {
         squads: [...new Set(userAllocations.map(a => a.squadId))].length
       });
     }
+  } finally {
+    isLoadingData = false;
   }
 }
 
@@ -1140,10 +1307,20 @@ function setupKPIMetricsCards() {
 }
 
 function setupEventListeners() {
-  // Filtro de tempo global (funciona para manager e colaborador)
+  // Remover listeners antigos se existirem
   const timeFilter = document.getElementById("timeFilter");
+  if (timeFilter && eventHandlers.timeFilter) {
+    timeFilter.removeEventListener("change", eventHandlers.timeFilter);
+  }
+  
+  const squadFilter = document.getElementById("squadFilter");
+  if (squadFilter && eventHandlers.squadFilter) {
+    squadFilter.removeEventListener("change", eventHandlers.squadFilter);
+  }
+  
+  // Filtro de tempo global (funciona para manager e colaborador)
   if (timeFilter) {
-    timeFilter.addEventListener("change", (e) => {
+    eventHandlers.timeFilter = (e) => {
       dashboardData.currentTimeFilter = e.target.value;
       
       // Se for manager, atualizar dashboard de gestão
@@ -1154,7 +1331,7 @@ function setupEventListeners() {
       paginationState.collaborators.currentPage = 1;
       paginationState.marketSkills.currentPage = 1;
       paginationState.employeeSkills.currentPage = 1;
-      updateAllCharts();
+      updateAllCharts().catch(err => console.error("Erro ao atualizar gráficos:", err));
       // Atualizar tabelas se estiver na aba de análises
       const activeTab = document.querySelector('.tab-button.active')?.getAttribute('data-tab');
       if (activeTab === 'analysis') {
@@ -1168,13 +1345,13 @@ function setupEventListeners() {
         updateCollaboratorCharts();
         updateCollaboratorTables();
       }
-    });
+    };
+    timeFilter.addEventListener("change", eventHandlers.timeFilter);
   }
 
   // Filtro de squad global
-  const squadFilter = document.getElementById("squadFilter");
   if (squadFilter) {
-    squadFilter.addEventListener("change", (e) => {
+    eventHandlers.squadFilter = (e) => {
       dashboardData.currentSquadFilter = e.target.value;
       // Resetar paginação das tabelas quando o filtro mudar
       paginationState.idleSquads.currentPage = 1;
@@ -1182,25 +1359,73 @@ function setupEventListeners() {
       paginationState.collaborators.currentPage = 1;
       paginationState.marketSkills.currentPage = 1;
       paginationState.employeeSkills.currentPage = 1;
-      updateAllCharts();
+      updateAllCharts().catch(err => console.error("Erro ao atualizar gráficos:", err));
       // Atualizar tabelas se estiver na aba de análises
       const activeTab = document.querySelector('.tab-button.active')?.getAttribute('data-tab');
       if (activeTab === 'analysis') {
         updateAllTables();
       }
-    });
+    };
+    squadFilter.addEventListener("change", eventHandlers.squadFilter);
   }
 
   // Filtros específicos de gráficos
-  document.getElementById("costDeviationSquadFilter")?.addEventListener("change", () => updateCostDeviationChart());
-  document.getElementById("costAllocatedSquadFilter")?.addEventListener("change", () => updateCostAllocatedChart());
-  document.getElementById("allocationLevelFilter")?.addEventListener("change", () => updateAllocationDistributionChart());
-  document.getElementById("skillsFilter")?.addEventListener("change", () => updateSkillsChart());
-  document.getElementById("strategicSquadFilter")?.addEventListener("change", () => updateStrategicViewChart());
-  document.getElementById("collaboratorSortBy")?.addEventListener("change", () => {
-    paginationState.collaborators.currentPage = 1;
-    updateCollaboratorsTable();
-  });
+  const costDeviationSquadFilter = document.getElementById("costDeviationSquadFilter");
+  if (costDeviationSquadFilter) {
+    if (eventHandlers.costDeviationSquadFilter) {
+      costDeviationSquadFilter.removeEventListener("change", eventHandlers.costDeviationSquadFilter);
+    }
+    eventHandlers.costDeviationSquadFilter = async () => await updateCostDeviationChart();
+    costDeviationSquadFilter.addEventListener("change", eventHandlers.costDeviationSquadFilter);
+  }
+  
+  const costAllocatedSquadFilter = document.getElementById("costAllocatedSquadFilter");
+  if (costAllocatedSquadFilter) {
+    if (eventHandlers.costAllocatedSquadFilter) {
+      costAllocatedSquadFilter.removeEventListener("change", eventHandlers.costAllocatedSquadFilter);
+    }
+    eventHandlers.costAllocatedSquadFilter = async () => await updateCostAllocatedChart();
+    costAllocatedSquadFilter.addEventListener("change", eventHandlers.costAllocatedSquadFilter);
+  }
+  
+  const allocationLevelFilter = document.getElementById("allocationLevelFilter");
+  if (allocationLevelFilter) {
+    if (eventHandlers.allocationLevelFilter) {
+      allocationLevelFilter.removeEventListener("change", eventHandlers.allocationLevelFilter);
+    }
+    eventHandlers.allocationLevelFilter = async () => await updateAllocationDistributionChart();
+    allocationLevelFilter.addEventListener("change", eventHandlers.allocationLevelFilter);
+  }
+  
+  const skillsFilter = document.getElementById("skillsFilter");
+  if (skillsFilter) {
+    if (eventHandlers.skillsFilter) {
+      skillsFilter.removeEventListener("change", eventHandlers.skillsFilter);
+    }
+    eventHandlers.skillsFilter = () => updateSkillsChart();
+    skillsFilter.addEventListener("change", eventHandlers.skillsFilter);
+  }
+  
+  const strategicSquadFilter = document.getElementById("strategicSquadFilter");
+  if (strategicSquadFilter) {
+    if (eventHandlers.strategicSquadFilter) {
+      strategicSquadFilter.removeEventListener("change", eventHandlers.strategicSquadFilter);
+    }
+    eventHandlers.strategicSquadFilter = () => updateStrategicViewChart();
+    strategicSquadFilter.addEventListener("change", eventHandlers.strategicSquadFilter);
+  }
+  
+  const collaboratorSortBy = document.getElementById("collaboratorSortBy");
+  if (collaboratorSortBy) {
+    if (eventHandlers.collaboratorSortBy) {
+      collaboratorSortBy.removeEventListener("change", eventHandlers.collaboratorSortBy);
+    }
+    eventHandlers.collaboratorSortBy = () => {
+      paginationState.collaborators.currentPage = 1;
+      updateCollaboratorsTable();
+    };
+    collaboratorSortBy.addEventListener("change", eventHandlers.collaboratorSortBy);
+  }
   // Removido: event listener de skills obsoletas (substituído por duas novas tabelas)
 
   // Paginação - Squads Ociosos
@@ -1297,9 +1522,30 @@ function setupEventListeners() {
 }
 
 function renderManagerDashboard() {
-  console.log("Renderizando dashboard do gestor");
-  document.getElementById("manager-dashboard").classList.remove("hidden");
-  document.getElementById("collaborator-dashboard").classList.add("hidden");
+  console.log("✅ Renderizando dashboard do gestor");
+  const managerDashboard = document.getElementById("manager-dashboard");
+  const collaboratorDashboard = document.getElementById("collaborator-dashboard");
+  
+  if (!managerDashboard) {
+    console.error("❌ ERRO: Elemento manager-dashboard não encontrado!");
+    return;
+  }
+  
+  if (!collaboratorDashboard) {
+    console.error("❌ ERRO: Elemento collaborator-dashboard não encontrado!");
+    return;
+  }
+  
+  console.log("📊 Ocultando dashboard de colaborador e mostrando dashboard gerencial");
+  managerDashboard.classList.remove("hidden");
+  collaboratorDashboard.classList.add("hidden");
+  
+  // Verificar se realmente foi aplicado
+  if (managerDashboard.classList.contains("hidden")) {
+    console.error("❌ ERRO: manager-dashboard ainda está oculto após remover hidden!");
+  } else {
+    console.log("✅ manager-dashboard está visível");
+  }
   
   // Mostrar filtro de squad para managers
   const squadFilterGroup = document.getElementById("squadFilterGroup");
@@ -1307,15 +1553,84 @@ function renderManagerDashboard() {
     squadFilterGroup.style.display = "flex";
   }
   
-  // Os KPIs e gráficos serão atualizados quando cada aba for aberta
-  console.log("Dashboard do gestor renderizado - aguardando ativação das abas");
+    // Aguardar um pouco para garantir que os elementos estão no DOM
+    setTimeout(async () => {
+      console.log("🔄 Atualizando dashboard do gestor...");
+      // Ativar a primeira aba (Custos) por padrão
+      const costsTab = document.querySelector('#manager-dashboard .tab-button[data-tab="costs"]');
+      const costsContent = document.getElementById("tab-costs");
+      
+      // Remover active de todas as tabs do gestor
+      document.querySelectorAll('#manager-dashboard .tab-button').forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll('#manager-dashboard .tab-content').forEach(content => content.classList.remove("active"));
+      
+      // Ativar a aba Custos
+      if (costsTab && costsContent) {
+        costsTab.classList.add("active");
+        costsContent.classList.add("active");
+        console.log("✅ Aba Custos ativada automaticamente");
+      }
+      
+      // Garantir que os dados foram carregados antes de atualizar
+      if (!dashboardData.costsSummary) {
+        await fetchCostsSummary();
+      }
+      if (dashboardData.overloadPercentage === null || dashboardData.overloadPercentage === undefined) {
+        await fetchOverloadPercentage();
+      }
+      if (dashboardData.idlePercentage === null || dashboardData.idlePercentage === undefined) {
+        await fetchIdlePercentage();
+      }
+      if (!dashboardData.plannedVsReal) {
+        await fetchPlannedVsReal();
+      }
+      if (!dashboardData.costsBySquad) {
+        await fetchCostsBySquad();
+      }
+      if (!dashboardData.allocationBands) {
+        await fetchAllocationBands();
+      }
+      if (!dashboardData.overloadIdlePerMonth) {
+        await fetchOverloadIdlePerMonth();
+      }
+      if (!dashboardData.workloadBySquad) {
+        await fetchWorkloadBySquad();
+      }
+      if (dashboardData.activeSquads === null || dashboardData.activeSquads === undefined) {
+        await fetchActiveSquads();
+      }
+      if (dashboardData.activeProjects === null || dashboardData.activeProjects === undefined) {
+        await fetchActiveProjects();
+      }
+      if (dashboardData.totalAllocatedHours === null || dashboardData.totalAllocatedHours === undefined) {
+        await fetchTotalAllocatedHours();
+      }
+      
+      // Atualizar KPIs e gráficos da aba ativa
+      setTimeout(async () => {
+        await updateChartsForTab("costs");
+      }, 100);
+    }, 200);
+  
+  console.log("Dashboard do gestor renderizado");
 }
 
 function renderCollaboratorDashboard() {
+  console.log("✅ Renderizando dashboard do colaborador");
   const managerDashboard = document.getElementById("manager-dashboard");
   const collaboratorDashboard = document.getElementById("collaborator-dashboard");
   
-  if (managerDashboard) managerDashboard.classList.add("hidden");
+  if (!managerDashboard) {
+    console.error("❌ ERRO: Elemento manager-dashboard não encontrado!");
+  } else {
+    console.log("📊 Ocultando dashboard gerencial");
+    managerDashboard.classList.add("hidden");
+  }
+  
+  if (!collaboratorDashboard) {
+    console.error("❌ ERRO: Elemento collaborator-dashboard não encontrado!");
+    return;
+  }
   
   // Ocultar filtro de squad para colaboradores
   const squadFilterGroup = document.getElementById("squadFilterGroup");
@@ -1323,8 +1638,17 @@ function renderCollaboratorDashboard() {
     squadFilterGroup.style.display = "none";
   }
   
+  console.log("📊 Mostrando dashboard de colaborador");
+  collaboratorDashboard.classList.remove("hidden");
+  
+  // Verificar se realmente foi aplicado
+  if (collaboratorDashboard.classList.contains("hidden")) {
+    console.error("❌ ERRO: collaborator-dashboard ainda está oculto após remover hidden!");
+  } else {
+    console.log("✅ collaborator-dashboard está visível");
+  }
+  
   if (collaboratorDashboard) {
-    collaboratorDashboard.classList.remove("hidden");
     
     // Garantir que userId está definido
     if (!dashboardData.userId && dashboardData.collaborators.length > 0) {
@@ -1344,6 +1668,14 @@ function renderCollaboratorDashboard() {
     // Aguardar um pouco para garantir que os elementos estão no DOM
     setTimeout(() => {
       console.log("🔄 Atualizando KPIs, gráficos e tabelas do colaborador...");
+      console.log("📊 Dados no momento da renderização:", {
+        collaborators: dashboardData.collaborators.length,
+        allocations: dashboardData.allocations.length,
+        projects: dashboardData.projects.length,
+        squads: dashboardData.squads.length,
+        userId: dashboardData.userId
+      });
+      
       // Ativar a aba "Indicadores" por padrão
       const indicatorsTab = document.querySelector('#collaborator-dashboard .tab-button[data-tab="indicators"]');
       const indicatorsContent = document.getElementById("tab-indicators");
@@ -1357,37 +1689,473 @@ function renderCollaboratorDashboard() {
         indicatorsTab.classList.add("active");
         indicatorsContent.classList.add("active");
         console.log("✅ Aba Indicadores ativada automaticamente");
+      } else {
+        console.error("❌ ERRO: Aba Indicadores não encontrada!");
+        console.log("indicatorsTab:", indicatorsTab);
+        console.log("indicatorsContent:", indicatorsContent);
       }
       
       // Configurar tabs do colaborador
       setupTabs();
+      
       // Atualizar KPIs (sempre visíveis na primeira aba)
-      updateCollaboratorKPIs();
+      console.log("🔄 Chamando updateCollaboratorKPIs()...");
+      try {
+        updateCollaboratorKPIs();
+        console.log("✅ updateCollaboratorKPIs() executado com sucesso");
+      } catch (error) {
+        console.error("❌ ERRO ao executar updateCollaboratorKPIs():", error);
+      }
+      
+      // Atualizar tabelas também
+      console.log("🔄 Chamando updateCollaboratorTables()...");
+      try {
+        updateCollaboratorTables();
+        console.log("✅ updateCollaboratorTables() executado com sucesso");
+      } catch (error) {
+        console.error("❌ ERRO ao executar updateCollaboratorTables():", error);
+      }
+      
       // Os gráficos serão atualizados quando as abas forem clicadas
-    }, 200);
+    }, 500); // Aumentado para 500ms para garantir que os dados estejam carregados
   }
 }
 
 // ==================== CÁLCULOS DE KPIs ====================
 
+// Função para buscar dados de custos da API
+async function fetchCostsSummary() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      console.warn("Token não encontrado, não é possível buscar dados de custos");
+      return null;
+    }
+
+    const response = await fetch("/api/dashboard/costs/summary", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Erro ao buscar dados de custos: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    dashboardData.costsSummary = data;
+    console.log("✅ Dados de custos carregados da API:", data);
+    return data;
+  } catch (error) {
+    console.error("Erro ao buscar dados de custos:", error);
+    return null;
+  }
+}
+
+// Função para buscar % Sobrecarga Operacional da API
+async function fetchOverloadPercentage() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      console.warn("Token não encontrado, não é possível buscar % sobrecarga");
+      return null;
+    }
+
+    const response = await fetch("/api/dashboard/summary/overload-percentage", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Erro ao buscar % sobrecarga: ${response.status}`);
+      return null;
+    }
+
+    // A API retorna um número diretamente, não JSON
+    const text = await response.text();
+    const percentage = parseFloat(text);
+    
+    if (isNaN(percentage)) {
+      console.warn("Resposta da API não é um número válido:", text);
+      return null;
+    }
+
+    dashboardData.overloadPercentage = percentage;
+    console.log("✅ % Sobrecarga Operacional carregado da API:", percentage);
+    return percentage;
+  } catch (error) {
+    console.error("Erro ao buscar % sobrecarga:", error);
+    return null;
+  }
+}
+
+// Função para buscar % Ociosidade Operacional da API
+async function fetchIdlePercentage() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      console.warn("Token não encontrado, não é possível buscar % ociosidade");
+      return null;
+    }
+
+    const response = await fetch("/api/dashboard/summary/idle-percentage", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Erro ao buscar % ociosidade: ${response.status}`);
+      return null;
+    }
+
+    // A API retorna um número diretamente, não JSON
+    const text = await response.text();
+    const percentage = parseFloat(text);
+    
+    if (isNaN(percentage)) {
+      console.warn("Resposta da API não é um número válido:", text);
+      return null;
+    }
+
+    dashboardData.idlePercentage = percentage;
+    console.log("✅ % Ociosidade Operacional carregado da API:", percentage);
+    return percentage;
+  } catch (error) {
+    console.error("Erro ao buscar % ociosidade:", error);
+    return null;
+  }
+}
+
+// Função para buscar dados de Custo Previsto vs Realizado da API (para costDeviationChart)
+async function fetchPlannedVsReal() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      console.warn("Token não encontrado, não é possível buscar dados de custo previsto vs realizado");
+      return null;
+    }
+
+    const response = await fetch("/api/dashboard/costs/planned-vs-real", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Erro ao buscar dados de custo previsto vs realizado: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    dashboardData.plannedVsReal = data;
+    console.log("✅ Dados de Custo Previsto vs Realizado carregados da API:", data);
+    return data;
+  } catch (error) {
+    console.error("Erro ao buscar dados de custo previsto vs realizado:", error);
+    return null;
+  }
+}
+
+// Função para buscar dados de Custo por Squad da API (para costAllocatedChart)
+async function fetchCostsBySquad() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      console.warn("Token não encontrado, não é possível buscar dados de custo por squad");
+      return null;
+    }
+
+    const response = await fetch("/api/dashboard/costs/by-squad", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Erro ao buscar dados de custo por squad: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    dashboardData.costsBySquad = data;
+    console.log("✅ Dados de Custo por Squad carregados da API:", data);
+    return data;
+  } catch (error) {
+    console.error("Erro ao buscar dados de custo por squad:", error);
+    return null;
+  }
+}
+
+// Função para buscar dados de Distribuição de Alocação da API (para allocationDistributionChart)
+async function fetchAllocationBands() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      console.warn("Token não encontrado, não é possível buscar dados de distribuição de alocação");
+      return null;
+    }
+
+    const response = await fetch("/api/dashboard/distribution/allocation-bands", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Erro ao buscar dados de distribuição de alocação: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    dashboardData.allocationBands = data;
+    console.log("✅ Dados de Distribuição de Alocação carregados da API:", data);
+    return data;
+  } catch (error) {
+    console.error("Erro ao buscar dados de distribuição de alocação:", error);
+    return null;
+  }
+}
+
+// Função para buscar dados de Sobrecarga e Ociosidade por Mês da API (para overloadIdleComparisonChart)
+async function fetchOverloadIdlePerMonth() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      console.warn("Token não encontrado, não é possível buscar dados de sobrecarga e ociosidade por mês");
+      return null;
+    }
+
+    const response = await fetch("/api/dashboard/workload/overload-idle-per-month", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Erro ao buscar dados de sobrecarga e ociosidade por mês: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    dashboardData.overloadIdlePerMonth = data;
+    console.log("✅ Dados de Sobrecarga e Ociosidade por Mês carregados da API:", data);
+    return data;
+  } catch (error) {
+    console.error("Erro ao buscar dados de sobrecarga e ociosidade por mês:", error);
+    return null;
+  }
+}
+
+// Função para buscar dados de Carga de Trabalho por Squad da API (para workloadDistributionChart)
+async function fetchWorkloadBySquad() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      console.warn("Token não encontrado, não é possível buscar dados de carga de trabalho por squad");
+      return null;
+    }
+
+    const response = await fetch("/api/dashboard/workload/by-squad", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Erro ao buscar dados de carga de trabalho por squad: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    dashboardData.workloadBySquad = data;
+    console.log("✅ Dados de Carga de Trabalho por Squad carregados da API:", data);
+    return data;
+  } catch (error) {
+    console.error("Erro ao buscar dados de carga de trabalho por squad:", error);
+    return null;
+  }
+}
+
+// Função para buscar número de squads ativos da API (para KPI Total de Squads Ativos)
+async function fetchActiveSquads() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      console.warn("Token não encontrado, não é possível buscar número de squads ativos");
+      return null;
+    }
+
+    const response = await fetch("/api/dashboard/squads/active-squads", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Erro ao buscar número de squads ativos: ${response.status}`);
+      return null;
+    }
+
+    // A API retorna um número diretamente, não JSON
+    const text = await response.text();
+    const count = parseInt(text, 10);
+    
+    if (isNaN(count)) {
+      console.warn("Resposta da API não é um número válido:", text);
+      return null;
+    }
+
+    dashboardData.activeSquads = count;
+    console.log("✅ Número de Squads Ativos carregado da API:", count);
+    return count;
+  } catch (error) {
+    console.error("Erro ao buscar número de squads ativos:", error);
+    return null;
+  }
+}
+
+// Função para buscar número de projetos ativos da API (para KPI Total de Projetos)
+async function fetchActiveProjects() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      console.warn("Token não encontrado, não é possível buscar número de projetos ativos");
+      return null;
+    }
+
+    const response = await fetch("/api/dashboard/projects/active-projects", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Erro ao buscar número de projetos ativos: ${response.status}`);
+      return null;
+    }
+
+    // A API retorna um número diretamente, não JSON
+    const text = await response.text();
+    const count = parseInt(text, 10);
+    
+    if (isNaN(count)) {
+      console.warn("Resposta da API não é um número válido:", text);
+      return null;
+    }
+
+    dashboardData.activeProjects = count;
+    console.log("✅ Número de Projetos Ativos carregado da API:", count);
+    return count;
+  } catch (error) {
+    console.error("Erro ao buscar número de projetos ativos:", error);
+    return null;
+  }
+}
+
+// Função para buscar total de horas alocadas da API (para KPI Total de Horas)
+async function fetchTotalAllocatedHours() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      console.warn("Token não encontrado, não é possível buscar total de horas alocadas");
+      return null;
+    }
+
+    const response = await fetch("/api/dashboard/hours/total-allocated-hours", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Erro ao buscar total de horas alocadas: ${response.status}`);
+      return null;
+    }
+
+    // A API retorna um número diretamente, não JSON
+    const text = await response.text();
+    const hours = parseFloat(text);
+    
+    if (isNaN(hours)) {
+      console.warn("Resposta da API não é um número válido:", text);
+      return null;
+    }
+
+    dashboardData.totalAllocatedHours = hours;
+    console.log("✅ Total de Horas Alocadas carregado da API:", hours);
+    return hours;
+  } catch (error) {
+    console.error("Erro ao buscar total de horas alocadas:", error);
+    return null;
+  }
+}
+
 function calculateKPIs() {
   const timeRange = getTimeRange();
   const filteredData = getFilteredData();
 
-  const activeProjects = filteredData.projects.filter(p => 
-    p.status && !["CONCLUÍDO", "CANCELADO"].includes(p.status.toUpperCase())
-  ).length;
+  // Total de Projetos Ativos - usar dados da API se disponíveis, senão calcular
+  let activeProjects;
+  if (dashboardData.activeProjects !== null && dashboardData.activeProjects !== undefined) {
+    activeProjects = dashboardData.activeProjects;
+  } else {
+    activeProjects = filteredData.projects.filter(p => 
+      p.status && !["CONCLUÍDO", "CANCELADO"].includes(p.status.toUpperCase())
+    ).length;
+  }
 
-  const activeSquads = filteredData.squads.length;
+  // Total de Squads Ativos - usar dados da API se disponíveis, senão calcular
+  let activeSquads;
+  if (dashboardData.activeSquads !== null && dashboardData.activeSquads !== undefined) {
+    activeSquads = dashboardData.activeSquads;
+  } else {
+    activeSquads = filteredData.squads.length;
+  }
 
-  // Calcular horas alocadas na semana atual
-  const currentWeek = getCurrentWeek();
-  const totalHours = filteredData.allocations
-    .filter(a => isInWeek(a.startDate || a.date, currentWeek))
-    .reduce((sum, a) => sum + (a.hours || a.weeklyHours || 0), 0);
+  // Total de Horas Alocadas - usar dados da API se disponíveis, senão calcular
+  let totalHours;
+  if (dashboardData.totalAllocatedHours !== null && dashboardData.totalAllocatedHours !== undefined) {
+    totalHours = dashboardData.totalAllocatedHours;
+  } else {
+    // Calcular horas alocadas na semana atual
+    const currentWeek = getCurrentWeek();
+    totalHours = filteredData.allocations
+      .filter(a => isInWeek(a.startDate || a.date, currentWeek))
+      .reduce((sum, a) => sum + (a.hours || a.weeklyHours || 0), 0);
+  }
 
-  // Desvio de custos
-  const costDeviation = calculateCostDeviation(filteredData.projects);
+  // Desvio de custos - usar dados da API se disponíveis, senão calcular
+  let costDeviation;
+  if (dashboardData.costsSummary && dashboardData.costsSummary.deviation !== undefined) {
+    costDeviation = dashboardData.costsSummary.deviation;
+  } else {
+    costDeviation = calculateCostDeviation(filteredData.projects);
+  }
 
   // Competência de talentos (assumindo que colaboradores com skills têm competência)
   const totalCollaborators = filteredData.collaborators.length;
@@ -1398,14 +2166,38 @@ function calculateKPIs() {
     ? (competentCollaborators / totalCollaborators) * 100 
     : 0;
 
-  // Custo de ociosidade
-  const idleCost = calculateIdleCost(filteredData);
+  // Custo de ociosidade - usar dados da API se disponíveis, senão calcular
+  let idleCost;
+  if (dashboardData.costsSummary && dashboardData.costsSummary.idle_cost !== undefined) {
+    idleCost = dashboardData.costsSummary.idle_cost;
+  } else {
+    idleCost = calculateIdleCost(filteredData);
+  }
 
-  // Custo médio por squad
-  const avgSquadCost = calculateAvgSquadCost(filteredData);
+  // Custo médio por squad - usar dados da API se disponíveis, senão calcular
+  let avgSquadCost;
+  if (dashboardData.costsSummary && dashboardData.costsSummary.average_cost_per_squad !== undefined) {
+    avgSquadCost = dashboardData.costsSummary.average_cost_per_squad;
+  } else {
+    avgSquadCost = calculateAvgSquadCost(filteredData);
+  }
 
-  // Percentuais de sobrecarga e ociosidade
-  const { overloadPercentage, idlePercentage } = calculateOverloadIdlePercentages(filteredData);
+  // Percentuais de sobrecarga e ociosidade - usar dados da API se disponíveis, senão calcular
+  let overloadPercentage;
+  if (dashboardData.overloadPercentage !== null && dashboardData.overloadPercentage !== undefined) {
+    overloadPercentage = dashboardData.overloadPercentage;
+  } else {
+    const calculated = calculateOverloadIdlePercentages(filteredData);
+    overloadPercentage = calculated.overloadPercentage;
+  }
+
+  let idlePercentage;
+  if (dashboardData.idlePercentage !== null && dashboardData.idlePercentage !== undefined) {
+    idlePercentage = dashboardData.idlePercentage;
+  } else {
+    const calculated = calculateOverloadIdlePercentages(filteredData);
+    idlePercentage = calculated.idlePercentage;
+  }
 
   // Certificados
   const certificatesExpiring = getExpiringCertificates(filteredData.collaborators);
@@ -1831,17 +2623,18 @@ function updateCompetenciesKPIs() {
 
 let chartInstances = {};
 
-function updateAllCharts() {
+async function updateAllCharts() {
   // Atualizar todos os KPIs
   updateCostKPIs();
   updateAllocationKPIs();
   updateCompetenciesKPIs();
   
   // Atualizar todos os gráficos
-  updateCostDeviationChart();
-  updateCostAllocatedChart();
-  updateAllocationDistributionChart();
-  updateOverloadIdleComparisonChart();
+  await updateCostDeviationChart();
+  await updateCostAllocatedChart();
+  await updateAllocationDistributionChart();
+  await updateOverloadIdleComparisonChart();
+  await updateWorkloadDistributionChart();
   updateSkillsChart();
   updateSeniorityChart();
   updateStrategicViewChart();
@@ -1849,7 +2642,7 @@ function updateAllCharts() {
   updateSkillsHeatmapChart();
 }
 
-function updateCostDeviationChart() {
+async function updateCostDeviationChart() {
   console.log("Criando gráfico de Desvio de Custo (Previsto vs Realizado)");
   const ctx = document.getElementById("costDeviationChart");
   if (!ctx) {
@@ -1857,40 +2650,60 @@ function updateCostDeviationChart() {
     return;
   }
 
-  const squadFilter = document.getElementById("costDeviationSquadFilter")?.value || "all";
-  const filteredData = getFilteredData();
-  
-  if (!filteredData.squads || filteredData.squads.length === 0) {
-    console.warn("Sem dados de squads para o gráfico");
-    return;
+  // Buscar dados da API se ainda não foram carregados
+  if (!dashboardData.plannedVsReal) {
+    await fetchPlannedVsReal();
   }
 
-  const squads = squadFilter === "all" 
-    ? filteredData.squads 
-    : filteredData.squads.filter(s => s.id == squadFilter);
+  let labels = [];
+  let previsto = [];
+  let realizado = [];
 
-  // REGRA DE NEGÓCIO: Um squad só pode ter um projeto (através de squad.projectId)
-  // Calcular valores previstos (budget) e realizados (spent) por squad
-  const previsto = squads.map(squad => {
-    const squadProject = filteredData.projects.find(p => 
-      String(p.id) === String(squad.projectId)
-    );
-    return squadProject ? (squadProject.budget || squadProject.estimatedCost || 0) : 0;
-  });
+  // Usar dados da API se disponíveis
+  if (dashboardData.plannedVsReal && Array.isArray(dashboardData.plannedVsReal) && dashboardData.plannedVsReal.length > 0) {
+    labels = dashboardData.plannedVsReal.map(item => item.team || `Team ${item.team}`);
+    previsto = dashboardData.plannedVsReal.map(item => item.planned || 0);
+    realizado = dashboardData.plannedVsReal.map(item => item.real || 0);
+  } else {
+    // Fallback para cálculo local se API não retornar dados
+    console.warn("Dados da API não disponíveis, usando cálculo local");
+    const squadFilter = document.getElementById("costDeviationSquadFilter")?.value || "all";
+    const filteredData = getFilteredData();
+    
+    if (!filteredData.squads || filteredData.squads.length === 0) {
+      console.warn("Sem dados de squads para o gráfico");
+      return;
+    }
 
-  const realizado = squads.map(squad => {
-    const squadProject = filteredData.projects.find(p => 
-      String(p.id) === String(squad.projectId)
-    );
-    return squadProject ? (squadProject.spentCost || squadProject.actualCost || 0) : 0;
-  });
+    const squads = squadFilter === "all" 
+      ? filteredData.squads 
+      : filteredData.squads.filter(s => s.id == squadFilter);
+
+    labels = squads.map(s => s.name || `Squad ${s.id}`);
+
+    // REGRA DE NEGÓCIO: Um squad só pode ter um projeto (através de squad.projectId)
+    // Calcular valores previstos (budget) e realizados (spent) por squad
+    previsto = squads.map(squad => {
+      const squadProject = filteredData.projects.find(p => 
+        String(p.id) === String(squad.projectId)
+      );
+      return squadProject ? (squadProject.budget || squadProject.estimatedCost || 0) : 0;
+    });
+
+    realizado = squads.map(squad => {
+      const squadProject = filteredData.projects.find(p => 
+        String(p.id) === String(squad.projectId)
+      );
+      return squadProject ? (squadProject.spentCost || squadProject.actualCost || 0) : 0;
+    });
+  }
 
   if (chartInstances.costDeviation) {
     chartInstances.costDeviation.destroy();
   }
 
-  console.log("Criando Chart.js combinado com", squads.length, "squads");
-  console.log("Labels:", squads.map(s => s.name || `Squad ${s.id}`));
+  console.log("Criando Chart.js combinado com", labels.length, "teams");
+  console.log("Labels:", labels);
   console.log("Previsto:", previsto);
   console.log("Realizado:", realizado);
   
@@ -1898,7 +2711,7 @@ function updateCostDeviationChart() {
     chartInstances.costDeviation = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: squads.map(s => s.name || `Squad ${s.id}`),
+        labels: labels,
         datasets: [
           {
             type: "bar",
@@ -1976,28 +2789,47 @@ function updateCostDeviationChart() {
   }
 }
 
-function updateCostAllocatedChart() {
-  console.log("Criando gráfico de Custo Alocado");
+async function updateCostAllocatedChart() {
+  console.log("Criando gráfico de Custo Alocado por Squad");
   const ctx = document.getElementById("costAllocatedChart");
   if (!ctx) {
     console.warn("Canvas costAllocatedChart não encontrado");
     return;
   }
 
-  const squadFilter = document.getElementById("costAllocatedSquadFilter")?.value || "all";
-  const filteredData = getFilteredData();
-  const squads = squadFilter === "all" 
-    ? filteredData.squads 
-    : filteredData.squads.filter(s => s.id == squadFilter);
+  // Buscar dados da API se ainda não foram carregados
+  if (!dashboardData.costsBySquad) {
+    await fetchCostsBySquad();
+  }
 
-  const costs = squads.map(squad => {
-    const squadAllocations = filteredData.allocations.filter(a => a.squadId === squad.id);
-    return squadAllocations.reduce((sum, a) => {
-      const collab = filteredData.collaborators.find(c => c.id === a.employeeId);
-      const hourlyCost = collab?.hourlyCost || collab?.salary / (40 * 4.33) || 0;
-      return sum + (a.hours || 0) * hourlyCost;
-    }, 0);
-  });
+  let labels = [];
+  let allocatedCosts = [];
+
+  // Usar dados da API se disponíveis
+  if (dashboardData.costsBySquad && Array.isArray(dashboardData.costsBySquad) && dashboardData.costsBySquad.length > 0) {
+    labels = dashboardData.costsBySquad.map(item => item.team || `Team ${item.team}`);
+    allocatedCosts = dashboardData.costsBySquad.map(item => item.allocated_cost || 0);
+  } else {
+    // Fallback para cálculo local se API não retornar dados
+    console.warn("Dados da API não disponíveis, usando cálculo local");
+    const squadFilter = document.getElementById("costAllocatedSquadFilter")?.value || "all";
+    const filteredData = getFilteredData();
+    const squads = squadFilter === "all" 
+      ? filteredData.squads 
+      : filteredData.squads.filter(s => s.id == squadFilter);
+
+    labels = squads.map(s => s.name || `Squad ${s.id}`);
+    
+    squads.forEach(squad => {
+      const squadAllocations = filteredData.allocations.filter(a => a.squadId === squad.id);
+      const cost = squadAllocations.reduce((sum, a) => {
+        const collab = filteredData.collaborators.find(c => c.id === a.employeeId);
+        const hourlyCost = collab?.hourlyCost || collab?.salary / (40 * 4.33) || 0;
+        return sum + (a.hours || 0) * hourlyCost;
+      }, 0);
+      allocatedCosts.push(cost);
+    });
+  }
 
   if (chartInstances.costAllocated) {
     chartInstances.costAllocated.destroy();
@@ -2006,14 +2838,16 @@ function updateCostAllocatedChart() {
   chartInstances.costAllocated = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: squads.map(s => s.name || `Squad ${s.id}`),
-      datasets: [{
-        label: "Custo Alocado (R$)",
-        data: costs,
-        backgroundColor: "rgba(64, 221, 254, 0.6)",
-        borderColor: "rgba(64, 221, 254, 1)",
-        borderWidth: 1,
-      }],
+      labels: labels,
+      datasets: [
+        {
+          label: "Custo Alocado (R$)",
+          data: allocatedCosts,
+          backgroundColor: "rgba(64, 221, 254, 0.6)",
+          borderColor: "rgba(64, 221, 254, 1)",
+          borderWidth: 1,
+        }
+      ],
     },
     options: {
       responsive: true,
@@ -2059,7 +2893,7 @@ function updateCostAllocatedChart() {
   });
 }
 
-function updateAllocationDistributionChart() {
+async function updateAllocationDistributionChart() {
   console.log("Criando gráfico de Distribuição de Alocação");
   const ctx = document.getElementById("allocationDistributionChart");
   if (!ctx) {
@@ -2067,52 +2901,71 @@ function updateAllocationDistributionChart() {
     return;
   }
 
-  const levelFilter = document.getElementById("allocationLevelFilter")?.value || "all";
-  const filteredData = getFilteredData();
+  // Buscar dados da API se ainda não foram carregados
+  if (!dashboardData.allocationBands) {
+    await fetchAllocationBands();
+  }
 
-  const ranges = {
-    "0-50": { min: 0, max: 50 },
-    "50-80": { min: 50, max: 80 },
-    "80-100": { min: 80, max: 100 },
-    "100-120": { min: 100, max: 120 },
-    "120+": { min: 120, max: Infinity },
-  };
+  let percentages = [];
+  let labels = ["0-50%", "50-80%", "80-100%", "100-120%", ">120%"];
 
-  const distribution = {
-    "0-50": 0,
-    "50-80": 0,
-    "80-100": 0,
-    "100-120": 0,
-    "120+": 0,
-  };
+  // Usar dados da API se disponíveis
+  if (dashboardData.allocationBands && typeof dashboardData.allocationBands === 'object') {
+    // A API retorna contagens, precisamos converter para porcentagens
+    const counts = {
+      "0-50%": dashboardData.allocationBands["0-50%"] || 0,
+      "50-80%": dashboardData.allocationBands["50-80%"] || 0,
+      "80-100%": dashboardData.allocationBands["80-100%"] || 0,
+      "100-120%": dashboardData.allocationBands["100-120%"] || 0,
+      ">120%": dashboardData.allocationBands[">120%"] || 0,
+    };
 
-  const collaboratorsByRange = {
-    "0-50": [],
-    "50-80": [],
-    "80-100": [],
-    "100-120": [],
-    "120+": [],
-  };
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    percentages = labels.map(label => {
+      const count = counts[label] || 0;
+      return total > 0 ? (count / total) * 100 : 0;
+    });
+  } else {
+    // Fallback para cálculo local se API não retornar dados
+    console.warn("Dados da API não disponíveis, usando cálculo local");
+    const levelFilter = document.getElementById("allocationLevelFilter")?.value || "all";
+    const filteredData = getFilteredData();
 
-  filteredData.collaborators.forEach(collab => {
-    const allocation = filteredData.allocations.find(a => a.employeeId === collab.id);
-    const allocatedHours = allocation ? (allocation.hours || 0) : 0;
-    const availableHours = collab.workHoursPerWeek || 40;
-    const percentage = (allocatedHours / availableHours) * 100;
+    const ranges = {
+      "0-50": { min: 0, max: 50 },
+      "50-80": { min: 50, max: 80 },
+      "80-100": { min: 80, max: 100 },
+      "100-120": { min: 100, max: 120 },
+      "120+": { min: 120, max: Infinity },
+    };
 
-    for (const [range, { min, max }] of Object.entries(ranges)) {
-      if (percentage >= min && percentage < max) {
-        distribution[range]++;
-        collaboratorsByRange[range].push(collab);
-        break;
+    const distribution = {
+      "0-50": 0,
+      "50-80": 0,
+      "80-100": 0,
+      "100-120": 0,
+      "120+": 0,
+    };
+
+    filteredData.collaborators.forEach(collab => {
+      const allocation = filteredData.allocations.find(a => a.employeeId === collab.id);
+      const allocatedHours = allocation ? (allocation.hours || 0) : 0;
+      const availableHours = collab.workHoursPerWeek || 40;
+      const percentage = (allocatedHours / availableHours) * 100;
+
+      for (const [range, { min, max }] of Object.entries(ranges)) {
+        if (percentage >= min && percentage < max) {
+          distribution[range]++;
+          break;
+        }
       }
-    }
-  });
+    });
 
-  const total = Object.values(distribution).reduce((a, b) => a + b, 0);
-  const percentages = Object.keys(distribution).map(range => 
-    total > 0 ? (distribution[range] / total) * 100 : 0
-  );
+    const total = Object.values(distribution).reduce((a, b) => a + b, 0);
+    percentages = Object.keys(distribution).map(range => 
+      total > 0 ? (distribution[range] / total) * 100 : 0
+    );
+  }
 
   if (chartInstances.allocationDistribution) {
     chartInstances.allocationDistribution.destroy();
@@ -2121,7 +2974,7 @@ function updateAllocationDistributionChart() {
   chartInstances.allocationDistribution = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: ["0-50%", "50-80%", "80-100%", "100-120%", ">120%"],
+      labels: labels,
       datasets: [{
         label: "% de Colaboradores",
         data: percentages,
@@ -2138,11 +2991,16 @@ function updateAllocationDistributionChart() {
       responsive: true,
       maintainAspectRatio: false,
       onClick: (event, elements) => {
-        if (elements.length > 0 && levelFilter === "all") {
-          const index = elements[0].index;
-          const ranges = ["0-50", "50-80", "80-100", "100-120", "120+"];
-          const selectedRange = ranges[index];
-          showAllocationDetails(collaboratorsByRange[selectedRange], selectedRange);
+        // Desabilitar click se estiver usando dados da API (não temos lista de colaboradores por range)
+        if (elements.length > 0 && !dashboardData.allocationBands) {
+          const levelFilter = document.getElementById("allocationLevelFilter")?.value || "all";
+          if (levelFilter === "all") {
+            const index = elements[0].index;
+            const ranges = ["0-50", "50-80", "80-100", "100-120", "120+"];
+            const selectedRange = ranges[index];
+            // Só funciona com dados locais que têm collaboratorsByRange
+            // Se usar dados da API, não temos essa informação
+          }
         }
       },
       scales: {
@@ -2172,17 +3030,55 @@ function showAllocationDetails(collaborators, range) {
   `;
 }
 
-function updateOverloadIdleComparisonChart() {
+async function updateOverloadIdleComparisonChart() {
   const ctx = document.getElementById("overloadIdleComparisonChart");
   if (!ctx) return;
 
-  const timeRange = getTimeRange();
-  const months = getLast6Months();
-  const data = months.map(month => {
-    const monthData = getDataForMonth(month);
-    const { overloadPercentage, idlePercentage } = calculateOverloadIdlePercentages(monthData);
-    return { overload: overloadPercentage, idle: idlePercentage };
-  });
+  // Buscar dados da API se ainda não foram carregados
+  if (!dashboardData.overloadIdlePerMonth) {
+    await fetchOverloadIdlePerMonth();
+  }
+
+  let labels = [];
+  let overloadData = [];
+  let idleData = [];
+
+  // Usar dados da API se disponíveis
+  if (dashboardData.overloadIdlePerMonth && Array.isArray(dashboardData.overloadIdlePerMonth) && dashboardData.overloadIdlePerMonth.length > 0) {
+    // Ordenar por mês (formato "YYYY-MM")
+    const sortedData = [...dashboardData.overloadIdlePerMonth].sort((a, b) => {
+      return a.month.localeCompare(b.month);
+    });
+    
+    labels = sortedData.map(item => {
+      // Converter "2024-06" para formato legível (ex: "Jun/2024")
+      const [year, month] = item.month.split('-');
+      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      const monthIndex = parseInt(month) - 1;
+      return `${monthNames[monthIndex]}/${year}`;
+    });
+    overloadData = sortedData.map(item => item.overload || 0);
+    idleData = sortedData.map(item => item.idle || 0);
+  } else {
+    // Fallback para cálculo local se API não retornar dados
+    console.warn("Dados da API não disponíveis, usando cálculo local");
+    const timeRange = getTimeRange();
+    const months = getLast6Months();
+    const data = months.map(month => {
+      const monthData = getDataForMonth(month);
+      const { overloadPercentage, idlePercentage } = calculateOverloadIdlePercentages(monthData);
+      return { overload: overloadPercentage, idle: idlePercentage };
+    });
+    
+    labels = months.map(month => {
+      const [year, monthNum] = month.split('-');
+      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      const monthIndex = parseInt(monthNum) - 1;
+      return `${monthNames[monthIndex]}/${year}`;
+    });
+    overloadData = data.map(d => d.overload);
+    idleData = data.map(d => d.idle);
+  }
 
   if (chartInstances.overloadIdleComparison) {
     chartInstances.overloadIdleComparison.destroy();
@@ -2191,16 +3087,16 @@ function updateOverloadIdleComparisonChart() {
   chartInstances.overloadIdleComparison = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: months.map(m => formatMonth(m)),
+      labels: labels,
       datasets: [
         {
           label: "Sobrecarga (%)",
-          data: data.map(d => d.overload),
+          data: overloadData,
           backgroundColor: "rgba(211, 47, 47, 0.6)",
         },
         {
           label: "Ociosidade (%)",
-          data: data.map(d => d.idle),
+          data: idleData,
           backgroundColor: "rgba(46, 125, 50, 0.6)",
         },
       ],
@@ -2519,31 +3415,56 @@ function updateStrategicViewChart() {
   });
 }
 
-function updateWorkloadDistributionChart() {
+async function updateWorkloadDistributionChart() {
   const ctx = document.getElementById("workloadDistributionChart");
   if (!ctx) return;
 
-  const filteredData = getFilteredData();
+  // Buscar dados da API se ainda não foram carregados
+  if (!dashboardData.workloadBySquad) {
+    await fetchWorkloadBySquad();
+  }
 
-  const workloadData = filteredData.squads.map(squad => {
-    const squadAllocations = filteredData.allocations.filter(a => a.squadId === squad.id);
-    const allocatedHours = squadAllocations.reduce((sum, a) => sum + (a.hours || 0), 0);
-    
-    const totalAvailableHours = squadAllocations.reduce((sum, a) => {
-      const collab = filteredData.collaborators.find(c => c.id === a.employeeId);
-      return sum + (collab?.workHoursPerWeek || 40);
-    }, 0);
+  let labels = [];
+  let overloadData = [];
+  let allocatedData = [];
+  let idleData = [];
 
-    const overloadHours = Math.max(0, allocatedHours - totalAvailableHours);
-    const unallocatedHours = Math.max(0, totalAvailableHours - allocatedHours);
+  // Usar dados da API se disponíveis
+  if (dashboardData.workloadBySquad && Array.isArray(dashboardData.workloadBySquad) && dashboardData.workloadBySquad.length > 0) {
+    labels = dashboardData.workloadBySquad.map(item => item.team || `Team ${item.team}`);
+    allocatedData = dashboardData.workloadBySquad.map(item => item.allocated || 0);
+    overloadData = dashboardData.workloadBySquad.map(item => item.overload || 0);
+    idleData = dashboardData.workloadBySquad.map(item => item.idle || 0);
+  } else {
+    // Fallback para cálculo local se API não retornar dados
+    console.warn("Dados da API não disponíveis, usando cálculo local");
+    const filteredData = getFilteredData();
 
-    return {
-      squad: squad.name || `Squad ${squad.id}`,
-      overload: overloadHours,
-      allocated: Math.min(allocatedHours, totalAvailableHours),
-      unallocated: unallocatedHours,
-    };
-  });
+    const workloadData = filteredData.squads.map(squad => {
+      const squadAllocations = filteredData.allocations.filter(a => a.squadId === squad.id);
+      const allocatedHours = squadAllocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+      
+      const totalAvailableHours = squadAllocations.reduce((sum, a) => {
+        const collab = filteredData.collaborators.find(c => c.id === a.employeeId);
+        return sum + (collab?.workHoursPerWeek || 40);
+      }, 0);
+
+      const overloadHours = Math.max(0, allocatedHours - totalAvailableHours);
+      const unallocatedHours = Math.max(0, totalAvailableHours - allocatedHours);
+
+      return {
+        squad: squad.name || `Squad ${squad.id}`,
+        overload: overloadHours,
+        allocated: Math.min(allocatedHours, totalAvailableHours),
+        unallocated: unallocatedHours,
+      };
+    });
+
+    labels = workloadData.map(d => d.squad);
+    allocatedData = workloadData.map(d => d.allocated);
+    overloadData = workloadData.map(d => d.overload);
+    idleData = workloadData.map(d => d.unallocated);
+  }
 
   if (chartInstances.workloadDistribution) {
     chartInstances.workloadDistribution.destroy();
@@ -2552,21 +3473,21 @@ function updateWorkloadDistributionChart() {
   chartInstances.workloadDistribution = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: workloadData.map(d => d.squad),
+      labels: labels,
       datasets: [
         {
           label: "Tempo de Sobrecarga",
-          data: workloadData.map(d => d.overload),
+          data: overloadData,
           backgroundColor: "rgba(211, 47, 47, 0.6)",
         },
         {
           label: "Horas Alocadas",
-          data: workloadData.map(d => d.allocated),
+          data: allocatedData,
           backgroundColor: "rgba(64, 221, 254, 0.6)",
         },
         {
           label: "Horas Não Alocadas",
-          data: workloadData.map(d => d.unallocated),
+          data: idleData,
           backgroundColor: "rgba(200, 200, 200, 0.6)",
         },
       ],
@@ -3014,7 +3935,8 @@ function getCollaboratorData() {
 
   if (dateFilter) {
     allocations = allocations.filter(a => {
-      const allocDate = a.startDate || a.date;
+      // A API retorna startedAt, mas o código pode usar startDate ou date também
+      const allocDate = a.startedAt || a.startDate || a.date;
       return allocDate && new Date(allocDate) >= dateFilter;
     });
   }
@@ -3088,7 +4010,8 @@ function updateCollaboratorKPIs() {
   const { collab, allocations, squads, projects } = data;
 
   // Calcular horas totais alocadas
-  const totalHours = allocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+  // A API retorna allocatedHours, mas o código pode usar hours também
+  const totalHours = allocations.reduce((sum, a) => sum + (a.allocatedHours || a.hours || 0), 0);
 
   // Contar squads ativas (squads com alocações no período)
   const activeSquads = squads.length;
@@ -3152,7 +4075,8 @@ function updateCollaboratorWorkloadChart() {
     if (!hoursBySquad[squadId]) {
       hoursBySquad[squadId] = 0;
     }
-    hoursBySquad[squadId] += (a.hours || 0);
+    // A API retorna allocatedHours, mas o código pode usar hours também
+    hoursBySquad[squadId] += (a.allocatedHours || a.hours || 0);
   });
 
   // Criar dados para o gráfico: horas por squad
@@ -3188,7 +4112,7 @@ function updateCollaboratorWorkloadChart() {
           if (!hoursByProject[relatedProject.id]) {
             hoursByProject[relatedProject.id] = 0;
           }
-          hoursByProject[relatedProject.id] += (a.hours || 0);
+          hoursByProject[relatedProject.id] += (a.allocatedHours || a.hours || 0);
         }
       }
     });
@@ -3239,186 +4163,28 @@ function updateCollaboratorWorkloadChart() {
     type: "bar",
     indexAxis: "y",
     data: {
-      labels: squads,
-      datasets: seniorities.map((seniority, idx) => ({
-        label: seniority,
-        data: squads.map(squad => seniorityBySquad[squad][seniority] || 0),
-        backgroundColor: [
-          "rgba(64, 221, 254, 0.6)",
-          "rgba(117, 18, 249, 0.6)",
-          "rgba(250, 18, 226, 0.6)",
-          "rgba(255, 252, 54, 0.6)",
-        ][idx],
-      })),
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      indexAxis: "y",
-      scales: {
-        x: {
-          stacked: true,
-          beginAtZero: true,
-        },
-        y: {
-          stacked: true,
-        },
-      },
-    },
-  });
-}
-
-function updateStrategicViewChart() {
-  const ctx = document.getElementById("strategicViewChart");
-  if (!ctx) return;
-
-  const squadFilter = document.getElementById("strategicSquadFilter")?.value || "all";
-  
-  // Usar getFilteredData() para aplicar filtros de período e squad principal
-  // Depois aplicar o filtro específico do gráfico estratégico
-  let data = getFilteredData();
-  
-  // Filtrar squads pelo filtro específico do gráfico estratégico (sobrescreve o filtro principal se necessário)
-  const squads = squadFilter === "all" 
-    ? data.squads 
-    : data.squads.filter(s => String(s.id) === String(squadFilter));
-
-  if (squads.length === 0) return;
-
-  // Calcular métricas para cada squad
-  const squadMetrics = squads.map(squad => {
-    const squadAllocations = data.allocations.filter(a => String(a.squadId) === String(squad.id));
-    
-    // Custo total
-    const cost = squadAllocations.reduce((sum, a) => {
-      const collab = data.collaborators.find(c => c.id === a.employeeId);
-      const hourlyCost = collab?.hourlyCost || collab?.salary / (40 * 4.33) || 0;
-      return sum + (a.hours || 0) * hourlyCost;
-    }, 0);
-    
-    // Alocação total (horas)
-    const totalAllocation = squadAllocations.reduce((sum, a) => sum + (a.hours || 0), 0);
-    
-    // Número de pessoas
-    const peopleCount = new Set(squadAllocations.map(a => a.employeeId)).size;
-
-    return {
-      squadId: squad.id,
-      label: squad.name || `Squad ${squad.id}`,
-      cost,
-      allocation: totalAllocation,
-      people: peopleCount,
-    };
-  });
-
-  // Normalizar valores para escala 0-100 (para o gráfico radar)
-  const maxValues = {
-    cost: Math.max(...squadMetrics.map(m => m.cost), 1),
-    allocation: Math.max(...squadMetrics.map(m => m.allocation), 1),
-    people: Math.max(...squadMetrics.map(m => m.people), 1),
-  };
-
-  // Definir cores fixas para cada squad baseado no ID
-  const colors = [
-    { bg: 'rgba(117, 18, 249, 0.2)', border: 'rgba(117, 18, 249, 1)' },
-    { bg: 'rgba(64, 221, 254, 0.2)', border: 'rgba(64, 221, 254, 1)' },
-    { bg: 'rgba(250, 18, 226, 0.2)', border: 'rgba(250, 18, 226, 1)' },
-    { bg: 'rgba(211, 47, 46, 0.2)', border: 'rgba(211, 47, 46, 1)' },
-    { bg: 'rgba(47, 125, 50, 0.2)', border: 'rgba(47, 125, 50, 1)' },
-  ];
-
-  // Criar datasets para o gráfico radar
-  const datasets = squadMetrics.map((metrics) => {
-    // Usar o ID do squad para determinar a cor de forma consistente
-    // Subtrair 1 porque os IDs geralmente começam em 1
-    const colorIndex = (metrics.squadId - 1) % colors.length;
-    const color = colors[colorIndex];
-
-    return {
-      label: metrics.label,
-      data: [
-        (metrics.cost / maxValues.cost) * 100,
-        (metrics.allocation / maxValues.allocation) * 100,
-        (metrics.people / maxValues.people) * 100,
-      ],
-      backgroundColor: color.bg,
-      borderColor: color.border,
-      borderWidth: 2,
-      pointBackgroundColor: color.border,
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: color.border,
-    };
-  });
-
-  if (chartInstances.strategicView) {
-    chartInstances.strategicView.destroy();
-  }
-
-  chartInstances.strategicView = new Chart(ctx, {
-    type: "radar",
-    data: {
       labels: squadNames,
       datasets: [{
         label: "Horas Alocadas",
         data: hoursData,
-        backgroundColor: hoursData.map((_, idx) => colors[idx % colors.length]),
-        borderColor: hoursData.map((_, idx) => colors[idx % colors.length].replace('0.6', '1')),
-        borderWidth: 1,
+        backgroundColor: colors.slice(0, hoursData.length),
       }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        y: {
+        x: {
           beginAtZero: true,
           title: {
             display: true,
             text: "Horas",
           },
         },
-        x: {
-          ticks: {
-            maxRotation: 0,
-            minRotation: 0,
-            autoSkip: false,
-            callback: function(value, index) {
-              const label = squadNames[index];
-              if (!label) return '';
-              
-              // Quebrar linha se o nome for muito longo (mais de 12 caracteres)
-              if (label.length > 12) {
-                // Tentar quebrar em espaços primeiro
-                const words = label.split(' ');
-                if (words.length > 1) {
-                  // Se tiver múltiplas palavras, tentar dividir de forma equilibrada
-                  let firstLine = '';
-                  let secondLine = '';
-                  const midPoint = Math.ceil(words.length / 2);
-                  
-                  firstLine = words.slice(0, midPoint).join(' ');
-                  secondLine = words.slice(midPoint).join(' ');
-                  
-                  // Se a primeira linha ainda for muito longa, quebrar no meio
-                  if (firstLine.length > 15) {
-                    const mid = Math.floor(label.length / 2);
-                    const spaceIndex = label.lastIndexOf(' ', mid);
-                    if (spaceIndex > 0) {
-                      return label.substring(0, spaceIndex) + '\n' + label.substring(spaceIndex + 1);
-                    }
-                    return label.substring(0, mid) + '\n' + label.substring(mid);
-                  }
-                  
-                  return firstLine + '\n' + secondLine;
-                } else {
-                  // Se não tiver espaços, quebrar no meio
-                  const mid = Math.floor(label.length / 2);
-                  return label.substring(0, mid) + '\n' + label.substring(mid);
-                }
-              }
-              return label;
-            },
+        y: {
+          title: {
+            display: true,
+            text: "Squads/Projetos",
           },
         },
       },
@@ -3429,9 +4195,7 @@ function updateStrategicViewChart() {
         tooltip: {
           callbacks: {
             label: function(context) {
-              const total = hoursData.reduce((a, b) => a + b, 0);
-              const percentage = total > 0 ? ((context.parsed.y / total) * 100).toFixed(1) : 0;
-              return `${context.dataset.label}: ${context.parsed.y}h (${percentage}%)`;
+              return `${context.dataset.label}: ${context.parsed.x}h`;
             },
           },
         },
@@ -3510,13 +4274,14 @@ function updateCollaboratorHoursEvolutionChart() {
   const hoursByPeriod = new Array(labels.length).fill(0);
   
   allocations.forEach(alloc => {
-    const allocDate = new Date(alloc.startDate || alloc.date);
+    const allocDate = new Date(alloc.startedAt || alloc.startDate || alloc.date);
     const daysAgo = Math.floor((now - allocDate) / (1000 * 60 * 60 * 24));
     
     if (daysAgo >= 0 && daysAgo < periodDays) {
       const periodIndex = Math.floor(daysAgo / intervalDays);
       if (periodIndex < hoursByPeriod.length) {
-        hoursByPeriod[periodIndex] += (alloc.hours || 0);
+        // A API retorna allocatedHours, mas o código pode usar hours também
+        hoursByPeriod[periodIndex] += (alloc.allocatedHours || alloc.hours || 0);
       }
     }
   });
@@ -3594,7 +4359,8 @@ function updateCollaboratorSquadsComparisonChart() {
     if (!hoursBySquad[squadId]) {
       hoursBySquad[squadId] = 0;
     }
-    hoursBySquad[squadId] += (a.hours || 0);
+    // A API retorna allocatedHours, mas o código pode usar hours também
+    hoursBySquad[squadId] += (a.allocatedHours || a.hours || 0);
   });
 
   // Criar dados para o gráfico
