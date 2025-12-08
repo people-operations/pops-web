@@ -1,5 +1,24 @@
 import { apiService } from "../../../assets/js/apiService.js";
 
+// ==================== CONFIGURAÇÃO DE AMBIENTE ====================
+
+/**
+ * Retorna a URL base da API baseado no ambiente
+ * - DEV (localhost): retorna "http://localhost:{port}"
+ * - PROD: retorna "" (string vazia para usar endpoint relativo)
+ */
+function getProjectApiBaseUrl() {
+  const isDevelopment = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' ||
+                        window.location.hostname === '';
+  
+  if (isDevelopment) {
+    return "http://localhost:8082";
+  } else {
+    return "";
+  }
+}
+
 let projects = [];
 let allProjects = [];
 let projectTypes = [];
@@ -34,7 +53,7 @@ async function fetchAndRenderProjects() {
       // Managers podem ver tipos e status
       [activeTypes, inactiveTypes, activeStatuses, inactiveStatuses] = await Promise.all([
         apiService.getProjectTypes(),
-        fetch("http://localhost:8082/api/project-types/inactive", {
+        fetch(`${getProjectApiBaseUrl()}/api/project-types/inactive`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -42,7 +61,7 @@ async function fetchAndRenderProjects() {
           },
         }).then(res => res.ok && res.status !== 204 ? res.json() : []).catch(() => []),
         apiService.getProjectStatuses(),
-        fetch("http://localhost:8082/api/project-status/inactive", {
+        fetch(`${getProjectApiBaseUrl()}/api/project-status/inactive`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -55,7 +74,7 @@ async function fetchAndRenderProjects() {
     // Buscar projetos ativos e inativos
     const [activeProjects, inactiveProjects] = await Promise.all([
       apiService.getAllProjects(),
-      fetch("http://localhost:8082/api/projects/inactive", {
+      fetch(`${getProjectApiBaseUrl()}/api/projects/inactive`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

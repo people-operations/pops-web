@@ -1,5 +1,25 @@
 import { getCurrentAccessLevel, applyAccessControl, requireAuth, requireAccess } from "../../../assets/js/permissions.js";
 
+// ==================== CONFIGURAÇÃO DE AMBIENTE ====================
+
+/**
+ * Retorna a URL base da API baseado no ambiente
+ * - DEV (localhost): retorna "http://localhost:8080"
+ * - PROD: retorna "" (string vazia para usar endpoint relativo)
+ */
+function getApiBaseUrl() {
+  const isDevelopment = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' ||
+                        window.location.hostname === '';
+  
+  if (isDevelopment) {
+    return "http://localhost:8080";
+  } else {
+    // Em produção, usa endpoint relativo (retorna string vazia)
+    return "";
+  }
+}
+
 // Estado global
 let dashboardData = {
   projects: [],
@@ -1732,7 +1752,7 @@ async function fetchCostsSummary() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/costs/summary", {
+    const response = await fetch(`${getApiBaseUrl()}/api/dashboard/costs/summary`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1764,7 +1784,7 @@ async function fetchOverloadPercentage() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/summary/overload-percentage", {
+    const response = await fetch(`${getApiBaseUrl()}/api/dashboard/summary/overload-percentage`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1804,7 +1824,7 @@ async function fetchIdlePercentage() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/summary/idle-percentage", {
+    const response = await fetch(`${getApiBaseUrl()}/api/dashboard/summary/idle-percentage`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1844,7 +1864,7 @@ async function fetchPlannedVsReal() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/costs/planned-vs-real", {
+    const response = await fetch(`${getApiBaseUrl()}/api/dashboard/costs/planned-vs-real`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1876,7 +1896,7 @@ async function fetchCostsBySquad() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/costs/by-squad", {
+    const response = await fetch(`${getApiBaseUrl()}/api/dashboard/costs/by-squad`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1908,7 +1928,7 @@ async function fetchAllocationBands() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/distribution/allocation-bands", {
+    const response = await fetch(`${getApiBaseUrl()}/api/dashboard/distribution/allocation-bands`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1940,7 +1960,7 @@ async function fetchOverloadIdlePerMonth() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/workload/overload-idle-per-month", {
+    const response = await fetch(`${getApiBaseUrl()}/api/dashboard/workload/overload-idle-per-month`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1972,7 +1992,7 @@ async function fetchWorkloadBySquad() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/workload/by-squad", {
+    const response = await fetch(`${getApiBaseUrl()}/api/dashboard/workload/by-squad`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -2004,7 +2024,7 @@ async function fetchActiveSquads() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/squads/active-squads", {
+    const response = await fetch(`${getApiBaseUrl()}/api/dashboard/squads/active-squads`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -2044,7 +2064,7 @@ async function fetchActiveProjects() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/projects/active-projects", {
+    const response = await fetch(`${getApiBaseUrl()}/api/dashboard/projects/active-projects`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -2084,7 +2104,7 @@ async function fetchTotalAllocatedHours() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/hours/total-allocated-hours", {
+    const response = await fetch(`${getApiBaseUrl()}/api/dashboard/hours/total-allocated-hours`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

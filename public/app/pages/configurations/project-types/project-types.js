@@ -1,6 +1,25 @@
 import { apiService, getAuthTokenOrThrow } from "../../../../assets/js/apiService.js";
 import { requireAuth, requireAccess } from "../../../../assets/js/permissions.js";
 
+// ==================== CONFIGURAÇÃO DE AMBIENTE ====================
+
+/**
+ * Retorna a URL base da API baseado no ambiente
+ * - DEV (localhost): retorna "http://localhost:8082"
+ * - PROD: retorna "" (string vazia para usar endpoint relativo)
+ */
+function getProjectApiBaseUrl() {
+  const isDevelopment = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' ||
+                        window.location.hostname === '';
+  
+  if (isDevelopment) {
+    return "http://localhost:8082";
+  } else {
+    return "";
+  }
+}
+
 // Verificar autenticação e acesso imediatamente
 if (!requireAuth()) {
   // Redireciona para login
@@ -108,7 +127,7 @@ async function loadProjectTypes() {
   try {
     const [activeData, inactiveData] = await Promise.all([
       apiService.getProjectTypes(),
-      fetch("http://localhost:8082/api/project-types/inactive", {
+      fetch(`${getProjectApiBaseUrl()}/api/project-types/inactive`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -195,7 +214,7 @@ function renderTable() {
 async function createProjectType(name, description) {
   try {
     const token = getAuthTokenOrThrow();
-    const response = await fetch("http://localhost:8082/api/project-types", {
+    const response = await fetch(`${getProjectApiBaseUrl()}/api/project-types`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -219,7 +238,7 @@ async function createProjectType(name, description) {
 async function updateProjectType(id, name, description) {
   try {
     const token = getAuthTokenOrThrow();
-    const response = await fetch(`http://localhost:8082/api/project-types/${id}`, {
+    const response = await fetch(`${getProjectApiBaseUrl()}/api/project-types/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -243,7 +262,7 @@ async function updateProjectType(id, name, description) {
 async function enableProjectType(id) {
   try {
     const token = getAuthTokenOrThrow();
-    const response = await fetch(`http://localhost:8082/api/project-types/enable/${id}`, {
+    const response = await fetch(`${getProjectApiBaseUrl()}/api/project-types/enable/${id}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -265,7 +284,7 @@ async function enableProjectType(id) {
 async function disableProjectType(id) {
   try {
     const token = getAuthTokenOrThrow();
-    const response = await fetch(`http://localhost:8082/api/project-types/disable/${id}`, {
+    const response = await fetch(`${getProjectApiBaseUrl()}/api/project-types/disable/${id}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,

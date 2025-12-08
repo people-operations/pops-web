@@ -1,3 +1,46 @@
+// ==================== CONFIGURAÇÃO DE AMBIENTE ====================
+
+/**
+ * Retorna a URL base da API baseado no ambiente
+ * - DEV (localhost): retorna "http://localhost:{port}"
+ * - PROD: retorna "" (string vazia para usar endpoint relativo)
+ * @param {number} port - Porta do serviço (8080, 8081, 8082, 8083)
+ * @returns {string} URL base da API
+ */
+function getApiBaseUrl(port) {
+  const isDevelopment = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' ||
+                        window.location.hostname === '';
+  
+  if (isDevelopment) {
+    return `http://localhost:${port}`;
+  } else {
+    // Em produção, usa endpoint relativo (retorna string vazia)
+    return "";
+  }
+}
+
+/**
+ * Retorna a URL base da API de Projetos
+ */
+function getProjectApiBaseUrl() {
+  return getApiBaseUrl(8082);
+}
+
+/**
+ * Retorna a URL base da API de Squads
+ */
+function getSquadApiBaseUrl() {
+  return getApiBaseUrl(8083);
+}
+
+/**
+ * Retorna a URL base da API de Employees
+ */
+function getEmployeeApiBaseUrl() {
+  return getApiBaseUrl(8081);
+}
+
 export function getAuthTokenOrThrow() {
   const token = localStorage.getItem("idToken");
   if (!token) {
@@ -101,7 +144,7 @@ export const apiService = {
   async insertProject(project) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("http://localhost:8082/api/projects", {
+      const response = await fetch(`${getProjectApiBaseUrl()}/api/projects`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -128,12 +171,12 @@ export const apiService = {
       const token = getAuthTokenOrThrow();
       console.log("✅ Token obtido:", token ? "Token presente" : "Token ausente");
       
-      console.log("📡 Fazendo requisição para: http://localhost:8082/api/projects");
+      console.log("📡 Fazendo requisição para:", `${getProjectApiBaseUrl()}/api/projects`);
       console.log("⏳ Aguardando resposta...");
       
       const startTime = Date.now();
       
-      const response = await fetch("http://localhost:8082/api/projects", {
+      const response = await fetch(`${getProjectApiBaseUrl()}/api/projects`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -203,7 +246,7 @@ export const apiService = {
   async getProjectById(id) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`http://localhost:8082/api/projects/${id}`, {
+      const response = await fetch(`${getProjectApiBaseUrl()}/api/projects/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -226,7 +269,7 @@ export const apiService = {
   async deleteProjectById(id) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`http://localhost:8082/api/projects/${id}`, {
+      const response = await fetch(`${getProjectApiBaseUrl()}/api/projects/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -248,7 +291,7 @@ export const apiService = {
   async disableProject(id) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`http://localhost:8082/api/projects/disable/${id}`, {
+      const response = await fetch(`${getProjectApiBaseUrl()}/api/projects/disable/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -270,7 +313,7 @@ export const apiService = {
   async enableProject(id) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`http://localhost:8082/api/projects/enable/${id}`, {
+      const response = await fetch(`${getProjectApiBaseUrl()}/api/projects/enable/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -292,7 +335,7 @@ export const apiService = {
   async updateProject(id, project) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`http://localhost:8082/api/projects/${id}`, {
+      const response = await fetch(`${getProjectApiBaseUrl()}/api/projects/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -316,7 +359,7 @@ export const apiService = {
   async getProjectTypes() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("http://localhost:8082/api/project-types", {
+      const response = await fetch(`${getProjectApiBaseUrl()}/api/project-types`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -342,7 +385,7 @@ export const apiService = {
   async getProjectStatuses() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("http://localhost:8082/api/project-status", {
+      const response = await fetch(`${getProjectApiBaseUrl()}/api/project-status`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -369,7 +412,7 @@ export const apiService = {
   async getSkills() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("http://localhost:8082/api/skills", {
+      const response = await fetch(`${getProjectApiBaseUrl()}/api/skills`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -392,7 +435,7 @@ export const apiService = {
   async getAllSquads() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("http://localhost:8083/api-squad/teams?page=0&size=100", {
+      const response = await fetch(`${getSquadApiBaseUrl()}/api-squad/teams?page=0&size=100`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -424,7 +467,7 @@ export const apiService = {
   async insertSquad(squad) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("http://localhost:8083/api-squad/teams", {
+      const response = await fetch(`${getSquadApiBaseUrl()}/api-squad/teams`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -449,7 +492,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api-squad/teams/${squadId}`,
+        `${getSquadApiBaseUrl()}/api-squad/teams/${squadId}`,
         {
           method: "PUT",
           headers: {
@@ -476,7 +519,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api-squad/teams/${squadId}`,
+        `${getSquadApiBaseUrl()}/api-squad/teams/${squadId}`,
         {
           method: "DELETE",
           headers: {
@@ -499,7 +542,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api-squad/teams/${squadId}`,
+        `${getSquadApiBaseUrl()}/api-squad/teams/${squadId}`,
         {
           method: "GET",
           headers: {
@@ -523,7 +566,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api-squad/teams/${squadId}/allocations`,
+        `${getSquadApiBaseUrl()}/api-squad/teams/${squadId}/allocations`,
         {
           method: "GET",
           headers: {
@@ -552,7 +595,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api-squad/teams/allocations/person/${personId}`,
+        `${getSquadApiBaseUrl()}/api-squad/teams/allocations/person/${personId}`,
         {
           method: "GET",
           headers: {
@@ -610,7 +653,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api-squad/teams/${squadId}/details`,
+        `${getSquadApiBaseUrl()}/api-squad/teams/${squadId}/details`,
         {
           method: "GET",
           headers: {
@@ -634,7 +677,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api-squad/teams/${squadId}/allocations`,
+        `${getSquadApiBaseUrl()}/api-squad/teams/${squadId}/allocations`,
         {
           method: "POST",
           headers: {
@@ -676,7 +719,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8081/api-employee/employees/${employeeId}`,
+        `${getEmployeeApiBaseUrl()}/api-employee/employees/${employeeId}`,
         {
           method: "GET",
           headers: {
@@ -700,7 +743,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8083/api-squad/teams/allocations/person/${employeeId}`,
+        `${getSquadApiBaseUrl()}/api-squad/teams/allocations/person/${employeeId}`,
         {
           method: "GET",
           headers: {
@@ -732,7 +775,7 @@ export const apiService = {
       if (filters.project) params.append("project", filters.project);
       if (filters.squad) params.append("squad", filters.squad);
       const response = await fetch(
-        `http://localhost:8081/api-employee/employees?${params.toString()}`,
+        `${getEmployeeApiBaseUrl()}/api-employee/employees?${params.toString()}`,
         {
           method: "GET",
           headers: {
@@ -753,7 +796,7 @@ export const apiService = {
   async getOdooSkills() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`http://localhost:8081/api-employee/skills`, {
+      const response = await fetch(`${getEmployeeApiBaseUrl()}/api-employee/skills`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -773,7 +816,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8082/api/projects/${projectId}/team-members`,
+        `${getProjectApiBaseUrl()}/api/projects/${projectId}/team-members`,
         {
           method: "GET",
           headers: {
@@ -795,7 +838,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8082/api/projects/${projectId}/team-details`,
+        `${getProjectApiBaseUrl()}/api/projects/${projectId}/team-details`,
         {
           method: "GET",
           headers: {

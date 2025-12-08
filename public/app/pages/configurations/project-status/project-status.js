@@ -1,6 +1,25 @@
 import { apiService, getAuthTokenOrThrow } from "../../../../assets/js/apiService.js";
 import { requireAuth, requireAccess } from "../../../../assets/js/permissions.js";
 
+// ==================== CONFIGURAÇÃO DE AMBIENTE ====================
+
+/**
+ * Retorna a URL base da API baseado no ambiente
+ * - DEV (localhost): retorna "http://localhost:8082"
+ * - PROD: retorna "" (string vazia para usar endpoint relativo)
+ */
+function getProjectApiBaseUrl() {
+  const isDevelopment = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' ||
+                        window.location.hostname === '';
+  
+  if (isDevelopment) {
+    return "http://localhost:8082";
+  } else {
+    return "";
+  }
+}
+
 // Verificar autenticação e acesso imediatamente
 if (!requireAuth()) {
   // Redireciona para login
@@ -108,7 +127,7 @@ async function loadProjectStatuses() {
   try {
     const [activeData, inactiveData] = await Promise.all([
       apiService.getProjectStatuses(),
-      fetch("http://localhost:8082/api/project-status/inactive", {
+      fetch(`${getProjectApiBaseUrl()}/api/project-status/inactive`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -195,7 +214,7 @@ function renderTable() {
 async function createProjectStatus(name, description) {
   try {
     const token = getAuthTokenOrThrow();
-    const response = await fetch("http://localhost:8082/api/project-status", {
+    const response = await fetch(`${getProjectApiBaseUrl()}/api/project-status`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -219,7 +238,7 @@ async function createProjectStatus(name, description) {
 async function updateProjectStatus(id, name, description) {
   try {
     const token = getAuthTokenOrThrow();
-    const response = await fetch(`http://localhost:8082/api/project-status/${id}`, {
+    const response = await fetch(`${getProjectApiBaseUrl()}/api/project-status/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -243,7 +262,7 @@ async function updateProjectStatus(id, name, description) {
 async function enableProjectStatus(id) {
   try {
     const token = getAuthTokenOrThrow();
-    const response = await fetch(`http://localhost:8082/api/project-status/enable/${id}`, {
+    const response = await fetch(`${getProjectApiBaseUrl()}/api/project-status/enable/${id}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -265,7 +284,7 @@ async function enableProjectStatus(id) {
 async function disableProjectStatus(id) {
   try {
     const token = getAuthTokenOrThrow();
-    const response = await fetch(`http://localhost:8082/api/project-status/disable/${id}`, {
+    const response = await fetch(`${getProjectApiBaseUrl()}/api/project-status/disable/${id}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
