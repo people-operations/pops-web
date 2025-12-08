@@ -108,7 +108,7 @@ async function loadProjectTypes() {
   try {
     const [activeData, inactiveData] = await Promise.all([
       apiService.getProjectTypes(),
-      fetch("/api/project-types/inactive", {
+      fetch("/api-project/project-types/inactive", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -195,7 +195,7 @@ function renderTable() {
 async function createProjectType(name, description) {
   try {
     const token = getAuthTokenOrThrow();
-    const response = await fetch("/api/project-types", {
+    const response = await fetch("/api-project/project-types", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -219,7 +219,7 @@ async function createProjectType(name, description) {
 async function updateProjectType(id, name, description) {
   try {
     const token = getAuthTokenOrThrow();
-    const response = await fetch(`/api/project-types/${id}`, {
+    const response = await fetch(`/api-project/project-types/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -243,7 +243,7 @@ async function updateProjectType(id, name, description) {
 async function enableProjectType(id) {
   try {
     const token = getAuthTokenOrThrow();
-    const response = await fetch(`/api/project-types/enable/${id}`, {
+    const response = await fetch(`/api-project/project-types/enable/${id}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -265,7 +265,7 @@ async function enableProjectType(id) {
 async function disableProjectType(id) {
   try {
     const token = getAuthTokenOrThrow();
-    const response = await fetch(`/api/project-types/disable/${id}`, {
+    const response = await fetch(`/api-project/project-types/disable/${id}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
