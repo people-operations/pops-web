@@ -10,7 +10,7 @@ let dashboardData = {
   skills: [],
   currentTimeFilter: "month",
   currentSquadFilter: "all",
-  userRole: "manager", // "manager" ou "collaborator"
+  userRole: null, // Será definido baseado no access_level - "manager" ou "collaborator"
   userId: null,
 };
 
@@ -73,27 +73,99 @@ window.addEventListener("load", () => {
 
 async function initializeDashboard() {
   try {
+    // Manter o loader visível durante o carregamento
+    const loader = document.getElementById("loader");
+    const mainContent = document.getElementById("main-content");
+    if (loader) {
+      loader.classList.remove("hidden");
+      loader.innerHTML = '<div class="spinner"></div><p>Carregando dados do dashboard...</p>';
+    }
+    if (mainContent) mainContent.classList.add("hidden");
+
+    // Ocultar ambos os dashboards por padrão até determinar qual mostrar
+    const managerDashboard = document.getElementById("manager-dashboard");
+    const collaboratorDashboard = document.getElementById("collaborator-dashboard");
+    if (managerDashboard) managerDashboard.classList.add("hidden");
+    if (collaboratorDashboard) collaboratorDashboard.classList.add("hidden");
+
     // Detectar tipo de usuário baseado no access_level do token
-    const accessLevel = getCurrentAccessLevel();
+    let accessLevel = getCurrentAccessLevel();
+    console.log("🔑 accessLevel obtido:", accessLevel, "tipo:", typeof accessLevel);
+    
+    // Verificar se accessLevel é válido
+    if (accessLevel === null || accessLevel === undefined) {
+      console.error("❌ ERRO CRÍTICO: accessLevel é null ou undefined! Tentando obter do token diretamente...");
+      // Tentar obter do token diretamente
+      try {
+        const token = localStorage.getItem("idToken");
+        if (token) {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const directAccessLevel = payload?.access_level;
+          console.log("🔑 accessLevel obtido diretamente do token:", directAccessLevel);
+          if (directAccessLevel !== null && directAccessLevel !== undefined) {
+            accessLevel = Number(directAccessLevel);
+            console.log("🔑 accessLevel convertido para número:", accessLevel);
+          }
+        }
+      } catch (e) {
+        console.error("❌ ERRO ao decodificar token:", e);
+      }
+    }
+    
+    // Garantir que accessLevel é um número
+    accessLevel = Number(accessLevel);
+    console.log("🔑 accessLevel final (número):", accessLevel);
     
     // DEFINIR userId ANTES de qualquer coisa
     dashboardData.userId = localStorage.getItem("userId");
+    
+    // Se não houver userId e for colaborador, tentar extrair do token
+    if (!dashboardData.userId && accessLevel === 3) {
+      try {
+        const token = localStorage.getItem("idToken");
+        if (token) {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const tokenUserId = payload?.user_id || payload?.userId || payload?.personId || payload?.id;
+          if (tokenUserId) {
+            dashboardData.userId = String(tokenUserId);
+            localStorage.setItem("userId", dashboardData.userId);
+            console.log("✅ userId extraído do token:", dashboardData.userId);
+          }
+        }
+      } catch (e) {
+        console.warn("⚠️ Erro ao extrair userId do token:", e);
+      }
+    }
+    
     console.log("🔑 userId definido:", dashboardData.userId);
     
-    // Se não houver userId, tentar usar o primeiro colaborador disponível (para testes)
+    // Se ainda não houver userId e for colaborador, será definido após carregar dados
     if (!dashboardData.userId && accessLevel === 3) {
-      console.warn("⚠️ userId não encontrado no localStorage, será definido após carregar dados");
+      console.warn("⚠️ userId não encontrado, será definido após carregar dados");
     }
     
     // Usa o access_level do token para determinar o role
     dashboardData.userRole = determineUserRole(accessLevel);
-    console.log("👤 userRole:", dashboardData.userRole);
+    console.log("👤 userRole determinado:", dashboardData.userRole, "baseado em accessLevel:", accessLevel);
+    
+    // Validação adicional: garantir que o role está correto
+    if (accessLevel === 3 && dashboardData.userRole !== "collaborator") {
+      console.error("❌ ERRO: accessLevel é 3 mas userRole não é 'collaborator'! Corrigindo...");
+      dashboardData.userRole = "collaborator";
+    } else if ((accessLevel === 1 || accessLevel === 2) && dashboardData.userRole !== "manager") {
+      console.error("❌ ERRO: accessLevel é 1 ou 2 mas userRole não é 'manager'! Corrigindo...");
+      dashboardData.userRole = "manager";
+    }
+    
+    console.log("✅ userRole final:", dashboardData.userRole, "accessLevel:", accessLevel);
 
     // Aplicar controle de acesso aos elementos da página
     applyAccessControl();
 
-    // Carregar dados
+    // Carregar dados (loader permanece visível)
+    console.log("📊 Carregando dados do dashboard...");
     await loadAllData();
+    console.log("✅ Dados carregados com sucesso");
     
     // Se ainda não tiver userId e for colaborador, usar o primeiro colaborador
     if (!dashboardData.userId && dashboardData.userRole === "collaborator" && dashboardData.collaborators.length > 0) {
@@ -106,10 +178,47 @@ async function initializeDashboard() {
     setupFilters();
 
     // Renderizar dashboard apropriado
+    console.log("🎯 Renderizando dashboard - userRole:", dashboardData.userRole, "accessLevel:", accessLevel);
+    
+    // Garantir que o role está correto antes de renderizar
+    if (!dashboardData.userRole) {
+      console.warn("⚠️ userRole não definido, determinando novamente...");
+      dashboardData.userRole = determineUserRole(accessLevel);
+    }
+    
+    // Forçar correção se necessário
+    if (accessLevel === 3 && dashboardData.userRole !== "collaborator") {
+      console.warn("⚠️ Corrigindo userRole: accessLevel é 3, mas userRole é", dashboardData.userRole);
+      dashboardData.userRole = "collaborator";
+    } else if ((accessLevel === 1 || accessLevel === 2) && dashboardData.userRole !== "manager") {
+      console.warn("⚠️ Corrigindo userRole: accessLevel é", accessLevel, "mas userRole é", dashboardData.userRole);
+      dashboardData.userRole = "manager";
+    }
+    
     if (dashboardData.userRole === "manager") {
+      console.log("✅ Renderizando dashboard GERENCIAL");
       renderManagerDashboard();
+      
+      // Verificação final: garantir que o dashboard gerencial está visível
+      setTimeout(() => {
+        const managerDashboard = document.getElementById("manager-dashboard");
+        if (managerDashboard && managerDashboard.classList.contains("hidden")) {
+          console.error("❌ ERRO: Dashboard gerencial ainda está oculto! Forçando exibição...");
+          managerDashboard.classList.remove("hidden");
+        }
+      }, 500);
     } else {
+      console.log("✅ Renderizando dashboard COLABORADOR");
       renderCollaboratorDashboard();
+      
+      // Verificação final: garantir que o dashboard de colaborador está visível
+      setTimeout(() => {
+        const collaboratorDashboard = document.getElementById("collaborator-dashboard");
+        if (collaboratorDashboard && collaboratorDashboard.classList.contains("hidden")) {
+          console.error("❌ ERRO: Dashboard de colaborador ainda está oculto! Forçando exibição...");
+          collaboratorDashboard.classList.remove("hidden");
+        }
+      }, 500);
     }
     
     // Garantir que o filtro de squad esteja oculto para colaboradores na inicialização
@@ -127,8 +236,28 @@ async function initializeDashboard() {
     setTimeout(() => {
       setupInfoTooltips();
     }, 200);
+    
+    // Ocultar loader e mostrar conteúdo após renderizar completamente
+    setTimeout(() => {
+      const loader = document.getElementById("loader");
+      const mainContent = document.getElementById("main-content");
+      if (loader) {
+        loader.classList.add("hidden");
+        loader.innerHTML = ''; // Limpar conteúdo do loader
+      }
+      if (mainContent) mainContent.classList.remove("hidden");
+      console.log("✅ Dashboard renderizado completamente - loader oculto");
+    }, 1500); // Aguardar um pouco mais para garantir que tudo foi renderizado
   } catch (error) {
     console.error("Erro ao inicializar dashboard:", error);
+    // Mesmo com erro, garantir que o conteúdo seja mostrado
+    const loader = document.getElementById("loader");
+    const mainContent = document.getElementById("main-content");
+    if (loader) {
+      loader.classList.add("hidden");
+      loader.innerHTML = '';
+    }
+    if (mainContent) mainContent.classList.remove("hidden");
   } finally {
     // Sempre configurar abas, mesmo se houver erro
     setTimeout(() => {
@@ -287,6 +416,8 @@ function updateChartsForTab(tabName) {
       console.log("Atualizando aba de Competências");
       // Atualizar KPIs de certificados
       updateCompetenciesKPIs();
+      // Atualizar tabela de Skills Mais Frequentes no Mercado
+      updateMarketSkillsTable();
       setTimeout(() => {
         updateSkillsChart();
         updateSeniorityChart();
@@ -651,15 +782,137 @@ async function loadAllData() {
       dashboardData.userId = localStorage.getItem("userId");
     }
     
-    let projects, squads, collaborators, skills;
+    // Obter access_level para filtrar dados se necessário
+    const accessLevel = getCurrentAccessLevel();
+    const isCollaborator = accessLevel === 3;
+    
+    let projects, squads, collaborators, skills, allocations;
     
     try {
-      [projects, squads, collaborators, skills] = await Promise.all([
-        apiService.getAllProjects(),
-        apiService.getAllSquads(),
-        apiService.getCollaborators(),
-        apiService.getSkills(),
-      ]);
+      if (isCollaborator && dashboardData.userId) {
+        // Para colaboradores, buscar apenas seus dados
+        console.log("👤 Carregando dados específicos do colaborador (ID:", dashboardData.userId, ")");
+        
+        // Buscar alocações do colaborador primeiro
+        try {
+          allocations = await apiService.getAllocationsByEmployeeId(dashboardData.userId);
+          console.log("✅ Alocações do colaborador carregadas:", allocations?.length || 0);
+        } catch (error) {
+          console.warn("⚠️ Erro ao carregar alocações do colaborador:", error);
+          allocations = [];
+        }
+        
+        // Extrair IDs de squads únicos das alocações
+        const squadIds = allocations ? [...new Set(allocations.map(a => a.team?.id || a.teamId || a.squadId).filter(id => id != null))] : [];
+        console.log("📊 Squads do colaborador:", squadIds);
+        
+        // Buscar squads específicos do colaborador
+        if (squadIds.length > 0) {
+          try {
+            const allSquads = await apiService.getAllSquads();
+            squads = allSquads.filter(s => squadIds.includes(s.id));
+            console.log("✅ Squads filtrados:", squads.length);
+          } catch (error) {
+            console.warn("⚠️ Erro ao filtrar squads:", error);
+            squads = [];
+          }
+        } else {
+          squads = [];
+        }
+        
+        // Extrair IDs de projetos únicos dos squads
+        const projectIds = [...new Set(squads.map(s => s.projectId).filter(id => id != null))];
+        console.log("📊 Projetos do colaborador:", projectIds);
+        
+        // Buscar projetos específicos do colaborador
+        if (projectIds.length > 0) {
+          try {
+            const allProjects = await apiService.getAllProjects();
+            projects = allProjects.filter(p => projectIds.includes(p.id));
+            console.log("✅ Projetos filtrados:", projects.length);
+          } catch (error) {
+            console.warn("⚠️ Erro ao filtrar projetos:", error);
+            projects = [];
+          }
+        } else {
+          projects = [];
+        }
+        
+        // Colaboradores não precisam ver todos os colaboradores, apenas eles mesmos
+        try {
+          const allCollaborators = await apiService.getCollaborators();
+          collaborators = allCollaborators.filter(c => String(c.id) === String(dashboardData.userId));
+          console.log("✅ Colaborador filtrado:", collaborators.length);
+        } catch (error) {
+          console.warn("⚠️ Erro ao buscar colaborador:", error);
+          collaborators = [];
+        }
+        
+        // Skills não são necessários para colaboradores no dashboard
+        skills = [];
+        
+        // Armazenar alocações e ajustar formato
+        dashboardData.allocations = (allocations || []).map(a => ({
+          id: a.id,
+          employeeId: a.personId || a.employeeId,
+          squadId: a.team?.id || a.teamId || a.squadId,
+          hours: a.allocatedHours || a.hours,
+          allocatedHours: a.allocatedHours || a.hours,
+          startDate: a.startedAt || a.startDate,
+          date: a.startedAt || a.date,
+          position: a.position
+        }));
+        
+        // Armazenar dados filtrados
+        dashboardData.projects = projects || [];
+        dashboardData.squads = squads || [];
+        dashboardData.collaborators = collaborators || [];
+        dashboardData.skills = skills || [];
+        
+        console.log("✅ Dados do colaborador carregados:");
+        console.log("  - Projetos:", dashboardData.projects.length);
+        console.log("  - Squads:", dashboardData.squads.length);
+        console.log("  - Alocações:", dashboardData.allocations.length);
+      } else {
+        // Para managers, buscar TODOS os dados sem filtro
+        console.log("👔 Carregando TODOS os dados (manager)");
+        [projects, squads, collaborators, skills] = await Promise.all([
+          apiService.getAllProjects(),
+          apiService.getAllSquads(),
+          apiService.getCollaborators(),
+          apiService.getSkills(),
+        ]);
+        
+        // Buscar alocações
+        try {
+          allocations = await apiService.getAllocations();
+          dashboardData.allocations = (allocations || []).map(a => ({
+            id: a.id,
+            employeeId: a.personId || a.employeeId,
+            squadId: a.team?.id || a.teamId || a.squadId,
+            hours: a.allocatedHours || a.hours,
+            allocatedHours: a.allocatedHours || a.hours,
+            startDate: a.startedAt || a.startDate,
+            date: a.startedAt || a.date,
+            position: a.position
+          }));
+        } catch (error) {
+          console.warn("⚠️ Erro ao carregar alocações:", error);
+          dashboardData.allocations = [];
+        }
+        
+        // Armazenar TODOS os dados (sem filtro)
+        dashboardData.projects = projects || [];
+        dashboardData.squads = squads || [];
+        dashboardData.collaborators = collaborators || [];
+        dashboardData.skills = skills || [];
+        
+        console.log("✅ TODOS os dados carregados (manager):");
+        console.log("  - Projetos:", dashboardData.projects.length);
+        console.log("  - Squads:", dashboardData.squads.length);
+        console.log("  - Colaboradores:", dashboardData.collaborators.length);
+        console.log("  - Alocações:", dashboardData.allocations.length);
+      }
     } catch (error) {
       console.warn("Erro ao carregar dados da API, usando dados mockados:", error);
     }
@@ -1297,9 +1550,30 @@ function setupEventListeners() {
 }
 
 function renderManagerDashboard() {
-  console.log("Renderizando dashboard do gestor");
-  document.getElementById("manager-dashboard").classList.remove("hidden");
-  document.getElementById("collaborator-dashboard").classList.add("hidden");
+  console.log("✅ Renderizando dashboard do gestor");
+  const managerDashboard = document.getElementById("manager-dashboard");
+  const collaboratorDashboard = document.getElementById("collaborator-dashboard");
+  
+  if (!managerDashboard) {
+    console.error("❌ ERRO: Elemento manager-dashboard não encontrado!");
+    return;
+  }
+  
+  if (!collaboratorDashboard) {
+    console.error("❌ ERRO: Elemento collaborator-dashboard não encontrado!");
+    return;
+  }
+  
+  console.log("📊 Ocultando dashboard de colaborador e mostrando dashboard gerencial");
+  managerDashboard.classList.remove("hidden");
+  collaboratorDashboard.classList.add("hidden");
+  
+  // Verificar se realmente foi aplicado
+  if (managerDashboard.classList.contains("hidden")) {
+    console.error("❌ ERRO: manager-dashboard ainda está oculto após remover hidden!");
+  } else {
+    console.log("✅ manager-dashboard está visível");
+  }
   
   // Mostrar filtro de squad para managers
   const squadFilterGroup = document.getElementById("squadFilterGroup");
@@ -1307,15 +1581,49 @@ function renderManagerDashboard() {
     squadFilterGroup.style.display = "flex";
   }
   
-  // Os KPIs e gráficos serão atualizados quando cada aba for aberta
-  console.log("Dashboard do gestor renderizado - aguardando ativação das abas");
+  // Aguardar um pouco para garantir que os elementos estão no DOM
+  setTimeout(() => {
+    console.log("🔄 Atualizando dashboard do gestor...");
+    // Ativar a primeira aba (Custos) por padrão
+    const costsTab = document.querySelector('#manager-dashboard .tab-button[data-tab="costs"]');
+    const costsContent = document.getElementById("tab-costs");
+    
+    // Remover active de todas as tabs do gestor
+    document.querySelectorAll('#manager-dashboard .tab-button').forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll('#manager-dashboard .tab-content').forEach(content => content.classList.remove("active"));
+    
+    // Ativar a aba Custos
+    if (costsTab && costsContent) {
+      costsTab.classList.add("active");
+      costsContent.classList.add("active");
+      console.log("✅ Aba Custos ativada automaticamente");
+    }
+    
+    // Atualizar KPIs e gráficos da aba ativa
+    setTimeout(() => {
+      updateChartsForTab("costs");
+    }, 100);
+  }, 200);
+  
+  console.log("Dashboard do gestor renderizado");
 }
 
 function renderCollaboratorDashboard() {
+  console.log("✅ Renderizando dashboard do colaborador");
   const managerDashboard = document.getElementById("manager-dashboard");
   const collaboratorDashboard = document.getElementById("collaborator-dashboard");
   
-  if (managerDashboard) managerDashboard.classList.add("hidden");
+  if (!managerDashboard) {
+    console.error("❌ ERRO: Elemento manager-dashboard não encontrado!");
+  } else {
+    console.log("📊 Ocultando dashboard gerencial");
+    managerDashboard.classList.add("hidden");
+  }
+  
+  if (!collaboratorDashboard) {
+    console.error("❌ ERRO: Elemento collaborator-dashboard não encontrado!");
+    return;
+  }
   
   // Ocultar filtro de squad para colaboradores
   const squadFilterGroup = document.getElementById("squadFilterGroup");
@@ -1323,8 +1631,17 @@ function renderCollaboratorDashboard() {
     squadFilterGroup.style.display = "none";
   }
   
+  console.log("📊 Mostrando dashboard de colaborador");
+  collaboratorDashboard.classList.remove("hidden");
+  
+  // Verificar se realmente foi aplicado
+  if (collaboratorDashboard.classList.contains("hidden")) {
+    console.error("❌ ERRO: collaborator-dashboard ainda está oculto após remover hidden!");
+  } else {
+    console.log("✅ collaborator-dashboard está visível");
+  }
+  
   if (collaboratorDashboard) {
-    collaboratorDashboard.classList.remove("hidden");
     
     // Garantir que userId está definido
     if (!dashboardData.userId && dashboardData.collaborators.length > 0) {
@@ -1344,6 +1661,14 @@ function renderCollaboratorDashboard() {
     // Aguardar um pouco para garantir que os elementos estão no DOM
     setTimeout(() => {
       console.log("🔄 Atualizando KPIs, gráficos e tabelas do colaborador...");
+      console.log("📊 Dados no momento da renderização:", {
+        collaborators: dashboardData.collaborators.length,
+        allocations: dashboardData.allocations.length,
+        projects: dashboardData.projects.length,
+        squads: dashboardData.squads.length,
+        userId: dashboardData.userId
+      });
+      
       // Ativar a aba "Indicadores" por padrão
       const indicatorsTab = document.querySelector('#collaborator-dashboard .tab-button[data-tab="indicators"]');
       const indicatorsContent = document.getElementById("tab-indicators");
@@ -1357,14 +1682,35 @@ function renderCollaboratorDashboard() {
         indicatorsTab.classList.add("active");
         indicatorsContent.classList.add("active");
         console.log("✅ Aba Indicadores ativada automaticamente");
+      } else {
+        console.error("❌ ERRO: Aba Indicadores não encontrada!");
+        console.log("indicatorsTab:", indicatorsTab);
+        console.log("indicatorsContent:", indicatorsContent);
       }
       
       // Configurar tabs do colaborador
       setupTabs();
+      
       // Atualizar KPIs (sempre visíveis na primeira aba)
-      updateCollaboratorKPIs();
+      console.log("🔄 Chamando updateCollaboratorKPIs()...");
+      try {
+        updateCollaboratorKPIs();
+        console.log("✅ updateCollaboratorKPIs() executado com sucesso");
+      } catch (error) {
+        console.error("❌ ERRO ao executar updateCollaboratorKPIs():", error);
+      }
+      
+      // Atualizar tabelas também
+      console.log("🔄 Chamando updateCollaboratorTables()...");
+      try {
+        updateCollaboratorTables();
+        console.log("✅ updateCollaboratorTables() executado com sucesso");
+      } catch (error) {
+        console.error("❌ ERRO ao executar updateCollaboratorTables():", error);
+      }
+      
       // Os gráficos serão atualizados quando as abas forem clicadas
-    }, 200);
+    }, 500); // Aumentado para 500ms para garantir que os dados estejam carregados
   }
 }
 
@@ -3014,7 +3360,8 @@ function getCollaboratorData() {
 
   if (dateFilter) {
     allocations = allocations.filter(a => {
-      const allocDate = a.startDate || a.date;
+      // A API retorna startedAt, mas o código pode usar startDate ou date também
+      const allocDate = a.startedAt || a.startDate || a.date;
       return allocDate && new Date(allocDate) >= dateFilter;
     });
   }
@@ -3088,7 +3435,8 @@ function updateCollaboratorKPIs() {
   const { collab, allocations, squads, projects } = data;
 
   // Calcular horas totais alocadas
-  const totalHours = allocations.reduce((sum, a) => sum + (a.hours || 0), 0);
+  // A API retorna allocatedHours, mas o código pode usar hours também
+  const totalHours = allocations.reduce((sum, a) => sum + (a.allocatedHours || a.hours || 0), 0);
 
   // Contar squads ativas (squads com alocações no período)
   const activeSquads = squads.length;
@@ -3152,7 +3500,8 @@ function updateCollaboratorWorkloadChart() {
     if (!hoursBySquad[squadId]) {
       hoursBySquad[squadId] = 0;
     }
-    hoursBySquad[squadId] += (a.hours || 0);
+    // A API retorna allocatedHours, mas o código pode usar hours também
+    hoursBySquad[squadId] += (a.allocatedHours || a.hours || 0);
   });
 
   // Criar dados para o gráfico: horas por squad
@@ -3188,7 +3537,7 @@ function updateCollaboratorWorkloadChart() {
           if (!hoursByProject[relatedProject.id]) {
             hoursByProject[relatedProject.id] = 0;
           }
-          hoursByProject[relatedProject.id] += (a.hours || 0);
+          hoursByProject[relatedProject.id] += (a.allocatedHours || a.hours || 0);
         }
       }
     });
@@ -3239,186 +3588,28 @@ function updateCollaboratorWorkloadChart() {
     type: "bar",
     indexAxis: "y",
     data: {
-      labels: squads,
-      datasets: seniorities.map((seniority, idx) => ({
-        label: seniority,
-        data: squads.map(squad => seniorityBySquad[squad][seniority] || 0),
-        backgroundColor: [
-          "rgba(64, 221, 254, 0.6)",
-          "rgba(117, 18, 249, 0.6)",
-          "rgba(250, 18, 226, 0.6)",
-          "rgba(255, 252, 54, 0.6)",
-        ][idx],
-      })),
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      indexAxis: "y",
-      scales: {
-        x: {
-          stacked: true,
-          beginAtZero: true,
-        },
-        y: {
-          stacked: true,
-        },
-      },
-    },
-  });
-}
-
-function updateStrategicViewChart() {
-  const ctx = document.getElementById("strategicViewChart");
-  if (!ctx) return;
-
-  const squadFilter = document.getElementById("strategicSquadFilter")?.value || "all";
-  
-  // Usar getFilteredData() para aplicar filtros de período e squad principal
-  // Depois aplicar o filtro específico do gráfico estratégico
-  let data = getFilteredData();
-  
-  // Filtrar squads pelo filtro específico do gráfico estratégico (sobrescreve o filtro principal se necessário)
-  const squads = squadFilter === "all" 
-    ? data.squads 
-    : data.squads.filter(s => String(s.id) === String(squadFilter));
-
-  if (squads.length === 0) return;
-
-  // Calcular métricas para cada squad
-  const squadMetrics = squads.map(squad => {
-    const squadAllocations = data.allocations.filter(a => String(a.squadId) === String(squad.id));
-    
-    // Custo total
-    const cost = squadAllocations.reduce((sum, a) => {
-      const collab = data.collaborators.find(c => c.id === a.employeeId);
-      const hourlyCost = collab?.hourlyCost || collab?.salary / (40 * 4.33) || 0;
-      return sum + (a.hours || 0) * hourlyCost;
-    }, 0);
-    
-    // Alocação total (horas)
-    const totalAllocation = squadAllocations.reduce((sum, a) => sum + (a.hours || 0), 0);
-    
-    // Número de pessoas
-    const peopleCount = new Set(squadAllocations.map(a => a.employeeId)).size;
-
-    return {
-      squadId: squad.id,
-      label: squad.name || `Squad ${squad.id}`,
-      cost,
-      allocation: totalAllocation,
-      people: peopleCount,
-    };
-  });
-
-  // Normalizar valores para escala 0-100 (para o gráfico radar)
-  const maxValues = {
-    cost: Math.max(...squadMetrics.map(m => m.cost), 1),
-    allocation: Math.max(...squadMetrics.map(m => m.allocation), 1),
-    people: Math.max(...squadMetrics.map(m => m.people), 1),
-  };
-
-  // Definir cores fixas para cada squad baseado no ID
-  const colors = [
-    { bg: 'rgba(117, 18, 249, 0.2)', border: 'rgba(117, 18, 249, 1)' },
-    { bg: 'rgba(64, 221, 254, 0.2)', border: 'rgba(64, 221, 254, 1)' },
-    { bg: 'rgba(250, 18, 226, 0.2)', border: 'rgba(250, 18, 226, 1)' },
-    { bg: 'rgba(211, 47, 46, 0.2)', border: 'rgba(211, 47, 46, 1)' },
-    { bg: 'rgba(47, 125, 50, 0.2)', border: 'rgba(47, 125, 50, 1)' },
-  ];
-
-  // Criar datasets para o gráfico radar
-  const datasets = squadMetrics.map((metrics) => {
-    // Usar o ID do squad para determinar a cor de forma consistente
-    // Subtrair 1 porque os IDs geralmente começam em 1
-    const colorIndex = (metrics.squadId - 1) % colors.length;
-    const color = colors[colorIndex];
-
-    return {
-      label: metrics.label,
-      data: [
-        (metrics.cost / maxValues.cost) * 100,
-        (metrics.allocation / maxValues.allocation) * 100,
-        (metrics.people / maxValues.people) * 100,
-      ],
-      backgroundColor: color.bg,
-      borderColor: color.border,
-      borderWidth: 2,
-      pointBackgroundColor: color.border,
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: color.border,
-    };
-  });
-
-  if (chartInstances.strategicView) {
-    chartInstances.strategicView.destroy();
-  }
-
-  chartInstances.strategicView = new Chart(ctx, {
-    type: "radar",
-    data: {
       labels: squadNames,
       datasets: [{
         label: "Horas Alocadas",
         data: hoursData,
-        backgroundColor: hoursData.map((_, idx) => colors[idx % colors.length]),
-        borderColor: hoursData.map((_, idx) => colors[idx % colors.length].replace('0.6', '1')),
-        borderWidth: 1,
+        backgroundColor: colors.slice(0, hoursData.length),
       }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        y: {
+        x: {
           beginAtZero: true,
           title: {
             display: true,
             text: "Horas",
           },
         },
-        x: {
-          ticks: {
-            maxRotation: 0,
-            minRotation: 0,
-            autoSkip: false,
-            callback: function(value, index) {
-              const label = squadNames[index];
-              if (!label) return '';
-              
-              // Quebrar linha se o nome for muito longo (mais de 12 caracteres)
-              if (label.length > 12) {
-                // Tentar quebrar em espaços primeiro
-                const words = label.split(' ');
-                if (words.length > 1) {
-                  // Se tiver múltiplas palavras, tentar dividir de forma equilibrada
-                  let firstLine = '';
-                  let secondLine = '';
-                  const midPoint = Math.ceil(words.length / 2);
-                  
-                  firstLine = words.slice(0, midPoint).join(' ');
-                  secondLine = words.slice(midPoint).join(' ');
-                  
-                  // Se a primeira linha ainda for muito longa, quebrar no meio
-                  if (firstLine.length > 15) {
-                    const mid = Math.floor(label.length / 2);
-                    const spaceIndex = label.lastIndexOf(' ', mid);
-                    if (spaceIndex > 0) {
-                      return label.substring(0, spaceIndex) + '\n' + label.substring(spaceIndex + 1);
-                    }
-                    return label.substring(0, mid) + '\n' + label.substring(mid);
-                  }
-                  
-                  return firstLine + '\n' + secondLine;
-                } else {
-                  // Se não tiver espaços, quebrar no meio
-                  const mid = Math.floor(label.length / 2);
-                  return label.substring(0, mid) + '\n' + label.substring(mid);
-                }
-              }
-              return label;
-            },
+        y: {
+          title: {
+            display: true,
+            text: "Squads/Projetos",
           },
         },
       },
@@ -3429,9 +3620,7 @@ function updateStrategicViewChart() {
         tooltip: {
           callbacks: {
             label: function(context) {
-              const total = hoursData.reduce((a, b) => a + b, 0);
-              const percentage = total > 0 ? ((context.parsed.y / total) * 100).toFixed(1) : 0;
-              return `${context.dataset.label}: ${context.parsed.y}h (${percentage}%)`;
+              return `${context.dataset.label}: ${context.parsed.x}h`;
             },
           },
         },
@@ -3510,13 +3699,14 @@ function updateCollaboratorHoursEvolutionChart() {
   const hoursByPeriod = new Array(labels.length).fill(0);
   
   allocations.forEach(alloc => {
-    const allocDate = new Date(alloc.startDate || alloc.date);
+    const allocDate = new Date(alloc.startedAt || alloc.startDate || alloc.date);
     const daysAgo = Math.floor((now - allocDate) / (1000 * 60 * 60 * 24));
     
     if (daysAgo >= 0 && daysAgo < periodDays) {
       const periodIndex = Math.floor(daysAgo / intervalDays);
       if (periodIndex < hoursByPeriod.length) {
-        hoursByPeriod[periodIndex] += (alloc.hours || 0);
+        // A API retorna allocatedHours, mas o código pode usar hours também
+        hoursByPeriod[periodIndex] += (alloc.allocatedHours || alloc.hours || 0);
       }
     }
   });
@@ -3594,7 +3784,8 @@ function updateCollaboratorSquadsComparisonChart() {
     if (!hoursBySquad[squadId]) {
       hoursBySquad[squadId] = 0;
     }
-    hoursBySquad[squadId] += (a.hours || 0);
+    // A API retorna allocatedHours, mas o código pode usar hours também
+    hoursBySquad[squadId] += (a.allocatedHours || a.hours || 0);
   });
 
   // Criar dados para o gráfico

@@ -1,0 +1,262 @@
+.highlight {
+  margin-top: 1rem;
+  font-size: 18px !important;
+}
+
+.skills-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px #ccc;
+}
+
+.skills-table thead {
+  background-color: #7b1fa269;
+}
+
+.skills-table th,
+.skills-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.skills-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.action-btns {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.edit-btn:hover {
+  transform: scale(1.1);
+}
+
+.action-btns .switch {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: "Poppins", sans-serif;
+  background-color: white;
+  cursor: pointer;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #7d1bff;
+}
+
+/* Modal Overlay com blur */
+#modal-overlay-tipo.modal-overlay,
+#modal-overlay-toggle-tipo.modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  z-index: 10001 !important;
+  pointer-events: auto !important;
+}
+
+#modal-overlay-tipo.modal-overlay.hidden,
+#modal-overlay-toggle-tipo.modal-overlay.hidden {
+  display: none !important;
+}
+
+/* Modal Styles - Sobrescreve estilos globais */
+#modal-tipo.modal-content,
+#modal-toggle-tipo.modal-content {
+  position: fixed !important;
+  top: 20% !important;
+  left: 50% !important;
+  transform: translate(-50%, 0) !important;
+  background: white !important;
+  border-radius: 12px !important;
+  padding: 32px !important;
+  max-width: 600px !important;
+  width: 90% !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  z-index: 10002 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+  pointer-events: auto !important;
+  margin: 0 !important;
+  display: block !important;
+}
+
+#modal-tipo.modal-content.hidden,
+#modal-toggle-tipo.modal-content.hidden {
+  display: none !important;
+}
+
+.modal-content h3 {
+  margin: 0 0 24px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.form-group label {
+  min-width: 80px;
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+  margin: 0;
+}
+
+.form-group input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: "Poppins", sans-serif;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #7d1bff;
+  box-shadow: 0 0 0 3px rgba(125, 27, 255, 0.1);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #eee;
+}
+
+.modal-actions .btn {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: "Poppins", sans-serif;
+}
+
+.modal-actions .btn.secondary {
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.modal-actions .btn.secondary:hover {
+  background: #e8e8e8;
+}
+
+.modal-actions .btn.primary {
+  background: #7d1bff;
+  color: white;
+  border: none;
+}
+
+.modal-actions .btn.primary:hover {
+  background: #6a17d4;
+}
+
+.modal-content p {
+  margin: 0 0 24px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+body.dark .skills-table {
+  background-color: #23232b;
+  color: #f3f3f3;
+}
+
+body.dark .skills-table thead {
+  background-color: #7b1fa269;
+}
+
+body.dark .skills-table tbody tr:hover {
+  background-color: #33364a;
+}
+
+body.dark .skills-table th,
+body.dark .skills-table td {
+  border-bottom-color: #444;
+}
+
+body.dark .modal-content {
+  background: #23232b;
+  color: #f3f3f3;
+}
+
+body.dark .modal-content h3 {
+  color: #f3f3f3;
+}
+
+body.dark .form-group label {
+  color: #f3f3f3;
+}
+
+body.dark .form-group input {
+  background: #2a2a35;
+  border-color: #444;
+  color: #f3f3f3;
+}
+
+body.dark .form-group input:focus {
+  border-color: #7d1bff;
+}
+
+body.dark .modal-actions {
+  border-top-color: #444;
+}
+
+body.dark .filter-select {
+  background-color: #23232b;
+  border-color: #444;
+  color: #f3f3f3;
+}
+
+body.dark .filter-select:focus {
+  border-color: #7d1bff;
+}
+

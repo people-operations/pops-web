@@ -76,7 +76,7 @@
             />
             <span data-i18n="navbar.projects"></span>
           </a>
-          <a href="../collaborators/collaborators.html">
+          <a href="../collaborators/collaborators.html" data-require-access="1,2">
             <img
               src="../../../assets/svg/colaborator.svg"
               alt="Colaboradores"
@@ -146,9 +146,6 @@
               href="#"
               ><span data-i18n="navbar.profile"></span
             ></a>
-            <a href="../inbox/inbox.html"
-              ><span data-i18n="navbar.inbox"></span
-            ></a>
             <a href="../configurations/general/general.html"
               ><span data-i18n="navbar.settings"></span
             ></a>
@@ -165,9 +162,10 @@
             <p class="subtitle" data-i18n="squads.subtitle"></p>
           </div>
           <button
-            class="create-squad btn"
+            class="btn btn-purple"
             onclick="window.location.href='squads-form/squads-form.html'"
             data-i18n="squads.create"
+            data-require-access="1,2"
           ></button>
         </div>
 

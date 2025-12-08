@@ -464,6 +464,13 @@ nav a {
   flex-direction: column;
 }
 
+.content .table-card {
+  flex: 1;
+  min-width: 300px;
+  max-width: none;
+  margin-bottom: 0;
+}
+
 .chart-card img {
   width: 100%;
   margin: 16px 0;
@@ -999,7 +1006,7 @@ body:not(.at-top) .global-filters {
   background: #fff;
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 -2px 6px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
   overflow-x: visible;
   width: 100%;

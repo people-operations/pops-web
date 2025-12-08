@@ -124,7 +124,12 @@ export function requireAuth() {
  * @param {string} redirectTo - URL para redirecionar (padrão: dashboard)
  */
 export function requireAccess(requiredLevel, redirectTo = "../pages/dashboard/dashboard.html") {
-  if (!hasAccess(requiredLevel)) {
+  // Se for array, usa hasAnyAccess; caso contrário, usa hasAccess
+  const hasPermission = Array.isArray(requiredLevel) 
+    ? hasAnyAccess(requiredLevel)
+    : hasAccess(requiredLevel);
+  
+  if (!hasPermission) {
     window.showNotification?.(
       "error",
       "Você não tem permissão para acessar esta página."
