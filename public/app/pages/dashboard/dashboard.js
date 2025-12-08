@@ -7,8 +7,7 @@ let dashboardData = {
   collaborators: [],
   allocations: [],
   skills: [],
-  currentTimeFilter: "month",
-  currentSquadFilter: "all",
+  // Filtros removidos
   userRole: null, // Será definido baseado no access_level - "manager" ou "collaborator"
   userId: null,
   costsSummary: null, // Dados do summary de custos da API
@@ -43,13 +42,7 @@ let eventListenersSetup = false;
 
 // Armazenar referências aos event handlers para poder removê-los
 const eventHandlers = {
-  timeFilter: null,
-  squadFilter: null,
-  costDeviationSquadFilter: null,
-  costAllocatedSquadFilter: null,
-  allocationLevelFilter: null,
-  skillsFilter: null,
-  strategicSquadFilter: null,
+  // Filtros removidos
   collaboratorSortBy: null,
   idleSquadsPrevPage: null,
   idleSquadsNextPage: null,
@@ -252,9 +245,6 @@ async function initializeDashboard() {
       console.log("✅ userId definido como primeiro colaborador:", dashboardData.userId);
     }
 
-    // Configurar filtros
-    setupFilters();
-
     // Renderizar dashboard apropriado
     console.log("🎯 Renderizando dashboard - userRole:", dashboardData.userRole, "accessLevel:", accessLevel);
     
@@ -299,13 +289,7 @@ async function initializeDashboard() {
       }, 500);
     }
     
-    // Garantir que o filtro de squad esteja oculto para colaboradores na inicialização
-    if (dashboardData.userRole === "collaborator") {
-      const squadFilterGroup = document.getElementById("squadFilterGroup");
-      if (squadFilterGroup) {
-        squadFilterGroup.style.display = "none";
-      }
-    }
+    // Filtros removidos
 
     // Configurar eventos (apenas uma vez)
     if (!eventListenersSetup) {
@@ -1032,45 +1016,7 @@ async function loadAllData() {
   }
 }
 
-function setupFilters() {
-  // Popular filtro de squads
-  const squadFilter = document.getElementById("squadFilter");
-  const costDeviationSquadFilter = document.getElementById("costDeviationSquadFilter");
-  const costAllocatedSquadFilter = document.getElementById("costAllocatedSquadFilter");
-  const strategicSquadFilter = document.getElementById("strategicSquadFilter");
-
-  [squadFilter, costDeviationSquadFilter, costAllocatedSquadFilter, strategicSquadFilter].forEach(select => {
-    if (select) {
-      select.innerHTML = '<option value="all">Todos os Squads</option>';
-      if (Array.isArray(dashboardData.squads)) {
-        dashboardData.squads.forEach(squad => {
-          if (squad && squad.id) {
-            const option = document.createElement("option");
-            option.value = squad.id;
-            option.textContent = squad.name || `Squad ${squad.id}`;
-            select.appendChild(option);
-          }
-        });
-      }
-    }
-  });
-
-  // Popular filtro de skills
-  const skillsFilter = document.getElementById("skillsFilter");
-  if (skillsFilter) {
-    skillsFilter.innerHTML = '<option value="all">Todas as Skills</option>';
-    if (Array.isArray(dashboardData.skills)) {
-      dashboardData.skills.forEach(skill => {
-        if (skill && (skill.id || skill.name)) {
-          const option = document.createElement("option");
-          option.value = skill.id || skill.name;
-          option.textContent = skill.name || skill.id;
-          skillsFilter.appendChild(option);
-        }
-      });
-    }
-  }
-}
+// Função setupFilters removida - filtros não são mais utilizados
 
 // Inicializar tooltips dos ícones de informação
 function setupInfoTooltips() {
@@ -1307,113 +1253,7 @@ function setupKPIMetricsCards() {
 }
 
 function setupEventListeners() {
-  // Remover listeners antigos se existirem
-  const timeFilter = document.getElementById("timeFilter");
-  if (timeFilter && eventHandlers.timeFilter) {
-    timeFilter.removeEventListener("change", eventHandlers.timeFilter);
-  }
-  
-  const squadFilter = document.getElementById("squadFilter");
-  if (squadFilter && eventHandlers.squadFilter) {
-    squadFilter.removeEventListener("change", eventHandlers.squadFilter);
-  }
-  
-  // Filtro de tempo global (funciona para manager e colaborador)
-  if (timeFilter) {
-    eventHandlers.timeFilter = (e) => {
-      dashboardData.currentTimeFilter = e.target.value;
-      
-      // Se for manager, atualizar dashboard de gestão
-      if (dashboardData.userRole === "manager") {
-      // Resetar paginação das tabelas quando o filtro de tempo mudar
-      paginationState.idleSquads.currentPage = 1;
-      paginationState.overloadSquads.currentPage = 1;
-      paginationState.collaborators.currentPage = 1;
-      paginationState.marketSkills.currentPage = 1;
-      paginationState.employeeSkills.currentPage = 1;
-      updateAllCharts().catch(err => console.error("Erro ao atualizar gráficos:", err));
-      // Atualizar tabelas se estiver na aba de análises
-      const activeTab = document.querySelector('.tab-button.active')?.getAttribute('data-tab');
-      if (activeTab === 'analysis') {
-        updateAllTables();
-        }
-      } else {
-        // Se for colaborador, atualizar dashboard de colaborador
-        paginationState.collabProjects.currentPage = 1;
-        paginationState.collabSquads.currentPage = 1;
-        updateCollaboratorKPIs();
-        updateCollaboratorCharts();
-        updateCollaboratorTables();
-      }
-    };
-    timeFilter.addEventListener("change", eventHandlers.timeFilter);
-  }
-
-  // Filtro de squad global
-  if (squadFilter) {
-    eventHandlers.squadFilter = (e) => {
-      dashboardData.currentSquadFilter = e.target.value;
-      // Resetar paginação das tabelas quando o filtro mudar
-      paginationState.idleSquads.currentPage = 1;
-      paginationState.overloadSquads.currentPage = 1;
-      paginationState.collaborators.currentPage = 1;
-      paginationState.marketSkills.currentPage = 1;
-      paginationState.employeeSkills.currentPage = 1;
-      updateAllCharts().catch(err => console.error("Erro ao atualizar gráficos:", err));
-      // Atualizar tabelas se estiver na aba de análises
-      const activeTab = document.querySelector('.tab-button.active')?.getAttribute('data-tab');
-      if (activeTab === 'analysis') {
-        updateAllTables();
-      }
-    };
-    squadFilter.addEventListener("change", eventHandlers.squadFilter);
-  }
-
-  // Filtros específicos de gráficos
-  const costDeviationSquadFilter = document.getElementById("costDeviationSquadFilter");
-  if (costDeviationSquadFilter) {
-    if (eventHandlers.costDeviationSquadFilter) {
-      costDeviationSquadFilter.removeEventListener("change", eventHandlers.costDeviationSquadFilter);
-    }
-    eventHandlers.costDeviationSquadFilter = async () => await updateCostDeviationChart();
-    costDeviationSquadFilter.addEventListener("change", eventHandlers.costDeviationSquadFilter);
-  }
-  
-  const costAllocatedSquadFilter = document.getElementById("costAllocatedSquadFilter");
-  if (costAllocatedSquadFilter) {
-    if (eventHandlers.costAllocatedSquadFilter) {
-      costAllocatedSquadFilter.removeEventListener("change", eventHandlers.costAllocatedSquadFilter);
-    }
-    eventHandlers.costAllocatedSquadFilter = async () => await updateCostAllocatedChart();
-    costAllocatedSquadFilter.addEventListener("change", eventHandlers.costAllocatedSquadFilter);
-  }
-  
-  const allocationLevelFilter = document.getElementById("allocationLevelFilter");
-  if (allocationLevelFilter) {
-    if (eventHandlers.allocationLevelFilter) {
-      allocationLevelFilter.removeEventListener("change", eventHandlers.allocationLevelFilter);
-    }
-    eventHandlers.allocationLevelFilter = async () => await updateAllocationDistributionChart();
-    allocationLevelFilter.addEventListener("change", eventHandlers.allocationLevelFilter);
-  }
-  
-  const skillsFilter = document.getElementById("skillsFilter");
-  if (skillsFilter) {
-    if (eventHandlers.skillsFilter) {
-      skillsFilter.removeEventListener("change", eventHandlers.skillsFilter);
-    }
-    eventHandlers.skillsFilter = () => updateSkillsChart();
-    skillsFilter.addEventListener("change", eventHandlers.skillsFilter);
-  }
-  
-  const strategicSquadFilter = document.getElementById("strategicSquadFilter");
-  if (strategicSquadFilter) {
-    if (eventHandlers.strategicSquadFilter) {
-      strategicSquadFilter.removeEventListener("change", eventHandlers.strategicSquadFilter);
-    }
-    eventHandlers.strategicSquadFilter = () => updateStrategicViewChart();
-    strategicSquadFilter.addEventListener("change", eventHandlers.strategicSquadFilter);
-  }
+  // Filtros removidos - não são mais utilizados
   
   const collaboratorSortBy = document.getElementById("collaboratorSortBy");
   if (collaboratorSortBy) {
@@ -1547,11 +1387,7 @@ function renderManagerDashboard() {
     console.log("✅ manager-dashboard está visível");
   }
   
-  // Mostrar filtro de squad para managers
-  const squadFilterGroup = document.getElementById("squadFilterGroup");
-  if (squadFilterGroup) {
-    squadFilterGroup.style.display = "flex";
-  }
+  // Filtros removidos
   
     // Aguardar um pouco para garantir que os elementos estão no DOM
     setTimeout(async () => {
@@ -1632,11 +1468,7 @@ function renderCollaboratorDashboard() {
     return;
   }
   
-  // Ocultar filtro de squad para colaboradores
-  const squadFilterGroup = document.getElementById("squadFilterGroup");
-  if (squadFilterGroup) {
-    squadFilterGroup.style.display = "none";
-  }
+  // Filtros removidos
   
   console.log("📊 Mostrando dashboard de colaborador");
   collaboratorDashboard.classList.remove("hidden");
@@ -2667,7 +2499,6 @@ async function updateCostDeviationChart() {
   } else {
     // Fallback para cálculo local se API não retornar dados
     console.warn("Dados da API não disponíveis, usando cálculo local");
-    const squadFilter = document.getElementById("costDeviationSquadFilter")?.value || "all";
     const filteredData = getFilteredData();
     
     if (!filteredData.squads || filteredData.squads.length === 0) {
@@ -2675,9 +2506,7 @@ async function updateCostDeviationChart() {
       return;
     }
 
-    const squads = squadFilter === "all" 
-      ? filteredData.squads 
-      : filteredData.squads.filter(s => s.id == squadFilter);
+    const squads = filteredData.squads;
 
     labels = squads.map(s => s.name || `Squad ${s.id}`);
 
@@ -2812,11 +2641,8 @@ async function updateCostAllocatedChart() {
   } else {
     // Fallback para cálculo local se API não retornar dados
     console.warn("Dados da API não disponíveis, usando cálculo local");
-    const squadFilter = document.getElementById("costAllocatedSquadFilter")?.value || "all";
     const filteredData = getFilteredData();
-    const squads = squadFilter === "all" 
-      ? filteredData.squads 
-      : filteredData.squads.filter(s => s.id == squadFilter);
+    const squads = filteredData.squads;
 
     labels = squads.map(s => s.name || `Squad ${s.id}`);
     
@@ -2928,7 +2754,6 @@ async function updateAllocationDistributionChart() {
   } else {
     // Fallback para cálculo local se API não retornar dados
     console.warn("Dados da API não disponíveis, usando cálculo local");
-    const levelFilter = document.getElementById("allocationLevelFilter")?.value || "all";
     const filteredData = getFilteredData();
 
     const ranges = {
@@ -3125,7 +2950,6 @@ function updateSkillsChart() {
     return;
   }
 
-  const skillFilter = document.getElementById("skillsFilter")?.value || "all";
   const filteredData = getFilteredData();
 
   const skillCounts = {};
@@ -3133,10 +2957,8 @@ function updateSkillsChart() {
     if (collab.skills && Array.isArray(collab.skills)) {
       collab.skills.forEach(skill => {
         const skillId = skill.id || skill.name;
-        if (skillFilter === "all" || skillId == skillFilter) {
-          const skillName = skill.name || skillId;
-          skillCounts[skillName] = (skillCounts[skillName] || 0) + 1;
-        }
+        const skillName = skill.name || skillId;
+        skillCounts[skillName] = (skillCounts[skillName] || 0) + 1;
       });
     }
   });
@@ -3259,16 +3081,11 @@ function updateStrategicViewChart() {
   const ctx = document.getElementById("strategicViewChart");
   if (!ctx) return;
 
-  const squadFilter = document.getElementById("strategicSquadFilter")?.value || "all";
-  
-  // Usar getFilteredData() para aplicar filtros de período e squad principal
-  // Depois aplicar o filtro específico do gráfico estratégico
+  // Usar getFilteredData() para obter todos os dados
   let data = getFilteredData();
   
-  // Filtrar squads pelo filtro específico do gráfico estratégico (sobrescreve o filtro principal se necessário)
-  const squads = squadFilter === "all" 
-    ? data.squads 
-    : data.squads.filter(s => String(s.id) === String(squadFilter));
+  // Usar todos os squads
+  const squads = data.squads;
 
   if (squads.length === 0) return;
 
@@ -4876,81 +4693,23 @@ function updatePaginationControls(tableId, currentPage, totalItems, itemsPerPage
 }
 
 function getTimeRange() {
-  return dashboardData.currentTimeFilter;
+  // Filtros removidos - retornar null para não filtrar
+  return null;
 }
 
 function getFilteredData() {
-  let data = {
+  // Retorna todos os dados sem filtros
+  return {
     projects: [...dashboardData.projects],
     squads: [...dashboardData.squads],
     collaborators: [...dashboardData.collaborators],
     allocations: [...dashboardData.allocations],
   };
-
-  // Filtrar por squad se necessário
-  if (dashboardData.currentSquadFilter !== "all") {
-    const squadId = dashboardData.currentSquadFilter;
-    const filteredSquad = data.squads.find(s => s.id == squadId);
-    data.squads = data.squads.filter(s => s.id == squadId);
-    data.allocations = data.allocations.filter(a => a.squadId == squadId);
-    // REGRA DE NEGÓCIO: Filtrar projetos através do projectId do squad
-    if (filteredSquad && filteredSquad.projectId) {
-      data.projects = data.projects.filter(p => String(p.id) === String(filteredSquad.projectId));
-    } else {
-      data.projects = [];
-    }
-    
-    // Filtrar colaboradores: mostrar apenas os que têm alocações no squad filtrado
-    const employeeIdsInSquad = [...new Set(data.allocations.map(a => a.employeeId))];
-    data.collaborators = data.collaborators.filter(c => employeeIdsInSquad.includes(c.id));
-  }
-
-  // Filtrar por período de tempo
-  const timeRange = getTimeRange();
-  const dateFilter = getDateFilter(timeRange);
-  if (dateFilter) {
-    console.log(`Filtrando dados por período: ${timeRange}, desde ${dateFilter.toLocaleDateString('pt-BR')}`);
-    
-    const projectsBefore = data.projects.length;
-    const allocationsBefore = data.allocations.length;
-    
-    data.projects = data.projects.filter(p => {
-      const projectDate = p.startDate || p.createdAt;
-      return projectDate && new Date(projectDate) >= dateFilter;
-    });
-    data.allocations = data.allocations.filter(a => {
-      const allocDate = a.startDate || a.date;
-      return allocDate && new Date(allocDate) >= dateFilter;
-    });
-    
-    console.log(`Projetos: ${projectsBefore} → ${data.projects.length}`);
-    console.log(`Alocações: ${allocationsBefore} → ${data.allocations.length}`);
-  }
-
-  return data;
 }
 
 function getDateFilter(timeRange) {
-  const now = new Date();
-  switch (timeRange) {
-    case "week":
-      // Últimos 7 dias
-      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    case "month":
-      // Últimos 30 dias
-      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    case "quarter":
-      // Últimos 90 dias
-      return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-    case "semester":
-      // Últimos 180 dias
-      return new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
-    case "year":
-      // Últimos 365 dias
-      return new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-    default:
-      return null;
-  }
+  // Filtros removidos - retornar null para não filtrar
+  return null;
 }
 
 function getCurrentWeek() {
