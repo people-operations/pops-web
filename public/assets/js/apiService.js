@@ -8,15 +8,24 @@
  * @returns {string} URL base da API
  */
 function getApiBaseUrl(port) {
-  const isDevelopment = window.location.hostname === 'localhost' || 
-                        window.location.hostname === '127.0.0.1' ||
-                        window.location.hostname === '';
+  const hostname = window.location.hostname;
+  const isDevelopment = hostname === 'localhost' || 
+                        hostname === '127.0.0.1' ||
+                        hostname === '';
+  
+  console.log(`🔍 Detecção de ambiente - hostname: "${hostname}", isDevelopment: ${isDevelopment}, port: ${port}`);
   
   if (isDevelopment) {
-    return `http://localhost:${port}`;
+    const url = `http://localhost:${port}`;
+    console.log(`✅ Ambiente DEV - URL base: ${url}`);
+    return url;
   } else {
-    // Em produção, usa endpoint relativo (retorna string vazia)
-    return "";
+    // Em produção, usa o mesmo hostname mas sem porta (endpoint relativo)
+    // Ou se preferir usar o hostname atual, descomente a linha abaixo:
+    // return `http://${hostname}:${port}`;
+    const url = "";
+    console.log(`✅ Ambiente PROD - URL base: "${url}" (endpoint relativo)`);
+    return url;
   }
 }
 
@@ -435,7 +444,10 @@ export const apiService = {
   async getAllSquads() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`${getSquadApiBaseUrl()}/api-squad/teams?page=0&size=100`, {
+      const baseUrl = getSquadApiBaseUrl();
+      const fullUrl = `${baseUrl}/api-squad/teams?page=0&size=100`;
+      console.log(`🔍 getAllSquads - baseUrl: "${baseUrl}", fullUrl: "${fullUrl}"`);
+      const response = await fetch(fullUrl, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

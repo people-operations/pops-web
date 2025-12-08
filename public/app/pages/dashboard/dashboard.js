@@ -8,15 +8,22 @@ import { getCurrentAccessLevel, applyAccessControl, requireAuth, requireAccess }
  * - PROD: retorna "" (string vazia para usar endpoint relativo)
  */
 function getApiBaseUrl() {
-  const isDevelopment = window.location.hostname === 'localhost' || 
-                        window.location.hostname === '127.0.0.1' ||
-                        window.location.hostname === '';
+  const hostname = window.location.hostname;
+  const isDevelopment = hostname === 'localhost' || 
+                        hostname === '127.0.0.1' ||
+                        hostname === '';
+  
+  console.log(`🔍 Dashboard - hostname: "${hostname}", isDevelopment: ${isDevelopment}`);
   
   if (isDevelopment) {
-    return "http://localhost:8080";
+    const url = "http://localhost:8080";
+    console.log(`✅ Dashboard DEV - URL base: ${url}`);
+    return url;
   } else {
     // Em produção, usa endpoint relativo (retorna string vazia)
-    return "";
+    const url = "";
+    console.log(`✅ Dashboard PROD - URL base: "${url}" (endpoint relativo)`);
+    return url;
   }
 }
 
