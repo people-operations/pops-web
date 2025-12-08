@@ -1,5 +1,5 @@
 import { apiService } from "../../../../assets/js/apiService.js";
-import { hasAccess, hasAnyAccess, applyAccessControl, protectFunction } from "../../../../assets/js/permissions.js";
+import { hasAccess, hasAnyAccess, applyAccessControl, protectFunction, isCollaborator } from "../../../../assets/js/permissions.js";
 
 // Salva o HTML original da sidebar para restaurar depois do skeleton
 let originalSidebarHTML = null;
@@ -294,17 +294,34 @@ async function renderProjectDetail() {
     typeElement.textContent = capitalizeFirst(project.type?.name || "-");
   }
   
-  // Budget
+  // Verificar se é colaborador (access_level 3)
+  const isColab = isCollaborator();
+  
+  // Budget - ocultar se for colaborador
   const budgetElement = document.getElementById("project-budget");
   if (budgetElement) {
-    budgetElement.textContent = formatCurrency(project.budget);
+    if (isColab) {
+      budgetElement.textContent = "-";
+      // Ocultar o elemento pai (linha inteira)
+      const budgetLine = budgetElement.closest('.info-line');
+      if (budgetLine) budgetLine.style.display = 'none';
+    } else {
+      budgetElement.textContent = formatCurrency(project.budget);
+    }
   }
   
   // Mão de obra aplicada será calculada depois de buscar os membros dos teams
   const laborCostElement = document.getElementById("project-labor-cost");
   if (laborCostElement) {
-    // Inicializar com "-" enquanto carrega
-    laborCostElement.textContent = "-";
+    if (isColab) {
+      laborCostElement.textContent = "-";
+      // Ocultar o elemento pai (linha inteira)
+      const laborCostLine = laborCostElement.closest('.info-line');
+      if (laborCostLine) laborCostLine.style.display = 'none';
+    } else {
+      // Inicializar com "-" enquanto carrega
+      laborCostElement.textContent = "-";
+    }
   }
   
   // Datas
@@ -378,8 +395,8 @@ async function renderProjectDetail() {
       
       console.log("📋 Teams com membros:", teamsWithMembers);
       
-      // Calcular Mão de obra aplicada baseado nos membros buscados
-      if (laborCostElement) {
+      // Calcular Mão de obra aplicada baseado nos membros buscados - apenas se não for colaborador
+      if (laborCostElement && !isColab) {
         try {
           // Calcular total investido somando o investedValue de todos os membros de todos os teams
           let totalInvested = 0;
@@ -503,7 +520,7 @@ async function renderProjectDetail() {
             </div>
             <p class="team-info">
               <strong>${teamData.members?.length || teamData.membersCount || 0} membros</strong>
-              ${teamData.totalInvestedValue ? ` • <strong style="color: #28a745;">Total investido: ${formatCurrency(teamData.totalInvestedValue)}</strong>` : ''}
+              ${!isColab && teamData.totalInvestedValue ? ` • <strong style="color: #28a745;">Total investido: ${formatCurrency(teamData.totalInvestedValue)}</strong>` : ''}
             </p>
             
             <!-- Skills agregadas (sempre visíveis) -->
@@ -558,8 +575,8 @@ async function renderProjectDetail() {
                       return teamData.members
                         .map(
                           (member) => {
-                            // Formatar valor investido
-                            const investedValueFormatted = member.investedValue 
+                            // Formatar valor investido - ocultar se for colaborador
+                            const investedValueFormatted = (!isColab && member.investedValue) 
                               ? formatCurrency(member.investedValue)
                               : null;
                             
@@ -584,7 +601,7 @@ async function renderProjectDetail() {
                                     <strong>Cargo:</strong> ${jobTitle}
                                   </div>
                                 ` : ''}
-                                ${member.investedValue ? `
+                                ${investedValueFormatted ? `
                                   <div style="margin-top: 6px; padding: 6px; background: rgba(255, 255, 255, 0.94); border-radius: 4px; border-left: 3px solid rgba(255, 255, 255, 0.3);">
                                     <div style="font-size: 11px; color:rgb(0, 0, 0); font-weight: 600; margin-bottom: 2px;">
                                       <strong>Parte do salário aplicado no projeto:</strong> ${investedValueFormatted}

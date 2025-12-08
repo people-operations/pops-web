@@ -354,6 +354,11 @@ async function renderProjects(projects) {
   container.innerHTML = "";
   const i18n = window.i18n;
   
+  // Verificar access_level
+  const { getCurrentAccessLevel } = await import("../../../assets/js/permissions.js");
+  const accessLevel = getCurrentAccessLevel();
+  const isCollaborator = accessLevel === 3;
+  
   if (!Array.isArray(projects) || projects.length === 0) {
     container.innerHTML = `<div style="padding:32px; text-align:center; color:#888;">${
       i18n?.t ? i18n.t("projects.not_found") : "Nenhum projeto encontrado."
@@ -404,6 +409,7 @@ async function renderProjects(projects) {
         <span class="tag-green">${statusName}</span>
       </div>
       <p class="project-description">${project.description || ""}</p>
+      ${!isCollaborator ? `
       <p>
         <img src="/assets/svg/budget.svg" alt="budget" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
         <strong data-i18n="projects.budget">${
@@ -414,6 +420,7 @@ async function renderProjects(projects) {
         <img src="/assets/svg/person-icon.svg" alt="Mão de obra" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
         <strong>Mão de obra aplicada: R$ </strong> ${laborCostFormatted}
       </p>
+      ` : ''}
       <p>
         <img src="/assets/svg/calendar.svg" alt="Início" style="vertical-align:middle; margin-right:4px; width:15px; height:15px;">
         <strong data-i18n="projects.startedAt">${
@@ -540,7 +547,11 @@ function addEllipsis(container) {
 
 // Inicialização dinâmica para garantir tradução e fetch
 if (typeof window !== "undefined") {
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
+    // Aplicar controle de acesso
+    const { applyAccessControl } = await import("../../../assets/js/permissions.js");
+    applyAccessControl();
+    
     fetchAndRenderProjects();
     if (window.i18n) window.i18n.apply();
     

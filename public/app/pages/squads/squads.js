@@ -153,7 +153,11 @@ async function fetchAndRenderSquads() {
 }
 
 if (typeof window !== "undefined") {
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
+    // Aplicar controle de acesso
+    const { applyAccessControl } = await import("../../../assets/js/permissions.js");
+    applyAccessControl();
+    
     fetchAndRenderSquads();
     // Se quiser manter tradução:
     if (window.i18n) window.i18n.apply();

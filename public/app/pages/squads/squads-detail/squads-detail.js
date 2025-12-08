@@ -1,6 +1,9 @@
 import { apiService } from "../../../../assets/js/apiService.js";
+import { applyAccessControl, isCollaborator } from "../../../../assets/js/permissions.js";
 
 document.addEventListener("DOMContentLoaded", function () {
+  // Aplicar controle de acesso
+  applyAccessControl();
   // Seletores dos botões do modal (fixos)
   const modal = document.getElementById("delete-modal");
   const confirmDeleteBtn = document.getElementById("confirm-delete-btn");
@@ -258,6 +261,8 @@ document.addEventListener("DOMContentLoaded", function () {
       `;
       // Adiciona os listeners nos botões após renderizar
       bindSummaryActionButtons();
+      // Aplicar controle de acesso após renderizar os botões
+      applyAccessControl();
     }
     // Cards de stats e finanças foram removidos
     // Remove skeleton da equipe
@@ -522,8 +527,11 @@ document.addEventListener("DOMContentLoaded", function () {
       })}`;
     }
     
-    // Total investido da squad
-    const totalInvestedFormatted = squadDetails.totalInvestedValue 
+    // Verificar se é colaborador (access_level 3)
+    const isColab = isCollaborator();
+    
+    // Total investido da squad - ocultar se for colaborador
+    const totalInvestedFormatted = (!isColab && squadDetails.totalInvestedValue) 
       ? formatCurrency(squadDetails.totalInvestedValue)
       : null;
     
@@ -586,7 +594,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const nome = member.name || "N/A";
         const jobTitle = member.jobTitle || null;
         const allocatedHours = member.allocatedHours || 0;
-        const investedValueFormatted = member.investedValue 
+        // Ocultar investedValue se for colaborador
+        const investedValueFormatted = (!isColab && member.investedValue) 
           ? formatCurrency(member.investedValue)
           : null;
         const memberSkills = member.skills || [];
