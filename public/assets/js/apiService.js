@@ -101,7 +101,7 @@ export const apiService = {
   async insertProject(project) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("/api/projects", {
+      const response = await fetch("/api-project/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -128,12 +128,12 @@ export const apiService = {
       const token = getAuthTokenOrThrow();
       console.log("✅ Token obtido:", token ? "Token presente" : "Token ausente");
       
-      console.log("📡 Fazendo requisição para: /api/projects");
+      console.log("📡 Fazendo requisição para: /api-project/projects");
       console.log("⏳ Aguardando resposta...");
       
       const startTime = Date.now();
       
-      const response = await fetch("/api/projects", {
+      const response = await fetch("/api-project/projects", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -203,7 +203,7 @@ export const apiService = {
   async getProjectById(id) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`/api/projects/${id}`, {
+      const response = await fetch(`/api-project/projects/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -226,7 +226,7 @@ export const apiService = {
   async deleteProjectById(id) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`/api/projects/${id}`, {
+      const response = await fetch(`/api-project/projects/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -248,7 +248,7 @@ export const apiService = {
   async disableProject(id) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`/api/projects/disable/${id}`, {
+      const response = await fetch(`/api-project/projects/disable/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -270,7 +270,7 @@ export const apiService = {
   async enableProject(id) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`/api/projects/enable/${id}`, {
+      const response = await fetch(`/api-project/projects/enable/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -292,7 +292,7 @@ export const apiService = {
   async updateProject(id, project) {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`/api/projects/${id}`, {
+      const response = await fetch(`/api-project/projects/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -316,7 +316,7 @@ export const apiService = {
   async getProjectTypes() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("/api/project-types", {
+      const response = await fetch("/api-project/project-types", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -342,7 +342,7 @@ export const apiService = {
   async getProjectStatuses() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch("/api/project-status", {
+      const response = await fetch("/api-project/project-status", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -773,7 +773,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `/api/projects/${projectId}/team-members`,
+        `/api-project/projects/${projectId}/team-members`,
         {
           method: "GET",
           headers: {
@@ -795,7 +795,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `/api/projects/${projectId}/team-details`,
+        `/api-project/projects/${projectId}/team-details`,
         {
           method: "GET",
           headers: {

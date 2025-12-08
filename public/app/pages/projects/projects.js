@@ -34,7 +34,7 @@ async function fetchAndRenderProjects() {
       // Managers podem ver tipos e status
       [activeTypes, inactiveTypes, activeStatuses, inactiveStatuses] = await Promise.all([
         apiService.getProjectTypes(),
-        fetch("/api/project-types/inactive", {
+        fetch("/api-project/project-types/inactive", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -42,7 +42,7 @@ async function fetchAndRenderProjects() {
           },
         }).then(res => res.ok && res.status !== 204 ? res.json() : []).catch(() => []),
         apiService.getProjectStatuses(),
-        fetch("/api/project-status/inactive", {
+        fetch("/api-project/project-status/inactive", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -55,7 +55,7 @@ async function fetchAndRenderProjects() {
     // Buscar projetos ativos e inativos
     const [activeProjects, inactiveProjects] = await Promise.all([
       apiService.getAllProjects(),
-      fetch("/api/projects/inactive", {
+      fetch("/api-project/projects/inactive", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
