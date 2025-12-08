@@ -144,26 +144,6 @@
           <h1 class="gradient-title" data-i18n="dashboard.main_title"></h1>
           <div class="subtitle" data-i18n="dashboard.subtitle"></div>
 
-          <!-- Filtros Globais -->
-          <div class="global-filters">
-            <div class="filter-group">
-              <label>Período:</label>
-              <select id="timeFilter">
-                <option value="week">Última Semana</option>
-                <option value="month" selected>Último Mês</option>
-                <option value="quarter">Último Trimestre</option>
-                <option value="semester">Último Semestre</option>
-                <option value="year">Último Ano</option>
-              </select>
-            </div>
-            <div class="filter-group" id="squadFilterGroup">
-              <label>Squad:</label>
-              <select id="squadFilter">
-                <option value="all">Todos os Squads</option>
-              </select>
-            </div>
-          </div>
-
           <!-- Dashboard do Gestor -->
           <div id="manager-dashboard" class="hidden">
             <!-- Abas -->
@@ -251,11 +231,6 @@
                       <div class="chart-title-group">
                         <h3>Custo Previsto vs Realizado</h3>
                       </div>
-                      <div class="chart-filters">
-                        <select id="costDeviationSquadFilter">
-                          <option value="all">Todos os Squads</option>
-                        </select>
-                      </div>
                     </div>
                     <p class="chart-description">Visualização comparativa entre o custo planejado e o custo real, auxiliando na tomada de decisão, no ajuste dos gastos ao longo do projeto e na verificação da precisão do planejamento para aprimorar previsões futuras.</p>
                     <canvas id="costDeviationChart"></canvas>
@@ -271,11 +246,6 @@
                             <circle cx="12" cy="8" r="1" fill="currentColor"/>
                           </svg>
                         </div>
-                      </div>
-                      <div class="chart-filters">
-                        <select id="costAllocatedSquadFilter">
-                          <option value="all">Todos os Squads</option>
-                        </select>
                       </div>
                     </div>
                     <p class="chart-description">Distribuição do investimento financeiro total por squad. Este gráfico ajuda a entender como os recursos estão sendo distribuídos entre as equipes, permitindo identificar desequilíbrios e oportunidades de otimização na alocação de orçamento.</p>
@@ -393,16 +363,6 @@
                   <div class="chart-card">
                     <div class="chart-header">
                       <h3>Distribuição de % Colaboradores por Nível de Alocação</h3>
-                      <div class="chart-filters">
-                        <select id="allocationLevelFilter">
-                          <option value="all">Todos os Níveis</option>
-                          <option value="0-50">0-50%</option>
-                          <option value="50-80">50-80%</option>
-                          <option value="80-100">80-100%</option>
-                          <option value="100-120">100-120%</option>
-                          <option value="120+">>120%</option>
-                        </select>
-                      </div>
                     </div>
                     <canvas id="allocationDistributionChart"></canvas>
                     <div id="allocationDetails" class="allocation-details hidden"></div>
@@ -472,11 +432,6 @@
                   <div class="chart-card">
                     <div class="chart-header">
                       <h3>Skills dos Colaboradores da Empresa</h3>
-                      <div class="chart-filters">
-                        <select id="skillsFilter">
-                          <option value="all">Todas as Skills</option>
-                        </select>
-                      </div>
                     </div>
                     <canvas id="skillsChart"></canvas>
                   </div>

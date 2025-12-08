@@ -6,6 +6,32 @@ export function getAuthTokenOrThrow() {
   return token;
 }
 
+// Cache para projetos
+let projectsCache = {
+  data: null,
+  timestamp: null,
+  CACHE_DURATION: 5 * 60 * 1000, // 5 minutos em milissegundos
+};
+
+/**
+ * Limpa o cache de projetos
+ */
+export function clearProjectsCache() {
+  projectsCache.data = null;
+  projectsCache.timestamp = null;
+}
+
+/**
+ * Verifica se o cache de projetos é válido
+ */
+function isProjectsCacheValid() {
+  if (!projectsCache.data || !projectsCache.timestamp) {
+    return false;
+  }
+  const now = Date.now();
+  return (now - projectsCache.timestamp) < projectsCache.CACHE_DURATION;
+}
+
 /**
  * Decodifica um JWT token e retorna o payload
  * @param {string} token - O token JWT
@@ -115,6 +141,8 @@ export const apiService = {
         throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
       }
       const data = await response.json();
+      // Limpar cache quando um projeto é inserido
+      clearProjectsCache();
       return data;
     } catch (error) {
       console.error("Erro ao inserir projeto:", error.message);
@@ -122,8 +150,14 @@ export const apiService = {
     }
   },
 
-  async getAllProjects() {
+  async getAllProjects(forceRefresh = false) {
     try {
+      // Verificar cache primeiro (se não for refresh forçado)
+      if (!forceRefresh && isProjectsCacheValid()) {
+        console.log("📦 Retornando projetos do cache");
+        return projectsCache.data;
+      }
+
       console.log("🔐 Obtendo token de autenticação...");
       const token = getAuthTokenOrThrow();
       console.log("✅ Token obtido:", token ? "Token presente" : "Token ausente");
@@ -150,6 +184,9 @@ export const apiService = {
 
       if (response.status === 204) {
         console.log("⚠️ Resposta 204 No Content - retornando array vazio");
+        // Armazenar array vazio no cache
+        projectsCache.data = [];
+        projectsCache.timestamp = Date.now();
         return [];
       }
 
@@ -168,6 +205,9 @@ export const apiService = {
         console.warn("⚠️ Content-Type não é JSON:", contentType);
         const text = await response.text();
         console.log("📄 Conteúdo como texto:", text);
+        // Armazenar array vazio no cache
+        projectsCache.data = [];
+        projectsCache.timestamp = Date.now();
         return [];
       }
       
@@ -184,6 +224,12 @@ export const apiService = {
       // Garante que sempre retorna um array
       const result = Array.isArray(data) ? data : [];
       console.log("✅ Retornando:", result.length, "projetos");
+      
+      // Armazenar no cache
+      projectsCache.data = result;
+      projectsCache.timestamp = Date.now();
+      console.log("💾 Projetos armazenados no cache");
+      
       return result;
     } catch (error) {
       console.error("❌ Erro ao buscar projetos:", error);
@@ -192,6 +238,13 @@ export const apiService = {
       if (error.stack) {
         console.error("❌ Stack trace:", error.stack);
       }
+      
+      // Se houver cache válido, retornar do cache mesmo em caso de erro
+      if (isProjectsCacheValid()) {
+        console.log("⚠️ Erro na requisição, retornando dados do cache");
+        return projectsCache.data;
+      }
+      
       // Mostra notificação para o usuário
       if (window.showNotification) {
         window.showNotification("error", "Erro ao buscar projetos: " + error.message);
@@ -238,6 +291,8 @@ export const apiService = {
         const errorText = await response.text();
         throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
       }
+      // Limpar cache quando um projeto é deletado
+      clearProjectsCache();
       return true;
     } catch (error) {
       console.error(`Erro ao deletar projeto com ID ${id}:`, error.message);
@@ -260,6 +315,8 @@ export const apiService = {
         const errorText = await response.text();
         throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
       }
+      // Limpar cache quando um projeto é desativado
+      clearProjectsCache();
       return await response.json();
     } catch (error) {
       console.error(`Erro ao desativar projeto com ID ${id}:`, error.message);
@@ -282,6 +339,8 @@ export const apiService = {
         const errorText = await response.text();
         throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
       }
+      // Limpar cache quando um projeto é ativado
+      clearProjectsCache();
       return await response.json();
     } catch (error) {
       console.error(`Erro ao ativar projeto com ID ${id}:`, error.message);
@@ -306,6 +365,8 @@ export const apiService = {
         throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
       }
       const data = await response.json();
+      // Limpar cache quando um projeto é atualizado
+      clearProjectsCache();
       return data;
     } catch (error) {
       console.error(`Erro ao atualizar projeto com ID ${id}:`, error.message);
