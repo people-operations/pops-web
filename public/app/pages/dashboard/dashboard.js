@@ -1732,7 +1732,7 @@ async function fetchCostsSummary() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/costs/summary", {
+    const response = await fetch("/api/dashboard/costs/summary", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1764,7 +1764,7 @@ async function fetchOverloadPercentage() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/summary/overload-percentage", {
+    const response = await fetch("/api/dashboard/summary/overload-percentage", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1804,7 +1804,7 @@ async function fetchIdlePercentage() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/summary/idle-percentage", {
+    const response = await fetch("/api/dashboard/summary/idle-percentage", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1844,7 +1844,7 @@ async function fetchPlannedVsReal() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/costs/planned-vs-real", {
+    const response = await fetch("/api/dashboard/costs/planned-vs-real", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1876,7 +1876,7 @@ async function fetchCostsBySquad() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/costs/by-squad", {
+    const response = await fetch("/api/dashboard/costs/by-squad", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1908,7 +1908,7 @@ async function fetchAllocationBands() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/distribution/allocation-bands", {
+    const response = await fetch("/api/dashboard/distribution/allocation-bands", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1940,7 +1940,7 @@ async function fetchOverloadIdlePerMonth() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/workload/overload-idle-per-month", {
+    const response = await fetch("/api/dashboard/workload/overload-idle-per-month", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1972,7 +1972,7 @@ async function fetchWorkloadBySquad() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/workload/by-squad", {
+    const response = await fetch("/api/dashboard/workload/by-squad", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -2004,7 +2004,7 @@ async function fetchActiveSquads() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/squads/active-squads", {
+    const response = await fetch("/api/dashboard/squads/active-squads", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -2044,7 +2044,7 @@ async function fetchActiveProjects() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/projects/active-projects", {
+    const response = await fetch("/api/dashboard/projects/active-projects", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -2084,7 +2084,7 @@ async function fetchTotalAllocatedHours() {
       return null;
     }
 
-    const response = await fetch("http://localhost:8080/api/dashboard/hours/total-allocated-hours", {
+    const response = await fetch("/api/dashboard/hours/total-allocated-hours", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
