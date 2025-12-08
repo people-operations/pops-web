@@ -676,7 +676,7 @@ export const apiService = {
     try {
       const token = getAuthTokenOrThrow();
       const response = await fetch(
-        `http://localhost:8081/api/employees/${employeeId}`,
+        `http://localhost:8081/api-employee/employees/${employeeId}`,
         {
           method: "GET",
           headers: {
@@ -732,7 +732,7 @@ export const apiService = {
       if (filters.project) params.append("project", filters.project);
       if (filters.squad) params.append("squad", filters.squad);
       const response = await fetch(
-        `http://localhost:8081/api/employees?${params.toString()}`,
+        `http://localhost:8081/api-employee/employees?${params.toString()}`,
         {
           method: "GET",
           headers: {
@@ -753,7 +753,7 @@ export const apiService = {
   async getOdooSkills() {
     try {
       const token = getAuthTokenOrThrow();
-      const response = await fetch(`http://localhost:8081/api/skills`, {
+      const response = await fetch(`http://localhost:8081/api-employee/skills`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

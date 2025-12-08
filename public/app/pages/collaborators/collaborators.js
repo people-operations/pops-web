@@ -33,6 +33,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentPage = 1;
   const itemsPerPage = 10;
   const percentagesCache = new Map(); // Cache para evitar recarregar dados
+  const allocationsCache = new Map(); // Cache para alocações de colaboradores
+  const loadingPercentages = new Set(); // Prevenir múltiplas execuções simultâneas
+  const loadingAllocations = new Set(); // Prevenir múltiplas requisições simultâneas para alocações
+  let isLoadingPercentages = false; // Flag para prevenir múltiplas execuções
 
   async function fetchCollaborators(filters = {}) {
     showSkeleton();
@@ -63,52 +67,150 @@ document.addEventListener("DOMContentLoaded", async () => {
       currentEmployees = employeesWithDefaults;
       currentPage = 1; // Reset para primeira página ao carregar novos dados
       populateFilters();
-      renderTable(employeesWithDefaults);
-      updatePagination(employeesWithDefaults.length);
+      
+      // Aplicar valores do cache imediatamente antes de renderizar
+      currentEmployees.forEach((emp) => {
+        if (percentagesCache.has(emp.id)) {
+          const cached = percentagesCache.get(emp.id);
+          // Marcar como carregado ANTES de atribuir os valores
+          emp._percentagesLoaded = true;
+          Object.assign(emp, cached);
+        }
+      });
+      
+      renderTable(currentEmployees);
+      updatePagination(currentEmployees.length);
       
       // Carregar porcentagens de forma assíncrona apenas para os que não estão em cache
-      setTimeout(() => loadPercentagesAsync(employeesWithDefaults), 200);
+      loadPercentagesAsync();
     } catch (error) {
       console.error("Erro ao carregar colaboradores:", error);
     }
   }
 
-  async function loadPercentagesAsync(employees) {
-    // Carregar porcentagens apenas para a página atual
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const paginatedEmployees = employees.slice(startIndex, endIndex);
+  async function loadPercentagesAsync() {
+    // Prevenir múltiplas execuções simultâneas
+    if (isLoadingPercentages) {
+      console.warn("⚠️ loadPercentagesAsync já está em execução, ignorando chamada duplicada");
+      return;
+    }
     
-    // Filtrar apenas os que ainda não têm porcentagens carregadas ou não estão no cache
-    const employeesToLoad = paginatedEmployees.filter(emp => {
-      return !emp._percentagesLoaded && !percentagesCache.has(emp.id);
-    });
+    isLoadingPercentages = true;
     
-    if (employeesToLoad.length === 0) return;
-    
-    // Carregar porcentagens em paralelo apenas para os itens que precisam
-    const percentagePromises = employeesToLoad.map(async (emp) => {
-      // Verificar cache primeiro
-      if (percentagesCache.has(emp.id)) {
-        Object.assign(emp, percentagesCache.get(emp.id));
-        emp._percentagesLoaded = true;
-        return emp;
+    try {
+      // SEMPRE usar currentEmployees para garantir consistência
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginatedEmployees = currentEmployees.slice(startIndex, endIndex);
+      
+      // Primeiro, aplicar valores do cache se existirem e atualizar currentEmployees
+      let hasCachedData = false;
+      paginatedEmployees.forEach(emp => {
+        if (percentagesCache.has(emp.id)) {
+          const cached = percentagesCache.get(emp.id);
+          // Marcar como carregado ANTES de atribuir os valores
+          emp._percentagesLoaded = true;
+          Object.assign(emp, cached);
+          hasCachedData = true;
+        }
+      });
+      
+      // Re-renderizar imediatamente se houver dados em cache
+      if (hasCachedData) {
+        renderTable(currentEmployees);
       }
       
-      const percentages = await calculatePercentages(emp);
-      // Armazenar no cache
-      percentagesCache.set(emp.id, percentages);
-      // Atualizar o objeto original
-      Object.assign(emp, percentages);
-      emp._percentagesLoaded = true;
-      return emp;
-    });
+      // Filtrar apenas os que ainda não têm porcentagens carregadas ou não estão no cache
+      const employeesToLoad = paginatedEmployees.filter(emp => {
+        return !emp._percentagesLoaded && !percentagesCache.has(emp.id) && !loadingPercentages.has(emp.id);
+      });
+      
+      if (employeesToLoad.length === 0) {
+        return;
+      }
+      
+      // Marcar como carregando
+      employeesToLoad.forEach(emp => loadingPercentages.add(emp.id));
+      
+      // Carregar porcentagens em paralelo apenas para os itens que precisam
+      const percentagePromises = employeesToLoad.map(async (emp) => {
+        try {
+          // Verificar cache novamente (pode ter sido adicionado enquanto aguardava)
+          if (percentagesCache.has(emp.id)) {
+            const cached = percentagesCache.get(emp.id);
+            // Encontrar o objeto correto em currentEmployees
+            const empInCurrent = currentEmployees.find(e => e.id === emp.id);
+            if (empInCurrent) {
+              // Marcar como carregado ANTES de atribuir os valores
+              empInCurrent._percentagesLoaded = true;
+              Object.assign(empInCurrent, cached);
+            }
+            return emp;
+          }
+          
+          const percentages = await calculatePercentages(emp);
+          // Armazenar no cache
+          percentagesCache.set(emp.id, percentages);
+          
+          // Atualizar o objeto em currentEmployees (sempre usar o objeto real)
+          const empInCurrent = currentEmployees.find(e => e.id === emp.id);
+          if (empInCurrent) {
+            // Marcar como carregado ANTES de atribuir os valores
+            empInCurrent._percentagesLoaded = true;
+            Object.assign(empInCurrent, percentages);
+          }
+          
+          return emp;
+        } catch (error) {
+          console.error(`Erro ao calcular porcentagens para ${emp.id}:`, error);
+          return emp;
+        } finally {
+          loadingPercentages.delete(emp.id);
+        }
+      });
+      
+      await Promise.all(percentagePromises);
+      
+      // Re-renderizar a tabela completa após carregar
+      renderTable(currentEmployees);
+      updatePagination(currentEmployees.length);
+    } finally {
+      isLoadingPercentages = false;
+    }
+  }
+
+  async function getSquadsByCollaboratorIdWithCache(employeeId) {
+    // Verificar cache primeiro
+    if (allocationsCache.has(employeeId)) {
+      return allocationsCache.get(employeeId);
+    }
     
-    await Promise.all(percentagePromises);
+    // Se já está sendo carregado, aguardar
+    if (loadingAllocations.has(employeeId)) {
+      let attempts = 0;
+      while (loadingAllocations.has(employeeId) && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+        if (allocationsCache.has(employeeId)) {
+          return allocationsCache.get(employeeId);
+        }
+      }
+      return [];
+    }
     
-    // Re-renderizar a tabela completa
-    renderTable(currentEmployees);
-    updatePagination(currentEmployees.length);
+    loadingAllocations.add(employeeId);
+    try {
+      const allocations = await apiService.getSquadsByCollaboratorId(employeeId);
+      if (allocations && Array.isArray(allocations)) {
+        allocationsCache.set(employeeId, allocations);
+      }
+      return allocations || [];
+    } catch (error) {
+      console.error(`Erro ao buscar alocações para ${employeeId}:`, error);
+      return [];
+    } finally {
+      loadingAllocations.delete(employeeId);
+    }
   }
 
   async function calculatePercentages(employee) {
@@ -118,9 +220,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const monthlyHours = weeklyHours * 4;
       let totalAllocatedHours = 0;
 
-      // Buscar alocações do colaborador
+      // Buscar alocações do colaborador (usando cache)
       try {
-        const allocations = await apiService.getSquadsByCollaboratorId(employee.id);
+        const allocations = await getSquadsByCollaboratorIdWithCache(employee.id);
         if (allocations && Array.isArray(allocations) && allocations.length > 0) {
           // Soma horas mensais alocadas: calcula a partir de horas semanais (horas semanais × 4)
           totalAllocatedHours = allocations.reduce((sum, allocation) => {
@@ -238,13 +340,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       const squads = getMockSquads(emp.id);
       const row = document.createElement("tr");
       row.classList.add("collaborator-row");
-      const totalAllocatedHours = emp.totalAllocatedHours || 0;
-      const weeklyHours = emp.weeklyHours || emp.workHoursPerWeek || 40;
-      const monthlyHours = emp.monthlyHours || (weeklyHours * 4);
-      const availableHours = emp.availableHours ?? monthlyHours;
-      const overloadPercent = emp.overloadPercent || 0;
-      const idlePercent = emp.idlePercent || 100;
-      const allocatedPercent = emp.allocatedPercent || 0;
+      
+      // Só usar valores se estiverem 100% prontos (_percentagesLoaded === true)
+      const isReady = emp._percentagesLoaded === true;
+      
+      let totalAllocatedHours, availableHours, allocatedPercent, overloadPercent, idlePercent;
+      
+      if (isReady) {
+        // Valores estão prontos, usar os valores calculados
+        totalAllocatedHours = emp.totalAllocatedHours ?? 0;
+        const weeklyHours = emp.weeklyHours || emp.workHoursPerWeek || 40;
+        const monthlyHours = emp.monthlyHours || (weeklyHours * 4);
+        availableHours = emp.availableHours ?? monthlyHours;
+        allocatedPercent = emp.allocatedPercent ?? 0;
+        overloadPercent = emp.overloadPercent ?? 0;
+        idlePercent = emp.idlePercent ?? 100;
+      } else {
+        // Valores não estão prontos, usar placeholders
+        totalAllocatedHours = null;
+        availableHours = null;
+        allocatedPercent = 0;
+        overloadPercent = 0;
+        idlePercent = 100;
+      }
 
       row.innerHTML = `
         <td>${emp.name || "—"}</td>
@@ -257,14 +375,26 @@ document.addEventListener("DOMContentLoaded", async () => {
           </div>
         </td>
         <td>
-          <span class="percentage-badge ${allocatedPercent > 100 ? 'overload' : ''}">
-            ${totalAllocatedHours}h
-          </span>
+          ${isReady ? `
+            <span class="percentage-badge ${allocatedPercent > 100 ? 'overload' : ''}">
+              ${totalAllocatedHours}h
+            </span>
+          ` : `
+            <span class="percentage-badge" style="opacity: 0.5;">
+              —
+            </span>
+          `}
         </td>
         <td>
-          <span class="percentage-badge">
-            ${availableHours}h
-          </span>
+          ${isReady ? `
+            <span class="percentage-badge">
+              ${availableHours}h
+            </span>
+          ` : `
+            <span class="percentage-badge" style="opacity: 0.5;">
+              —
+            </span>
+          `}
         </td>
         <td>
           <span class="status-badge ${
@@ -358,8 +488,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     numberButton.textContent = pageNum;
     numberButton.addEventListener("click", () => {
       currentPage = pageNum;
+      // Aplicar valores do cache antes de renderizar
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginatedEmployees = currentEmployees.slice(startIndex, endIndex);
+      paginatedEmployees.forEach(emp => {
+        if (percentagesCache.has(emp.id)) {
+          const cached = percentagesCache.get(emp.id);
+          // Marcar como carregado ANTES de atribuir os valores
+          emp._percentagesLoaded = true;
+          Object.assign(emp, cached);
+        }
+      });
       renderTable(currentEmployees);
       updatePagination(currentEmployees.length);
+      // Carregar porcentagens para a nova página
+      loadPercentagesAsync();
       // Scroll para o topo da tabela
       document.querySelector(".table-container")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
@@ -429,9 +573,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     prevPageButton.addEventListener("click", () => {
       if (currentPage > 1) {
         currentPage--;
+        // Aplicar valores do cache antes de renderizar
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedEmployees = currentEmployees.slice(startIndex, endIndex);
+        paginatedEmployees.forEach(emp => {
+          if (percentagesCache.has(emp.id)) {
+            const cached = percentagesCache.get(emp.id);
+            Object.assign(emp, cached);
+            emp._percentagesLoaded = true;
+          }
+        });
         renderTable(currentEmployees);
         updatePagination(currentEmployees.length);
-        setTimeout(() => loadPercentagesAsync(currentEmployees), 100);
+        loadPercentagesAsync();
         document.querySelector(".table-container")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
@@ -442,9 +597,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       const totalPages = Math.ceil(currentEmployees.length / itemsPerPage);
       if (currentPage < totalPages) {
         currentPage++;
+        // Aplicar valores do cache antes de renderizar
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedEmployees = currentEmployees.slice(startIndex, endIndex);
+        paginatedEmployees.forEach(emp => {
+          if (percentagesCache.has(emp.id)) {
+            const cached = percentagesCache.get(emp.id);
+            Object.assign(emp, cached);
+            emp._percentagesLoaded = true;
+          }
+        });
         renderTable(currentEmployees);
         updatePagination(currentEmployees.length);
-        setTimeout(() => loadPercentagesAsync(currentEmployees), 100);
+        loadPercentagesAsync();
         document.querySelector(".table-container")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
@@ -544,9 +710,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       monthlyHours
     });
     
+    // Aplicar valores do cache antes de renderizar
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedEmployees = currentEmployees.slice(startIndex, endIndex);
+    paginatedEmployees.forEach(emp => {
+      if (percentagesCache.has(emp.id)) {
+        const cached = percentagesCache.get(emp.id);
+        Object.assign(emp, cached);
+        emp._percentagesLoaded = true;
+      }
+    });
+    
     // Re-renderizar a tabela
     renderTable(currentEmployees);
     updatePagination(currentEmployees.length);
+    
+    // Carregar porcentagens se necessário
+    loadPercentagesAsync();
     
     console.log(`✅ Sobrecarga simulada para ${employee.name}:`, {
       'Horas Alocadas': `${totalAllocatedHours.toFixed(1)}h`,

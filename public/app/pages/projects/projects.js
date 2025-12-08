@@ -269,12 +269,32 @@ function showSkeleton() {
 
 // Cache de funcionários para evitar múltiplas chamadas
 const employeeCache = new Map();
+const allocationCache = new Map();
+const laborCostCache = new Map();
+const loadingEmployees = new Set(); // Prevenir múltiplas requisições simultâneas para o mesmo funcionário
+const loadingAllocations = new Set(); // Prevenir múltiplas requisições simultâneas para as mesmas alocações
 
 async function getEmployeeWithCache(employeeId) {
+  // Se já está no cache, retornar imediatamente
   if (employeeCache.has(employeeId)) {
     return employeeCache.get(employeeId);
   }
   
+  // Se já está sendo carregado, aguardar
+  if (loadingEmployees.has(employeeId)) {
+    // Aguardar até que o carregamento termine
+    let attempts = 0;
+    while (loadingEmployees.has(employeeId) && attempts < 50) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+      if (employeeCache.has(employeeId)) {
+        return employeeCache.get(employeeId);
+      }
+    }
+    return null;
+  }
+  
+  loadingEmployees.add(employeeId);
   try {
     const employee = await apiService.getCollaboratorById(employeeId);
     if (employee) {
@@ -284,23 +304,65 @@ async function getEmployeeWithCache(employeeId) {
   } catch (err) {
     console.error(`Erro ao buscar funcionário ${employeeId}:`, err);
     return null;
+  } finally {
+    loadingEmployees.delete(employeeId);
+  }
+}
+
+async function getAllocationsWithCache(squadId) {
+  // Se já está no cache, retornar imediatamente
+  if (allocationCache.has(squadId)) {
+    return allocationCache.get(squadId);
+  }
+  
+  // Se já está sendo carregado, aguardar
+  if (loadingAllocations.has(squadId)) {
+    // Aguardar até que o carregamento termine
+    let attempts = 0;
+    while (loadingAllocations.has(squadId) && attempts < 50) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+      if (allocationCache.has(squadId)) {
+        return allocationCache.get(squadId);
+      }
+    }
+    return [];
+  }
+  
+  loadingAllocations.add(squadId);
+  try {
+    const allocations = await apiService.getSquadAllocations(squadId);
+    if (allocations && Array.isArray(allocations)) {
+      allocationCache.set(squadId, allocations);
+    }
+    return allocations || [];
+  } catch (err) {
+    console.error(`Erro ao buscar alocações do squad ${squadId}:`, err);
+    return [];
+  } finally {
+    loadingAllocations.delete(squadId);
   }
 }
 
 async function calculateLaborCost(project) {
+  // Verificar cache primeiro
+  if (laborCostCache.has(project.id)) {
+    return laborCostCache.get(project.id);
+  }
+  
   try {
     if (!project.squads || project.squads.length === 0) {
+      laborCostCache.set(project.id, 0);
       return 0;
     }
     
     let totalCost = 0;
-    const employeePromises = [];
     const allocationData = [];
     
-    // Coletar todas as alocações primeiro
+    // Coletar todas as alocações primeiro (usando cache)
     for (const squad of project.squads) {
       try {
-        const allocations = await apiService.getSquadAllocations(squad.id);
+        const allocations = await getAllocationsWithCache(squad.id);
         if (allocations && allocations.length > 0) {
           allocations.forEach((allocation) => {
             if (allocation.employee && allocation.employee.id) {
@@ -316,7 +378,7 @@ async function calculateLaborCost(project) {
       }
     }
     
-    // Buscar todos os funcionários em paralelo
+    // Buscar todos os funcionários em paralelo (usando cache)
     const uniqueEmployeeIds = [...new Set(allocationData.map(a => a.employeeId))];
     const employeePromisesList = uniqueEmployeeIds.map(id => getEmployeeWithCache(id));
     const employees = await Promise.all(employeePromisesList);
@@ -342,9 +404,12 @@ async function calculateLaborCost(project) {
       }
     });
     
+    // Armazenar no cache
+    laborCostCache.set(project.id, totalCost);
     return totalCost;
   } catch (err) {
     console.error("Erro ao calcular custo de mão de obra:", err);
+    laborCostCache.set(project.id, 0);
     return 0;
   }
 }
