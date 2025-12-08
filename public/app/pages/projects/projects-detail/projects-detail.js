@@ -300,37 +300,11 @@ async function renderProjectDetail() {
     budgetElement.textContent = formatCurrency(project.budget);
   }
   
-  // Mão de obra aplicada - usar total investido das equipes
+  // Mão de obra aplicada será calculada depois de buscar os membros dos teams
   const laborCostElement = document.getElementById("project-labor-cost");
   if (laborCostElement) {
-    try {
-      // Buscar detalhes dos teams para obter o total investido
-      const teamDetailsData = await apiService.getProjectTeamDetails(id);
-      if (teamDetailsData && teamDetailsData.teams && teamDetailsData.teams.length > 0) {
-        // Somar todos os totalInvestedValue de todas as equipes
-        const totalInvested = teamDetailsData.teams.reduce((sum, team) => {
-          const teamTotal = team.totalInvestedValue ? Number(team.totalInvestedValue) : 0;
-          return sum + teamTotal;
-        }, 0);
-        
-        const totalInvestedFormatted = totalInvested > 0
-          ? formatCurrency(totalInvested)
-          : "-";
-        laborCostElement.textContent = totalInvestedFormatted;
-      } else {
-        laborCostElement.textContent = "-";
-      }
-    } catch (error) {
-      console.warn("Erro ao buscar total investido das equipes:", error);
-      // Fallback para o cálculo antigo se houver erro
-      const laborCost = await calculateLaborCost(project);
-      const laborCostFormatted = laborCost > 0
-        ? `R$ ${Number(laborCost).toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-          })}`
-        : "-";
-      laborCostElement.textContent = laborCostFormatted;
-    }
+    // Inicializar com "-" enquanto carrega
+    laborCostElement.textContent = "-";
   }
   
   // Datas
@@ -340,49 +314,183 @@ async function renderProjectDetail() {
   }
     // Equipes (teams) - Buscar informações detalhadas com valores financeiros
     const teamsList = document.querySelector(".teams-list");
+    console.log("🔍 Elemento teamsList encontrado:", teamsList);
+    console.log("📊 project.squads:", project.squads);
+    console.log("📊 É array?", Array.isArray(project.squads));
+    console.log("📊 Tem length?", project.squads?.length);
+    
+    if (!teamsList) {
+      console.error("❌ ERRO: Elemento .teams-list não encontrado no DOM!");
+    }
+    
     if (Array.isArray(project.squads) && project.squads.length) {
+      console.log("✅ Squads válidas, processando...");
       // Buscar informações detalhadas dos teams com valores financeiros
       let teamDetailsData = null;
       try {
         teamDetailsData = await apiService.getProjectTeamDetails(id);
+        console.log("✅ teamDetailsData recebido:", teamDetailsData);
+        console.log("✅ teamDetailsData.teams:", teamDetailsData?.teams);
       } catch (error) {
-        console.warn("Erro ao buscar detalhes dos teams:", error);
+        console.warn("⚠️ Erro ao buscar detalhes dos teams:", error);
         // Continua com os dados básicos dos squads
+      }
+      
+      // Buscar membros de cada team usando getSquadDetails (mesmo método usado em squads-detail)
+      const teamsWithMembers = await Promise.all(
+        project.squads.map(async (squad) => {
+          try {
+            console.log(`🔍 Buscando detalhes do squad ${squad.id}...`);
+            const squadDetails = await apiService.getSquadDetails(squad.id);
+            console.log(`✅ Squad ${squad.id} detalhes:`, squadDetails);
+            
+            // Se temos teamDetailsData, usar os dados financeiros de lá
+            const teamDetail = teamDetailsData?.teams?.find(t => t.teamId === squad.id);
+            
+            return {
+              teamId: squad.id,
+              teamName: squad.name,
+              teamDescription: squad.description,
+              po: squad.po || teamDetail?.po,
+              members: squadDetails?.members || [],
+              membersCount: squadDetails?.membersCount || (squadDetails?.members?.length || 0),
+              totalInvestedValue: teamDetail?.totalInvestedValue || null,
+              // Manter referência aos detalhes completos
+              squadDetails: squadDetails
+            };
+          } catch (error) {
+            console.warn(`⚠️ Erro ao buscar detalhes do squad ${squad.id}:`, error);
+            // Fallback: usar dados básicos
+            const teamDetail = teamDetailsData?.teams?.find(t => t.teamId === squad.id);
+            return {
+              teamId: squad.id,
+              teamName: squad.name,
+              teamDescription: squad.description,
+              po: squad.po || teamDetail?.po,
+              members: [],
+              membersCount: 0,
+              totalInvestedValue: teamDetail?.totalInvestedValue || null,
+              squadDetails: null
+            };
+          }
+        })
+      );
+      
+      console.log("📋 Teams com membros:", teamsWithMembers);
+      
+      // Calcular Mão de obra aplicada baseado nos membros buscados
+      if (laborCostElement) {
+        try {
+          // Calcular total investido somando o investedValue de todos os membros de todos os teams
+          let totalInvested = 0;
+          
+          console.log("💰 Calculando total investido...");
+          console.log("💰 teamsWithMembers:", teamsWithMembers);
+          
+          // Primeiro, tentar usar totalInvestedValue dos teams se disponível
+          teamsWithMembers.forEach((team, idx) => {
+            console.log(`💰 Team ${idx} (${team.teamName}):`, {
+              totalInvestedValue: team.totalInvestedValue,
+              squadDetailsTotalInvested: team.squadDetails?.totalInvestedValue,
+              membersCount: team.members?.length || 0
+            });
+            
+            if (team.totalInvestedValue) {
+              totalInvested += Number(team.totalInvestedValue);
+              console.log(`💰 Team ${idx} - usando totalInvestedValue: ${team.totalInvestedValue}`);
+            } else if (team.squadDetails?.totalInvestedValue) {
+              // Usar totalInvestedValue do squadDetails se disponível
+              totalInvested += Number(team.squadDetails.totalInvestedValue);
+              console.log(`💰 Team ${idx} - usando squadDetails.totalInvestedValue: ${team.squadDetails.totalInvestedValue}`);
+            } else if (team.members && Array.isArray(team.members)) {
+              // Se não tiver totalInvestedValue, calcular somando investedValue dos membros
+              let teamTotal = 0;
+              team.members.forEach((member, memberIdx) => {
+                if (member.investedValue) {
+                  const memberValue = Number(member.investedValue);
+                  teamTotal += memberValue;
+                  console.log(`💰 Team ${idx} - Membro ${memberIdx} (${member.name}): investedValue = ${member.investedValue}`);
+                }
+              });
+              totalInvested += teamTotal;
+              console.log(`💰 Team ${idx} - Total calculado dos membros: ${teamTotal}`);
+            }
+          });
+          
+          const totalInvestedFormatted = totalInvested > 0
+            ? formatCurrency(totalInvested)
+            : "-";
+          laborCostElement.textContent = totalInvestedFormatted;
+          console.log("💰 Total investido calculado:", totalInvested, "Formatado:", totalInvestedFormatted);
+        } catch (error) {
+          console.warn("Erro ao calcular total investido:", error);
+          laborCostElement.textContent = "-";
+        }
+      } else {
+        console.warn("⚠️ Elemento project-labor-cost não encontrado no DOM");
       }
       
       // Salvar referência do project para usar nos event listeners
       window.currentProject = project;
       window.teamDetailsData = teamDetailsData; // Salvar também os detalhes
+      window.teamsWithMembers = teamsWithMembers; // Salvar teams com membros
       
-      teamsList.innerHTML = (teamDetailsData?.teams || project.squads)
+      // Usar teamsWithMembers que tem os membros buscados
+      const teamsToRender = teamsWithMembers;
+      console.log("📋 Teams para renderizar:", teamsToRender);
+      console.log("📋 Quantidade:", teamsToRender?.length);
+      
+      if (!teamsList) {
+        console.error("❌ ERRO: teamsList ainda não existe!");
+        return;
+      }
+      
+      // Gerar HTML primeiro
+      const htmlContent = teamsToRender
       .map(
         (team, idx) => {
-          // Se temos teamDetailsData, usar os dados detalhados, senão usar squad básico
-          const isDetailed = teamDetailsData && teamDetailsData.teams && teamDetailsData.teams[idx];
-          const teamData = isDetailed ? teamDetailsData.teams[idx] : {
-            teamId: project.squads[idx].id,
-            teamName: project.squads[idx].name,
-            teamDescription: project.squads[idx].description,
-            po: project.squads[idx].po,
-            membersCount: project.squads[idx].members?.length || 0,
-            members: project.squads[idx].members || [],
-            totalInvestedValue: null
+          // Usar dados do team que já tem os membros buscados via getSquadDetails
+          const members = Array.isArray(team.members) ? team.members : [];
+          
+          const teamData = {
+            teamId: team.teamId,
+            teamName: team.teamName,
+            teamDescription: team.teamDescription,
+            po: team.po,
+            membersCount: team.membersCount || members.length,
+            members: members,
+            totalInvestedValue: team.totalInvestedValue || null
           };
+          
+          console.log(`✅ Team ${idx} (${teamData.teamName}) - DADOS:`, {
+            membersCount: teamData.membersCount,
+            membersArrayLength: teamData.members?.length || 0,
+            membersArray: teamData.members,
+            hasSkills: teamData.members.some(m => m.skills && Array.isArray(m.skills) && m.skills.length > 0)
+          });
           
           // Agregar todas as skills dos membros
           const allSkills = [];
           if (teamData.members && teamData.members.length > 0) {
+            console.log(`🔧 Processando skills para team ${idx}, ${teamData.members.length} membros`);
             const skillsMap = new Map();
-            teamData.members.forEach(member => {
+            teamData.members.forEach((member, memberIdx) => {
+              console.log(`🔧 Membro ${memberIdx}:`, member);
+              console.log(`🔧 Membro ${memberIdx}.skills:`, member.skills);
               if (member.skills && Array.isArray(member.skills)) {
                 member.skills.forEach(skill => {
-                  if (skill.name && !skillsMap.has(skill.name)) {
-                    skillsMap.set(skill.name, skill);
+                  // A skill pode ser um objeto com 'name' ou apenas uma string
+                  const skillName = typeof skill === 'string' ? skill : (skill.name || skill.skillName || skill);
+                  if (skillName && !skillsMap.has(skillName)) {
+                    skillsMap.set(skillName, typeof skill === 'string' ? { name: skill } : skill);
                   }
                 });
               }
             });
             allSkills.push(...Array.from(skillsMap.values()));
+            console.log(`🔧 Skills agregadas para team ${idx}:`, allSkills);
+          } else {
+            console.log(`⚠️ Team ${idx} não tem membros ou membros está vazio`);
           }
           
           return `
@@ -394,8 +502,7 @@ async function renderProjectDetail() {
               </button>
             </div>
             <p class="team-info">
-              <strong>${teamData.membersCount || 0} membros</strong>
-              ${teamData.po && teamData.po !== "-" ? ` • <strong data-i18n="projects_detail.po">PO:</strong> ${teamData.po}` : ''}
+              <strong>${teamData.members?.length || teamData.membersCount || 0} membros</strong>
               ${teamData.totalInvestedValue ? ` • <strong style="color: #28a745;">Total investido: ${formatCurrency(teamData.totalInvestedValue)}</strong>` : ''}
             </p>
             
@@ -412,7 +519,10 @@ async function renderProjectDetail() {
                         ${allSkills
                           .slice(0, 5)
                           .map(
-                            (skill) => `<span class="skill">${skill.name}</span>`
+                            (skill) => {
+                              const skillName = typeof skill === 'string' ? skill : (skill.name || skill.skillName || 'N/A');
+                              return `<span class="skill">${skillName}</span>`;
+                            }
                           )
                           .join("")}
                       </div>
@@ -442,40 +552,52 @@ async function renderProjectDetail() {
                 <strong>Membros:</strong>
               </p>
               ${
-                teamData.members && teamData.members.length > 0
-                  ? teamData.members
-                      .map(
-                        (member) => {
-                          // Formatar valor investido
-                          const investedValueFormatted = member.investedValue 
-                            ? formatCurrency(member.investedValue)
-                            : null;
-                          
-                          return `
-                          <div class="member-item" style="background: rgba(255,255,255,0.5); padding: 10px; border-radius: 6px; margin-bottom: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                              <strong style="font-size: 14px;">${member.name || "N/A"}</strong>
-                              <span style="font-size: 12px; color: #666; font-weight: 600;">${member.allocatedHours || 0}h</span>
-                            </div>
-                            <div style="font-size: 11px; color: #555; margin-top: 4px;">
-                              ${member.jobTitle ? `
-                                <div style="margin-bottom: 4px;">
-                                  <strong>Cargo:</strong> ${member.jobTitle}
-                                </div>
-                              ` : ''}
-                              ${member.investedValue ? `
-                                <div style="margin-top: 6px; padding: 6px; background: rgba(255, 255, 255, 0.94); border-radius: 4px; border-left: 3px solid rgba(255, 255, 255, 0.3);">
-                                  <div style="font-size: 11px; color:rgb(0, 0, 0); font-weight: 600; margin-bottom: 2px;">
-                                    <strong>Parte do salário aplicado no projeto:</strong> ${investedValueFormatted}
+                teamData.members && Array.isArray(teamData.members) && teamData.members.length > 0
+                  ? (() => {
+                      console.log(`👥 Renderizando ${teamData.members.length} membros para team ${idx}:`, teamData.members);
+                      return teamData.members
+                        .map(
+                          (member) => {
+                            // Formatar valor investido
+                            const investedValueFormatted = member.investedValue 
+                              ? formatCurrency(member.investedValue)
+                              : null;
+                            
+                            // Obter allocatedHours de diferentes possíveis campos
+                            const allocatedHours = member.allocatedHours || member.hours || 0;
+                            
+                            // Obter nome de diferentes possíveis campos
+                            const memberName = member.name || member.employeeName || "N/A";
+                            
+                            // Obter jobTitle/position de diferentes possíveis campos
+                            const jobTitle = member.jobTitle || member.position || null;
+                            
+                            return `
+                            <div class="member-item" style="background: rgba(255,255,255,0.5); padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <strong style="font-size: 14px;">${memberName}</strong>
+                                <span style="font-size: 12px; color: #666; font-weight: 600;">${allocatedHours}h</span>
+                              </div>
+                              <div style="font-size: 11px; color: #555; margin-top: 4px;">
+                                ${jobTitle ? `
+                                  <div style="margin-bottom: 4px;">
+                                    <strong>Cargo:</strong> ${jobTitle}
                                   </div>
-                                </div>
-                              ` : ''}
+                                ` : ''}
+                                ${member.investedValue ? `
+                                  <div style="margin-top: 6px; padding: 6px; background: rgba(255, 255, 255, 0.94); border-radius: 4px; border-left: 3px solid rgba(255, 255, 255, 0.3);">
+                                    <div style="font-size: 11px; color:rgb(0, 0, 0); font-weight: 600; margin-bottom: 2px;">
+                                      <strong>Parte do salário aplicado no projeto:</strong> ${investedValueFormatted}
+                                    </div>
+                                  </div>
+                                ` : ''}
+                              </div>
                             </div>
-                          </div>
-                        `;
-                        }
-                      )
-                      .join("")
+                          `;
+                          }
+                        )
+                        .join("");
+                    })()
                   : '<span style="color: #888; font-style: italic; font-size: 13px;">Nenhum membro alocado</span>'
               }
             </div>
@@ -484,6 +606,18 @@ async function renderProjectDetail() {
         }
       )
       .join("");
+      
+      console.log("✅ HTML gerado. Tamanho:", htmlContent.length);
+      console.log("✅ Primeiros 300 caracteres:", htmlContent.substring(0, 300));
+      
+      // Atribuir o HTML ao elemento
+      teamsList.innerHTML = htmlContent;
+      console.log("✅ HTML atribuído ao teamsList. innerHTML.length:", teamsList.innerHTML.length);
+      console.log("✅ Elemento teamsList após atribuição:", teamsList);
+      console.log("✅ Número de team-cards renderizados:", teamsList.querySelectorAll('.team-card').length);
+      
+      // Forçar reflow para garantir que o navegador renderize
+      void teamsList.offsetHeight;
       
       // Adicionar event listeners para os botões "Ver todas" após renderizar
       setTimeout(() => {
@@ -494,16 +628,18 @@ async function renderProjectDetail() {
           
           newBtn.addEventListener("click", function() {
             const teamIdx = parseInt(this.getAttribute("data-team-idx"));
-            // Buscar skills agregadas do team
-            const teamDetails = window.teamDetailsData?.teams?.[teamIdx];
-            if (teamDetails && teamDetails.members) {
+            // Buscar skills agregadas do team usando teamsWithMembers
+            const team = window.teamsWithMembers?.[teamIdx];
+            if (team && team.members) {
               const allSkills = [];
               const skillsMap = new Map();
-              teamDetails.members.forEach(member => {
+              team.members.forEach(member => {
                 if (member.skills && Array.isArray(member.skills)) {
                   member.skills.forEach(skill => {
-                    if (skill.name && !skillsMap.has(skill.name)) {
-                      skillsMap.set(skill.name, skill);
+                    // A skill pode ser um objeto com 'name' ou apenas uma string
+                    const skillName = typeof skill === 'string' ? skill : (skill.name || skill.skillName || skill);
+                    if (skillName && !skillsMap.has(skillName)) {
+                      skillsMap.set(skillName, typeof skill === 'string' ? { name: skill } : skill);
                     }
                   });
                 }
@@ -526,8 +662,13 @@ async function renderProjectDetail() {
         });
       }, 100);
     } else {
-      teamsList.innerHTML =
-        '<div style="padding:16px; color:#888;">Nenhuma equipe cadastrada.</div>';
+      console.warn("⚠️ Nenhuma squad encontrada ou array vazio");
+      if (teamsList) {
+        teamsList.innerHTML =
+          '<div style="padding:16px; color:#888;">Nenhuma equipe cadastrada.</div>';
+      } else {
+        console.error("❌ ERRO: teamsList não existe para mostrar mensagem de 'nenhuma equipe'");
+      }
     }
     
     resolve();
@@ -618,11 +759,17 @@ function toggleAllSkills(teamIdx, squadOrSkills) {
   
   const showingAll = btn.getAttribute("data-showing-all") === "true";
   
+  // Função auxiliar para extrair o nome da skill
+  const getSkillName = (skill) => {
+    if (typeof skill === 'string') return skill;
+    return skill.name || skill.skillName || 'N/A';
+  };
+  
   if (showingAll) {
     // Mostrar apenas 5
     skillsList.innerHTML = skills
       .slice(0, 5)
-      .map((skill) => `<span class="skill">${skill.name || skill}</span>`)
+      .map((skill) => `<span class="skill">${getSkillName(skill)}</span>`)
       .join("");
     btn.textContent = `Ver todas (${skills.length})`;
     btn.setAttribute("data-showing-all", "false");
@@ -632,7 +779,7 @@ function toggleAllSkills(teamIdx, squadOrSkills) {
   } else {
     // Mostrar todas
     skillsList.innerHTML = skills
-      .map((skill) => `<span class="skill">${skill.name || skill}</span>`)
+      .map((skill) => `<span class="skill">${getSkillName(skill)}</span>`)
       .join("");
     btn.textContent = "Ver menos";
     btn.setAttribute("data-showing-all", "true");

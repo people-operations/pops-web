@@ -1,5 +1,43 @@
 import { apiService } from "../../../../../assets/js/apiService.js";
 
+// Mostra loader IMEDIATAMENTE se estiver editando ou tiver squadId (antes de qualquer coisa)
+(function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isEdit = !!urlParams.get("id");
+  const squadId = urlParams.get("squadId") || urlParams.get("id");
+  
+  // Mostra loader se estiver editando ou se tiver squadId (modo criação com squad já criada)
+  if (isEdit || squadId) {
+    const loader = document.getElementById("loader");
+    const mainContent = document.getElementById("main-content");
+    if (loader) {
+      loader.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+          <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #7d1bff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+          <p style="color: #7d1bff; font-size: 16px;">Carregando membros...</p>
+        </div>
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+      loader.style.display = "flex";
+      loader.style.zIndex = "99999";
+      loader.style.position = "fixed";
+      loader.style.top = "0";
+      loader.style.left = "0";
+      loader.style.width = "100vw";
+      loader.style.height = "100vh";
+      loader.style.backgroundColor = "#fff";
+    }
+    if (mainContent) {
+      mainContent.classList.add("hidden");
+    }
+  }
+})();
+
 // --------- Mock helpers / leitura dos passos anteriores ----------
 function readJSON(key, fallback) {
   try {
@@ -24,10 +62,18 @@ function getSelectedRoles() {
   }
   return roles;
 }
-const selectedRoles = getSelectedRoles();
+let selectedRoles = getSelectedRoles();
 
 // Do passo "weeklyRequirements": [{ id, title, hours }]
-const weeklyReqs = readJSON("squads.weeklyRequirements", []);
+// Tenta carregar de window.__roles primeiro (da página anterior), depois do localStorage
+let weeklyReqs = [];
+if (typeof window !== 'undefined' && window.__roles && Array.isArray(window.__roles)) {
+  weeklyReqs = window.__roles;
+  console.log("✅ WeeklyReqs carregados de window.__roles:", weeklyReqs);
+} else {
+  weeklyReqs = readJSON("squads.weeklyRequirements", []);
+  console.log("✅ WeeklyReqs carregados do localStorage:", weeklyReqs);
+}
 
 // Duração da sprint em semanas (será buscada da squad)
 let sprintDuration = 0;
@@ -51,7 +97,8 @@ async function fetchAndPrepareCandidates() {
   
   // Busca sprintDuration da squad se houver squadId na URL
   const urlParams = new URLSearchParams(window.location.search);
-  const squadId = urlParams.get("squadId");
+  const squadId = urlParams.get("squadId") || urlParams.get("id");
+  const isEdit = !!urlParams.get("id");
   
   if (squadId) {
     try {
@@ -68,6 +115,129 @@ async function fetchAndPrepareCandidates() {
   } else {
     // Se não houver squadId, usa valor padrão
     sprintDuration = 4; // padrão: 4 semanas
+  }
+  
+  // Carrega os membros já alocados se houver squadId (tanto em modo edição quanto criação)
+  // Também carrega weeklyReqs da squad se disponível
+  if (squadId) {
+    try {
+      const squadDetails = await api.getSquadDetails(squadId);
+      
+      // Carrega weeklyReqs da squad se disponível (para cálculo correto do match)
+      if (squadDetails && squadDetails.allocations && Array.isArray(squadDetails.allocations)) {
+        // Agrupa allocations por função para obter horas semanais
+        const hoursByFunction = {};
+        squadDetails.allocations.forEach(alloc => {
+          const functionName = alloc.position || alloc.jobTitle || "";
+          if (functionName && !hoursByFunction[functionName]) {
+            // Pega a primeira allocation dessa função para obter as horas
+            hoursByFunction[functionName] = alloc.allocatedHours || 0;
+          }
+        });
+        
+        // Atualiza weeklyReqs com as horas da squad
+        if (Object.keys(hoursByFunction).length > 0) {
+          weeklyReqs = selectedRoles.map(role => {
+            const roleFunction = (role.funcao || role.title || role.cargo || "").trim();
+            const hours = hoursByFunction[roleFunction] || 0;
+            return {
+              id: role.id,
+              title: role.title || role.funcao,
+              hours: hours
+            };
+          });
+          console.log("✅ WeeklyReqs carregados da squad:", weeklyReqs);
+        }
+      }
+      
+      if (squadDetails && squadDetails.members && Array.isArray(squadDetails.members)) {
+        // Se não houver roles carregadas, tenta buscar da squad primeiro
+        if (selectedRoles.length === 0 && squadDetails.members.length > 0) {
+          // Tenta buscar roles da squad se disponível
+          if (squadDetails.roles && Array.isArray(squadDetails.roles) && squadDetails.roles.length > 0) {
+            selectedRoles = squadDetails.roles.map((role, index) => ({
+              id: role.id || `role-${index + 1}`,
+              funcao: role.funcao || role.title || role.cargo || role.position || "Sem função",
+              title: role.title || role.funcao || role.cargo || role.position || "Sem função",
+              quantity: role.quantity || 1
+            }));
+            console.log("✅ Roles carregadas da squad:", selectedRoles);
+          } else {
+            // Se não houver roles na squad, cria roles baseadas nos membros
+            const rolesByFunction = new Map();
+            let roleIdCounter = 1;
+            
+            squadDetails.members.forEach(member => {
+              const memberFunction = member.position || member.jobTitle || "Sem função";
+              if (!rolesByFunction.has(memberFunction)) {
+                rolesByFunction.set(memberFunction, {
+                  id: `role-${roleIdCounter++}`,
+                  funcao: memberFunction,
+                  title: memberFunction,
+                  quantity: 0
+                });
+              }
+              rolesByFunction.get(memberFunction).quantity += 1;
+            });
+            
+            selectedRoles = Array.from(rolesByFunction.values());
+            console.log("✅ Roles criadas a partir dos membros:", selectedRoles);
+          }
+        }
+        
+        // Agrupa membros por função (position ou jobTitle) e marca como selecionados
+        // MAS APENAS se a função corresponder a uma role existente
+        const membersByRole = {};
+        squadDetails.members.forEach(member => {
+          // Tenta usar position primeiro, depois jobTitle
+          const memberFunction = member.position || member.jobTitle || "Sem função";
+          // Encontra a role correspondente - tenta match com funcao, title ou cargo
+          const role = selectedRoles.find(r => {
+            const roleFunction = (r.funcao || r.title || r.cargo || "").toLowerCase().trim();
+            const memberFunctionLower = memberFunction.toLowerCase().trim();
+            return roleFunction === memberFunctionLower;
+          });
+          if (role) {
+            const roleId = role.id;
+            if (!membersByRole[roleId]) {
+              membersByRole[roleId] = [];
+            }
+            // Adiciona o ID do membro à lista de selecionados para essa função
+            // Usa personId se disponível, senão usa id ou employee.id
+            const memberId = member.personId || member.id || (member.employee && member.employee.id);
+            if (memberId) {
+              membersByRole[roleId].push(Number(memberId));
+            }
+          }
+        });
+        // Atualiza o estado com os membros já selecionados
+        Object.keys(membersByRole).forEach(roleId => {
+          if (!state.selectedByRole[roleId]) {
+            state.selectedByRole[roleId] = [];
+          }
+          // Adiciona os membros já alocados, evitando duplicatas
+          membersByRole[roleId].forEach(memberId => {
+            if (!state.selectedByRole[roleId].includes(memberId)) {
+              state.selectedByRole[roleId].push(memberId);
+            }
+          });
+        });
+        console.log("✅ Membros já alocados carregados:", state.selectedByRole);
+        console.log("✅ Roles disponíveis para filtro:", selectedRoles);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar membros já alocados:", error);
+    }
+  }
+  
+  // Garante que há pelo menos uma role selecionada para o filtro funcionar
+  if (selectedRoles.length > 0 && !state.roleId) {
+    state.roleId = selectedRoles[0].id;
+    // Atualiza o select de roles se existir
+    const roleSelect = document.getElementById("roleSelect");
+    if (roleSelect) {
+      roleSelect.value = state.roleId;
+    }
   }
   
   // Exibe skeleton
@@ -132,8 +302,27 @@ async function fetchAndPrepareCandidates() {
   const ordered = sortCandidates(filtered, state.roleId, state.orderBy);
   totalPages = Math.ceil(ordered.length / PAGE_SIZE) || 1;
   hideSkeleton();
-  document.getElementById("loader").style.display = "none";
-  document.getElementById("main-content").classList.remove("hidden");
+  
+  // Esconde loader e mostra conteúdo
+  const loader = document.getElementById("loader");
+  const mainContent = document.getElementById("main-content");
+  if (loader) {
+    loader.style.display = "none";
+    loader.classList.add("hidden");
+  }
+  if (mainContent) {
+    mainContent.classList.remove("hidden");
+  }
+  
+  // Configura botão de salvar após carregar dados
+  // Reutiliza urlParams, squadId e isEdit já declarados no início da função
+  const saveBtn = document.getElementById("saveBtn");
+  if (saveBtn && (isEdit || squadId)) {
+    saveBtn.style.display = "inline-block";
+    saveBtn.style.visibility = "visible";
+    console.log("✅ Botão salvar exibido após carregar dados - squadId:", squadId, "isEdit:", isEdit);
+  }
+  
   render();
 }
 
@@ -202,8 +391,12 @@ function getRequiredSkills(roleId) {
 }
 
 function matchPercent(candidate, roleId) {
-  const role = selectedRoles.find((r) => r.id === roleId);
-  if (!role) return 0;
+  // Compara IDs como strings para garantir match correto
+  const role = selectedRoles.find((r) => String(r.id) === String(roleId));
+  if (!role) {
+    console.warn("⚠️ Role não encontrada para match:", roleId);
+    return 0;
+  }
   
   // 1. Calcula match de skills (peso: 60%)
   const req = getRequiredSkills(roleId)
@@ -211,6 +404,8 @@ function matchPercent(candidate, roleId) {
     .filter(Boolean);
   
   let skillsMatch = 0;
+  let useSkillsWeight = true;
+  
   if (req.length > 0) {
     let inter = 0;
     candidate.skills.forEach((skill) => {
@@ -224,17 +419,21 @@ function matchPercent(candidate, roleId) {
     });
     skillsMatch = inter > 0 ? Math.round((inter / req.length) * 100) : 0;
   } else {
-    // Se não há skills requeridas, considera 50% de match base
-    skillsMatch = 50;
+    // Se não há skills requeridas, não conta skills no match
+    // O match será baseado apenas na disponibilidade
+    useSkillsWeight = false;
+    skillsMatch = 0;
   }
   
   // 2. Calcula match de disponibilidade de horas (peso: 40%)
-  // Horas semanais necessárias para a função
-  const requiredHoursPerWeek = weeklyReqs.find((w) => w.id === roleId)?.hours ?? 0;
+  // Horas semanais necessárias para a função - compara IDs como strings
+  const weeklyReq = weeklyReqs.find((w) => String(w.id) === String(roleId));
+  const requiredHoursPerWeek = weeklyReq?.hours ?? 0;
   // Horas totais necessárias para o projeto (semanas * horas semanais)
   const requiredHoursTotal = requiredHoursPerWeek * sprintDuration;
   
   let availabilityMatch = 0;
+  let useAvailabilityWeight = true;
   
   if (requiredHoursTotal > 0) {
     // Usa horas totais disponíveis do colaborador para o projeto
@@ -252,28 +451,92 @@ function matchPercent(candidate, roleId) {
       availabilityMatch = 0;
     }
   } else {
-    // Se não há horas requeridas, considera 50% de match base
-    availabilityMatch = 50;
+    // Se não há horas requeridas, não conta disponibilidade no match
+    // O match será baseado apenas nas skills
+    useAvailabilityWeight = false;
+    availabilityMatch = 0;
   }
   
-  // 3. Combina os dois scores (60% skills + 40% disponibilidade)
-  const finalMatch = Math.round(skillsMatch * 0.6 + availabilityMatch * 0.4);
+  // 3. Combina os dois scores
+  // Se não há skills requeridas, o match é baseado apenas na disponibilidade
+  // Se não há horas requeridas, o match é baseado apenas nas skills
+  // Se ambos existem, usa 60% skills + 40% disponibilidade
+  // Se nenhum existe, retorna 0% (sem critérios de match)
+  let finalMatch = 0;
+  
+  if (!useSkillsWeight && !useAvailabilityWeight) {
+    // Nenhum critério disponível - 0% de match
+    finalMatch = 0;
+  } else if (!useSkillsWeight && useAvailabilityWeight) {
+    // Apenas disponibilidade conta - 100% baseado em disponibilidade
+    finalMatch = availabilityMatch;
+  } else if (useSkillsWeight && !useAvailabilityWeight) {
+    // Apenas skills contam - 100% baseado em skills
+    finalMatch = skillsMatch;
+  } else {
+    // Ambos contam - 60% skills + 40% disponibilidade
+    finalMatch = Math.round(skillsMatch * 0.6 + availabilityMatch * 0.4);
+  }
+  
+  console.log(`📊 Match calculado para ${candidate.name} (${role.funcao || role.title}):`, {
+    skillsMatch: useSkillsWeight ? `${skillsMatch}%` : "N/A (sem skills requeridas)",
+    availabilityMatch: useAvailabilityWeight ? `${availabilityMatch}%` : "N/A (sem horas requeridas)",
+    requiredHoursPerWeek,
+    requiredHoursTotal,
+    availableHoursTotal: candidate.availableHoursTotal,
+    useSkillsWeight,
+    useAvailabilityWeight,
+    formula: !useSkillsWeight && !useAvailabilityWeight 
+      ? "0% (sem critérios)"
+      : !useSkillsWeight && useAvailabilityWeight
+      ? "100% disponibilidade"
+      : useSkillsWeight && !useAvailabilityWeight
+      ? "100% skills"
+      : "60% skills + 40% disponibilidade",
+    finalMatch: `${finalMatch}%`
+  });
   
   return finalMatch;
 }
 
 // --------- Filtro por função/cargo ----------
 function filterCandidatesByRole(list, roleId) {
-  const role = selectedRoles.find((r) => r.id === roleId);
-  if (!role || !role.funcao) return list;
+  if (!roleId) {
+    console.warn("⚠️ roleId não fornecido para filtro");
+    return list;
+  }
+  
+  const role = selectedRoles.find((r) => r.id === roleId || r.id == roleId);
+  if (!role) {
+    console.warn("⚠️ Role não encontrada:", roleId, "Roles disponíveis:", selectedRoles.map(r => ({ id: r.id, funcao: r.funcao })));
+    return [];
+  }
+  
+  if (!role.funcao && !role.title && !role.cargo) {
+    console.warn("⚠️ Role sem função definida:", role);
+    return [];
+  }
   
   // Filtra candidatos que têm o mesmo jobTitle da função selecionada
-  const roleJobTitle = role.funcao.trim();
-  return list.filter((candidate) => {
+  const roleJobTitle = (role.funcao || role.title || role.cargo || "").trim();
+  if (!roleJobTitle) {
+    console.warn("⚠️ Role sem função válida:", role);
+    return [];
+  }
+  
+  const filtered = list.filter((candidate) => {
     const candidateJobTitle = (candidate.jobTitle || "").trim();
+    if (!candidateJobTitle) {
+      return false;
+    }
     // Comparação case-insensitive e exata
-    return candidateJobTitle.toLowerCase() === roleJobTitle.toLowerCase();
+    const matches = candidateJobTitle.toLowerCase() === roleJobTitle.toLowerCase();
+    return matches;
   });
+  
+  console.log(`🔍 Filtro: Role "${roleJobTitle}" (${roleId}) - ${filtered.length} candidatos de ${list.length} total`);
+  console.log(`   Candidatos filtrados:`, filtered.map(c => ({ name: c.name, jobTitle: c.jobTitle })));
+  return filtered;
 }
 
 // --------- Ordenação ----------
@@ -311,24 +574,34 @@ function render() {
     .map((r) => {
       const filled = (state.selectedByRole[r.id] || []).length;
       const needed = r.quantity ?? 2;
-      console.log("Role render:", { r, filled, needed }); // DEBUG
       const label = `${r.funcao || "Função"} – ${filled}/${needed} preenchido`;
-      return `<option value="${r.id}" ${
-        state.roleId === r.id ? "selected" : ""
-      }>${label}</option>`;
+      // Compara IDs como strings para garantir match
+      const isSelected = String(state.roleId) === String(r.id);
+      return `<option value="${r.id}" ${isSelected ? "selected" : ""}>${label}</option>`;
     })
     .join("");
 
   // Atualiza contagem do papel atual
-  const currentRole = selectedRoles.find((r) => r.id === state.roleId);
+  let finalRole = selectedRoles.find((r) => String(r.id) === String(state.roleId));
+  if (!finalRole && selectedRoles.length > 0) {
+    // Se a role atual não foi encontrada, usa a primeira
+    state.roleId = selectedRoles[0].id;
+    roleSelect.value = state.roleId;
+    finalRole = selectedRoles[0];
+  } else if (!finalRole) {
+    // Se não há roles, cria uma role vazia para evitar erros
+    finalRole = { id: state.roleId, funcao: "", quantity: 2 };
+  }
+  
   const filled = (state.selectedByRole[state.roleId] || []).length;
-  const needed = currentRole?.quantity ?? 2;
+  const needed = finalRole?.quantity ?? 2;
   infoSpan.textContent = `${filled} / ${needed} preenchido`;
 
   // Ordenação
   orderSelect.value = state.orderBy;
 
   // Filtra candidatos pela função selecionada
+  console.log("🎯 Render - Filtrando candidatos para roleId:", state.roleId, "Total de candidatos:", allCandidates.length);
   const filtered = filterCandidatesByRole(allCandidates, state.roleId);
   
   // Paginação
@@ -340,14 +613,14 @@ function render() {
 
   cards.innerHTML = "";
   if (filtered.length === 0) {
-    const role = selectedRoles.find((r) => r.id === state.roleId);
-    const roleName = role?.funcao || "função selecionada";
+    const role = selectedRoles.find((r) => String(r.id) === String(state.roleId));
+    const roleName = role?.funcao || role?.title || "função selecionada";
     cards.innerHTML = `<div style="text-align: center; padding: 40px; color: #666;">
       <p>Nenhum colaborador encontrado com o cargo "${roleName}".</p>
       <p style="font-size: 14px; margin-top: 8px;">Tente selecionar outra função ou verifique se há colaboradores cadastrados com esse cargo.</p>
     </div>`;
   } else {
-    paginated.forEach((c) => cards.appendChild(buildCard(c, currentRole)));
+    paginated.forEach((c) => cards.appendChild(buildCard(c, finalRole)));
   }
 
   // Paginação UI
@@ -424,8 +697,9 @@ function buildCard(c, role) {
   body.className = "body";
 
   const match = matchPercent(c, state.roleId);
-  // Horas semanais necessárias para a função
-  const requiredHoursPerWeek = weeklyReqs.find((w) => w.id === state.roleId)?.hours ?? 0;
+  // Horas semanais necessárias para a função - compara IDs como strings
+  const weeklyReq = weeklyReqs.find((w) => String(w.id) === String(state.roleId));
+  const requiredHoursPerWeek = weeklyReq?.hours ?? 0;
   // Horas totais necessárias para o projeto
   const requiredHoursTotal = requiredHoursPerWeek * sprintDuration;
 
@@ -482,17 +756,34 @@ function buildCard(c, role) {
     <div class="exp">Experiência: ${c.exp}</div>
   `;
 
-  // Limita seleção à quantidade necessária
+  // Limita seleção à quantidade necessária e garante que o colaborador tenha a mesma função
   checkbox.addEventListener("change", () => {
     const max = role?.quantity ?? 2;
     const arr = state.selectedByRole[state.roleId] || [];
+    
+    // Verifica se o colaborador tem a mesma função da role selecionada
+    const roleFunction = (role?.funcao || role?.title || role?.cargo || "").trim().toLowerCase();
+    const candidateFunction = (c.jobTitle || "").trim().toLowerCase();
+    
     if (checkbox.checked) {
+      // Valida se a função do candidato corresponde à função da role
+      if (candidateFunction !== roleFunction) {
+        checkbox.checked = false;
+        if (window.showNotification) {
+          window.showNotification(
+            "error",
+            `Este colaborador não possui a função "${role?.funcao || role?.title || 'selecionada'}". Apenas colaboradores com a mesma função podem ser selecionados.`
+          );
+        }
+        return;
+      }
+      
       if (arr.length >= max) {
         checkbox.checked = false;
         if (window.showNotification) {
           window.showNotification(
             "error",
-            `Limite atingido: ${max} para ${role?.title || "função"}.`
+            `Limite atingido: ${max} para ${role?.title || role?.funcao || "função"}.`
           );
         }
         return;
@@ -517,7 +808,13 @@ function buildCard(c, role) {
 fetchAndPrepareCandidates();
 
 document.getElementById("roleSelect").addEventListener("change", (e) => {
-  state.roleId = e.target.value;
+  const newRoleId = e.target.value;
+  console.log("🔄 Mudando de função:", { 
+    oldRoleId: state.roleId, 
+    newRoleId,
+    selectedRoles: selectedRoles.map(r => ({ id: r.id, funcao: r.funcao }))
+  });
+  state.roleId = newRoleId;
   currentPage = 1;
   render();
 });
@@ -536,23 +833,55 @@ if (orderSelect && !orderSelect.querySelector('option[value="name-desc"]')) {
   orderSelect.appendChild(option);
 }
 
+// O botão de salvar é configurado após o carregamento dos dados em fetchAndPrepareCandidates()
+
+// Mostra botão próximo se estiver editando
+const nextBtn = document.getElementById("nextBtn");
+if (nextBtn) {
+  const params = new URLSearchParams(window.location.search);
+  const squadId = params.get("squadId") || params.get("id");
+  const isEdit = !!params.get("id");
+  
+  if (isEdit) {
+    nextBtn.style.display = "inline-block";
+    nextBtn.addEventListener("click", () => {
+      // Avançar para weekly requirements
+      const param = isEdit ? `id=${squadId}` : (squadId ? `squadId=${squadId}` : "");
+      window.location.href = `../squads-weekly-requirements/squads-weekly-requirements.html${param ? `?${param}` : ""}`;
+    });
+  }
+}
+
 document.getElementById("backBtn").addEventListener("click", () => {
-  window.location.href =
-    "../squads-weekly-requirements/squads-weekly-requirements.html";
+  // Voltar para weekly requirements, mantendo o id
+  const params = new URLSearchParams(window.location.search);
+  const squadId = params.get("squadId") || params.get("id");
+  const isEdit = !!params.get("id");
+  const param = isEdit ? `id=${squadId}` : (squadId ? `squadId=${squadId}` : "");
+  window.location.href = `../squads-weekly-requirements/squads-weekly-requirements.html${param ? `?${param}` : ""}`;
 });
 
-document.getElementById("saveBtn").addEventListener("click", () => {
+document.getElementById("saveBtn").addEventListener("click", async () => {
   localStorage.setItem(
     "squads.membersSelection",
     JSON.stringify(state.selectedByRole)
   );
 
-  // Pega squadId da URL
+  // Pega squadId da URL (pode ser squadId ou id)
   const params = new URLSearchParams(window.location.search);
-  const squadId = params.get("squadId");
+  const squadId = params.get("squadId") || params.get("id");
   if (!squadId) {
     if (window.showNotification) {
       window.showNotification("error", "ID da Squad não encontrado na URL!");
+    }
+    return;
+  }
+
+  // Valida se há membros selecionados
+  const totalSelected = Object.values(state.selectedByRole).reduce((sum, arr) => sum + (arr?.length || 0), 0);
+  if (totalSelected === 0) {
+    if (window.showNotification) {
+      window.showNotification("error", "Selecione pelo menos um membro antes de salvar!");
     }
     return;
   }
@@ -561,42 +890,114 @@ document.getElementById("saveBtn").addEventListener("click", () => {
   const today = new Date();
   const startedAt = today.toISOString().split("T")[0]; // yyyy-mm-dd
   const allocations = [];
+  const errors = [];
+  
   Object.entries(state.selectedByRole).forEach(([roleId, memberIds]) => {
-    const role = selectedRoles.find((r) => r.id == roleId);
-    const weekly = weeklyReqs.find((w) => w.id == roleId);
+    const role = selectedRoles.find((r) => String(r.id) === String(roleId));
+    const weekly = weeklyReqs.find((w) => String(w.id) === String(roleId));
+    
     // Horas semanais alocadas
     const allocatedHours = weekly?.hours || 0;
-    const position = role?.title || "";
+    if (allocatedHours === 0) {
+      errors.push(`Role "${role?.funcao || role?.title || roleId}" não tem horas definidas.`);
+    }
+    
+    // Posição (função) - obrigatória
+    const position = (role?.funcao || role?.title || role?.cargo || "").trim();
+    if (!position) {
+      errors.push(`Role ${roleId} não tem posição definida.`);
+      return; // Pula esta role se não tiver posição
+    }
+    
     (memberIds || []).forEach((personId) => {
+      if (!personId || isNaN(Number(personId))) {
+        errors.push(`PersonId inválido: ${personId}`);
+        return;
+      }
+      
       allocations.push({
         startedAt,
-        allocatedHours, // Horas semanais (backend armazena assim)
+        allocatedHours: Number(allocatedHours), // Garante que é número
         personId: Number(personId),
         position,
-        team: Number(squadId),
       });
     });
   });
+  
+  // Valida antes de enviar
+  if (errors.length > 0) {
+    console.error("❌ Erros de validação:", errors);
+    if (window.showNotification) {
+      window.showNotification("error", `Erros encontrados:\n${errors.slice(0, 3).join("\n")}${errors.length > 3 ? "\n..." : ""}`);
+    }
+    return;
+  }
 
-  // Chama API
-  apiService
-    .insertSquadAllocations(squadId, allocations)
-    .then((result) => {
-      if (window.showNotification) {
-        if (result) {
-          window.showNotification("success", "Alocações salvas!");
-          // Redireciona para a página de squads após salvar
-          setTimeout(() => {
-            window.location.href = "../../squads.html";
-          }, 1000);
-        } else {
-          window.showNotification("error", "Erro ao salvar alocações!");
-        }
-      }
-    })
-    .catch((err) => {
-      if (window.showNotification) {
-        window.showNotification("error", "Erro ao salvar alocações!");
-      }
+  if (allocations.length === 0) {
+    if (window.showNotification) {
+      window.showNotification("error", "Nenhuma alocação para salvar!");
+    }
+    return;
+  }
+
+  console.log("💾 Salvando allocations:", { squadId, allocations });
+
+  // Desabilita botão durante o salvamento
+  const saveBtn = document.getElementById("saveBtn");
+  const originalText = saveBtn.textContent;
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Salvando...";
+
+  try {
+    // Aguarda apiService estar disponível
+    const api = await apiService;
+    
+    console.log("📤 Enviando para API:", {
+      squadId,
+      allocationsCount: allocations.length,
+      allocations: allocations.map(a => ({
+        startedAt: a.startedAt,
+        allocatedHours: a.allocatedHours,
+        personId: a.personId,
+        position: a.position
+      }))
     });
+    
+    // Chama API
+    const result = await api.insertSquadAllocations(squadId, allocations);
+    
+    console.log("📥 Resposta da API:", result);
+    
+    if (result && Array.isArray(result)) {
+      if (window.showNotification) {
+        window.showNotification("success", `Alocações salvas com sucesso! ${result.length} membro(s) alocado(s).`);
+      }
+      // Redireciona para a página de squads após salvar
+      setTimeout(() => {
+        window.location.href = "../../squads.html";
+      }, 1500);
+    } else {
+      throw new Error("Resposta inválida da API - esperado array de allocations");
+    }
+  } catch (err) {
+    console.error("❌ Erro ao salvar alocações:", err);
+    console.error("❌ Detalhes do erro:", {
+      message: err.message,
+      stack: err.stack,
+      name: err.name
+    });
+    
+    let errorMessage = "Erro ao salvar alocações";
+    if (err.message) {
+      errorMessage += `: ${err.message}`;
+    }
+    
+    if (window.showNotification) {
+      window.showNotification("error", errorMessage);
+    }
+  } finally {
+    // Reabilita botão
+    saveBtn.disabled = false;
+    saveBtn.textContent = originalText;
+  }
 });

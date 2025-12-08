@@ -469,6 +469,40 @@ body.dark .exp {
   color: #fff !important;
   background: #7d1bff !important;
 }
+.save-secondary {
+  background: #fff;
+  border: 2px solid #7d1bff;
+  color: #7d1bff;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 32px;
+  width: 133px;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding: 0 !important;
+  letter-spacing: 0 !important;
+  font-family: "Poppins", sans-serif;
+  transition: all 0.2s;
+}
+.save-secondary:hover {
+  background: #f5f0ff;
+}
+.save-secondary:disabled,
+.save-secondary[disabled] {
+  background: #f3f4f6 !important;
+  color: #9ca3af !important;
+  border-color: #e5e7eb !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+body.dark .save-secondary {
+  background: transparent;
+  border: 2px solid #7d1bff;
+  color: #7d1bff;
+}
+body.dark .save-secondary:hover {
+  background: rgba(125, 27, 255, 0.1);
+}
 .save {
   background-color: #7d1bff;
   color: white;

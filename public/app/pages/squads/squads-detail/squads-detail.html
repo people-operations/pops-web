@@ -71,7 +71,7 @@
             />
             <span data-i18n="navbar.projects"></span>
           </a>
-          <a href="../../collaborators/collaborators.html">
+          <a href="../../collaborators/collaborators.html" data-require-access="1,2">
             <img
               src="../../../../assets/svg/colaborator.svg"
               alt="Colaboradores"
@@ -141,9 +141,6 @@
               href="#"
               ><span data-i18n="navbar.profile"></span
             ></a>
-            <a href="../inbox/inbox.html"
-              ><span data-i18n="navbar.inbox"></span
-            ></a>
             <a href="../configurations/general/general.html"
               ><span data-i18n="navbar.settings"></span
             ></a>
@@ -177,47 +174,24 @@
               />
             </div>
           </div>
+          <div class="projects-count" id="projects-count" style="display: inline-block; background: #2f7d32; color: #fff; border-radius: 50px; padding: 4px 10px; font-size: 14px; font-weight: 500; margin-bottom: 12px;">0 projetos ativos</div>
           <p class="description" data-i18n="squads_detail.description"></p>
           <p class="info-line">
-            <strong data-i18n="squads_detail.area"></strong> Desenvolvimento •
-            <strong data-i18n="squads_detail.members"></strong> 5
+            <strong data-i18n="squads_detail.members"></strong> <span id="members-count">0</span>
+          </p>
+          <p class="info-line" id="hours-info">
+            <strong>Horas totais:</strong> <span id="total-hours">-</span> • 
+            <strong>Horas aplicadas:</strong> <span id="allocated-hours-info">-</span>
+          </p>
+          <p class="info-line" id="overload-info">
+            <strong>Índice de sobrecarga:</strong> <span id="overload-percent">-</span>
+          </p>
+          <p class="info-line" id="sprint-info" style="display: none;">
+            <strong>Duração do Sprint:</strong> <span id="sprint-duration">-</span> semanas
           </p>
         </div>
         <!-- Main content -->
         <section class="content">
-          <!-- Top stats -->
-          <div class="stats-container">
-            <div class="card azul">
-              <h3 data-i18n="squads_detail.allocated_hours"></h3>
-              <div class="value" id="allocated-hours"></div>
-              <small id="allocated-hours-available"></small>
-            </div>
-            <div class="card rosa">
-              <h3 data-i18n="squads_detail.overload_index"></h3>
-              <div class="value" id="overload-index"></div>
-              <small data-i18n="squads_detail.overload_index_hint"></small>
-            </div>
-          </div>
-          <!-- Financial overview -->
-          <div class="financial-overview">
-            <div class="card">
-              <h3 data-i18n="squads_detail.financial_overview"></h3>
-              <div class="financial-stats">
-                <div class="stat-item">
-                  <p data-i18n="squads_detail.monthly_investment"></p>
-                  <div class="value" id="monthly-investment"></div>
-                  <small
-                    data-i18n="squads_detail.monthly_investment_hint"
-                  ></small>
-                </div>
-                <div class="stat-item">
-                  <p data-i18n="squads_detail.total_budget"></p>
-                  <div class="value" id="total-budget"></div>
-                  <small data-i18n="squads_detail.total_budget_hint"></small>
-                </div>
-              </div>
-            </div>
-          </div>
           <!-- Team members -->
           <div class="team-members">
             <header class="projects-header">

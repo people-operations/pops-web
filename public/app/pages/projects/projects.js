@@ -8,31 +8,54 @@ let currentPage = 1;
 const itemsPerPage = 9;
 
 async function fetchAndRenderProjects() {
+  // Mostrar loader
+  const loader = document.getElementById("loader");
+  const mainContent = document.getElementById("main-content");
+  if (loader) {
+    loader.classList.remove("hidden");
+    loader.innerHTML = '<div class="spinner"></div><p>Carregando projetos...</p>';
+  }
+  if (mainContent) mainContent.classList.add("hidden");
+  
   showSkeleton();
   try {
+    // Verificar access_level
+    const { getCurrentAccessLevel } = await import("../../../assets/js/permissions.js");
+    const accessLevel = getCurrentAccessLevel();
+    const isCollaborator = accessLevel === 3;
+    
     const { getAuthTokenOrThrow } = await import("../../../assets/js/apiService.js");
     const token = getAuthTokenOrThrow();
     
+    // Para colaboradores, não buscar tipos e status
+    let activeTypes = [], inactiveTypes = [], activeStatuses = [], inactiveStatuses = [];
+    
+    if (!isCollaborator) {
+      // Managers podem ver tipos e status
+      [activeTypes, inactiveTypes, activeStatuses, inactiveStatuses] = await Promise.all([
+        apiService.getProjectTypes(),
+        fetch("http://localhost:8082/api/project-types/inactive", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(res => res.ok && res.status !== 204 ? res.json() : []).catch(() => []),
+        apiService.getProjectStatuses(),
+        fetch("http://localhost:8082/api/project-status/inactive", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(res => res.ok && res.status !== 204 ? res.json() : []).catch(() => [])
+      ]);
+    }
+    
     // Buscar projetos ativos e inativos
-    const [activeProjects, inactiveProjects, activeTypes, inactiveTypes, activeStatuses, inactiveStatuses] = await Promise.all([
+    const [activeProjects, inactiveProjects] = await Promise.all([
       apiService.getAllProjects(),
       fetch("http://localhost:8082/api/projects/inactive", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }).then(res => res.ok && res.status !== 204 ? res.json() : []).catch(() => []),
-      apiService.getProjectTypes(),
-      fetch("http://localhost:8082/api/project-types/inactive", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }).then(res => res.ok && res.status !== 204 ? res.json() : []).catch(() => []),
-      apiService.getProjectStatuses(),
-      fetch("http://localhost:8082/api/project-status/inactive", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -42,9 +65,32 @@ async function fetchAndRenderProjects() {
     ]);
     
     // Combinar projetos ativos e inativos
-    const active = Array.isArray(activeProjects) ? activeProjects : [];
-    const inactive = Array.isArray(inactiveProjects) ? inactiveProjects : [];
+    let active = Array.isArray(activeProjects) ? activeProjects : [];
+    let inactive = Array.isArray(inactiveProjects) ? inactiveProjects : [];
     allProjects = [...active, ...inactive];
+    
+    // Se for colaborador, filtrar apenas seus projetos
+    if (isCollaborator) {
+      const userId = localStorage.getItem("userId");
+      if (userId) {
+        try {
+          // Buscar alocações do colaborador
+          const allocations = await apiService.getAllocationsByEmployeeId(userId);
+          const squadIds = [...new Set(allocations.map(a => a.team?.id || a.teamId || a.squadId).filter(id => id != null))];
+          
+          // Buscar squads para obter projectIds
+          const allSquads = await apiService.getAllSquads();
+          const userSquads = allSquads.filter(s => squadIds.includes(s.id));
+          const projectIds = [...new Set(userSquads.map(s => s.projectId).filter(id => id != null))];
+          
+          // Filtrar projetos
+          allProjects = allProjects.filter(p => projectIds.includes(p.id));
+          console.log("✅ Projetos filtrados para colaborador:", allProjects.length);
+        } catch (error) {
+          console.warn("⚠️ Erro ao filtrar projetos do colaborador:", error);
+        }
+      }
+    }
     
     // Ordenar alfabeticamente por nome
     allProjects.sort((a, b) => {
@@ -60,6 +106,10 @@ async function fetchAndRenderProjects() {
     
     populateFilters();
     renderProjects(projects);
+    
+    // Ocultar loader e mostrar conteúdo
+    if (loader) loader.classList.add("hidden");
+    if (mainContent) mainContent.classList.remove("hidden");
   } catch (err) {
     const i18n = window.i18n;
     window.showNotification &&
@@ -71,6 +121,10 @@ async function fetchAndRenderProjects() {
       i18n?.t ? i18n.t("projects.fetch_error") : "Erro ao buscar projetos:",
       err
     );
+    
+    // Ocultar loader mesmo em caso de erro
+    if (loader) loader.classList.add("hidden");
+    if (mainContent) mainContent.classList.remove("hidden");
     renderProjects([]);
   }
 }

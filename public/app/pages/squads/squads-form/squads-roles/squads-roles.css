@@ -203,6 +203,26 @@ h5 {
   font-family: "Poppins", sans-serif;
 }
 
+/* Estilo do botão Salvar (save-secondary) */
+.save-secondary {
+  background: #fff;
+  border: 2px solid #7d1bff;
+  color: #7d1bff;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 32px;
+  width: 133px;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding: 0 !important;
+  letter-spacing: 0 !important;
+  font-family: "Poppins", sans-serif;
+  transition: all 0.2s;
+}
+.save-secondary:hover {
+  background: #f5f0ff;
+}
+
 /* Estado desabilitado para o botão .save */
 .save:disabled,
 .save[disabled] {

@@ -1,6 +1,16 @@
 import { apiService } from "../../../assets/js/apiService.js";
+import { requireAuth, requireAccess } from "../../../assets/js/permissions.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Verificar autenticação
+  if (!requireAuth()) {
+    return; // Redireciona para login
+  }
+  
+  // Verificar acesso - apenas access_level 1 ou 2 (managers)
+  if (!requireAccess([1, 2], "../../dashboard/dashboard.html")) {
+    return; // Redireciona para dashboard com mensagem de erro
+  }
   const searchInput = document.querySelector(".search-bar input");
   const searchButton = document.querySelector(".search-bar button");
   const clearSearchButton = document.querySelector(

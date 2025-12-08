@@ -35,7 +35,7 @@
     <div
       id="loader"
       class="center"
-      style="height: 100vh; font-size: 1.5rem; background-color: #fff"
+      style="display: flex; height: 100vh; font-size: 1.5rem; background-color: #fff; align-items: center; justify-content: center;"
     ></div>
     <div id="main-content" class="hidden">
       <header>
@@ -77,7 +77,7 @@
             />
             <span data-i18n="navbar.projects"></span>
           </a>
-          <a href="../../collaborators/collaborators.html">
+          <a href="../../collaborators/collaborators.html" data-require-access="1,2">
             <img
               src="../../../../assets/svg/colaborator.svg"
               alt="Colaboradores"
@@ -145,9 +145,6 @@
             <a id="profile-link" href="#"
               ><span data-i18n="navbar.profile"></span
             ></a>
-            <a href="../inbox/inbox.html"
-              ><span data-i18n="navbar.inbox"></span
-            ></a>
             <a href="../configurations/general/general.html"
               ><span data-i18n="navbar.settings"></span
             ></a>
@@ -197,6 +194,7 @@
               <div class="col">
                 <label data-i18n="squads_form.status"></label>
                 <select
+                  id="select-status"
                   type="text"
                   data-i18n-placeholder="squads_form.status_placeholder"
                 >
@@ -238,11 +236,6 @@
             <textarea
               data-i18n-placeholder="squads_form.description_placeholder"
             ></textarea>
-            <label data-i18n="squads_form.approver"></label>
-            <select
-              id="select-approver"
-              data-i18n-placeholder="squads_form.select_approver"
-            ></select>
 
             <!-- Botões -->
             <div class="form-actions">
@@ -253,8 +246,15 @@
               ></button>
               <button
                 type="button"
-                class="save"
+                class="save-secondary"
                 id="save-btn"
+                data-i18n="squads_form.save"
+                style="display: none;"
+              ></button>
+              <button
+                type="button"
+                class="save"
+                id="next-btn"
                 data-i18n="squads_form.next"
               ></button>
             </div>

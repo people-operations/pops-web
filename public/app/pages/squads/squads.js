@@ -89,9 +89,43 @@ function renderSquads() {
 }
 
 async function fetchAndRenderSquads() {
+  // Mostrar loader
+  const loader = document.getElementById("loader");
+  const mainContent = document.getElementById("main-content");
+  if (loader) {
+    loader.classList.remove("hidden");
+    loader.innerHTML = '<div class="spinner"></div><p>Carregando squads...</p>';
+  }
+  if (mainContent) mainContent.classList.add("hidden");
+  
   showSkeleton();
   try {
-    const response = await apiService.getAllSquads();
+    // Verificar access_level
+    const { getCurrentAccessLevel } = await import("../../../assets/js/permissions.js");
+    const accessLevel = getCurrentAccessLevel();
+    const isCollaborator = accessLevel === 3;
+    
+    let response = await apiService.getAllSquads();
+    
+    // Se for colaborador, filtrar apenas suas squads
+    if (isCollaborator) {
+      const userId = localStorage.getItem("userId");
+      if (userId) {
+        try {
+          // Buscar alocações do colaborador
+          const allocations = await apiService.getAllocationsByEmployeeId(userId);
+          const squadIds = [...new Set(allocations.map(a => a.team?.id || a.teamId || a.squadId).filter(id => id != null))];
+          
+          // Filtrar squads
+          if (Array.isArray(response)) {
+            response = response.filter(s => squadIds.includes(s.id));
+            console.log("✅ Squads filtradas para colaborador:", response.length);
+          }
+        } catch (error) {
+          console.warn("⚠️ Erro ao filtrar squads do colaborador:", error);
+        }
+      }
+    }
     
     // O apiService já retorna um array
     if (Array.isArray(response)) {
@@ -101,12 +135,20 @@ async function fetchAndRenderSquads() {
     }
     
     renderSquads();
+    
+    // Ocultar loader e mostrar conteúdo
+    if (loader) loader.classList.add("hidden");
+    if (mainContent) mainContent.classList.remove("hidden");
   } catch (err) {
     window.showNotification &&
       window.showNotification("error", "Erro ao buscar squads.");
     console.error("Erro ao buscar squads:", err);
     squads = [];
     renderSquads();
+    
+    // Ocultar loader mesmo em caso de erro
+    if (loader) loader.classList.add("hidden");
+    if (mainContent) mainContent.classList.remove("hidden");
   }
 }
 

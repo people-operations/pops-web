@@ -17,11 +17,35 @@ document.addEventListener("DOMContentLoaded", function () {
     if (editBtn) {
       editBtn.addEventListener("click", function () {
         const squadId = getSquadIdFromUrl();
-        if (squadId) {
-          window.location.href = `../squads-form/squads-form.html?id=${squadId}`;
-        } else {
-          window.location.href = "../squads-form/squads-form.html";
+        // Mostra loader antes de redirecionar
+        const loader = document.getElementById("loader");
+        const mainContent = document.getElementById("main-content");
+        if (loader) {
+          loader.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+              <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #7d1bff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+              <p style="color: #7d1bff; font-size: 16px;">Carregando dados da squad...</p>
+            </div>
+            <style>
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            </style>
+          `;
+          loader.style.display = "flex";
         }
+        if (mainContent) {
+          mainContent.classList.add("hidden");
+        }
+        // Redireciona após um pequeno delay para garantir que o loader apareça
+        setTimeout(() => {
+          if (squadId) {
+            window.location.href = `../squads-form/squads-form.html?id=${squadId}`;
+          } else {
+            window.location.href = "../squads-form/squads-form.html";
+          }
+        }, 100);
       });
     }
     if (trashBtn) {
@@ -68,28 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
       `;
     }
-    // Skeleton para cards de estatísticas
-    const stats = document.querySelectorAll(".stats-container .card");
-    if (stats && stats.length) {
-      stats.forEach((card) => {
-        card.innerHTML = `
-          <div class="skeleton-box" style="width:60%;height:22px;margin:0 auto 12px auto;"></div>
-          <div class="skeleton-box" style="width:80%;height:28px;margin:0 auto 8px auto;"></div>
-          <div class="skeleton-box" style="width:50%;height:16px;margin:0 auto 0 auto;"></div>
-        `;
-      });
-    }
-    // Skeleton para cards de finanças
-    const finances = document.querySelectorAll(".financial-overview .card");
-    if (finances && finances.length) {
-      finances.forEach((card) => {
-        card.innerHTML = `
-          <div class="skeleton-box" style="width:60%;height:22px;margin:0 auto 12px auto;"></div>
-          <div class="skeleton-box" style="width:80%;height:28px;margin:0 auto 8px auto;"></div>
-          <div class="skeleton-box" style="width:50%;height:16px;margin:0 auto 0 auto;"></div>
-        `;
-      });
-    }
+    // Cards de stats e finanças foram removidos
     // Skeleton para equipe
     const membersList = document.getElementById("members-list");
     if (membersList) {
@@ -110,42 +113,100 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // Função para esconder o loader e mostrar o conteúdo principal
+  function hideLoaderAndShowContent() {
+    const loader = document.getElementById("loader");
+    const mainContent = document.getElementById("main-content");
+    if (loader) {
+      loader.style.display = "none";
+      loader.classList.add("hidden");
+    }
+    if (mainContent) {
+      mainContent.classList.remove("hidden");
+    }
+  }
+
   // Função para popular os detalhes da squad
   async function fetchAndRenderSquadDetails() {
+    // Esconde o loader e mostra o conteúdo antes de carregar os dados
+    hideLoaderAndShowContent();
     showSkeletonDetail();
     const squadId = getSquadIdFromUrl();
     if (!squadId) {
       removeSkeletons();
-      renderSquadDetails(null, []);
+      renderSquadDetails(null, null, 0);
       return;
     }
     try {
-      const [squad, allocations] = await Promise.all([
+      const [squad, squadDetails] = await Promise.all([
         apiService.getSquadById(squadId),
-        apiService.getSquadAllocations(squadId),
+        apiService.getSquadDetails(squadId),
       ]);
       
-      // Busca projeto associado à squad se houver projectId
-      let project = null;
-      if (squad && squad.projectId) {
+      // Buscar todos os projetos ativos e contar quantos têm essa squad vinculada
+      let activeProjectsCount = 0;
+      let projectsList = [];
+      
+      try {
+        const allProjects = await apiService.getAllProjects();
+        if (allProjects && Array.isArray(allProjects)) {
+          // Filtrar projetos que têm essa squad (team) vinculada
+          // A squad pode estar vinculada através do fk_project OU através da lista de squads do projeto
+          projectsList = allProjects.filter(project => {
+            // Verifica se o projeto tem essa squad na lista de squads
+            if (project.squads && Array.isArray(project.squads)) {
+              return project.squads.some(s => s.id === parseInt(squadId) || s.id === squadId);
+            }
+            // Também verifica se o projectId da squad corresponde ao ID do projeto
+            if (squad && squad.projectId && project.id) {
+              return project.id === squad.projectId || project.id === parseInt(squad.projectId);
+            }
+            return false;
+          });
+          // Contar apenas projetos ativos
+          activeProjectsCount = projectsList.filter(p => p.active !== false).length;
+        }
+      } catch (err) {
+        console.warn("Erro ao buscar projetos para contar:", err);
+        // Se falhar, tentar buscar apenas o projeto principal
+        if (squad && squad.projectId) {
+          try {
+            const project = await apiService.getProjectById(squad.projectId);
+            if (project) {
+              projectsList = [project];
+              if (project.active !== false) {
+                activeProjectsCount = 1;
+              }
+            }
+          } catch (err2) {
+            console.warn("Erro ao buscar projeto principal:", err2);
+          }
+        }
+      }
+      
+      // Se não encontrou projetos através da busca, usar o projeto principal
+      if (projectsList.length === 0 && squad && squad.projectId) {
         try {
-          project = await apiService.getProjectById(squad.projectId);
+          const project = await apiService.getProjectById(squad.projectId);
+          if (project) {
+            projectsList = [project];
+            if (project.active !== false) {
+              activeProjectsCount = 1;
+            }
+          }
         } catch (err) {
           console.warn("Erro ao buscar projeto da squad:", err);
         }
       }
       
-      // Se houver projeto, adiciona à lista de projetos
-      if (project) {
-        squad.projectsList = [project];
-      }
+      squad.projectsList = projectsList;
       
       removeSkeletons();
-      renderSquadDetails(squad, allocations);
+      renderSquadDetails(squad, squadDetails, activeProjectsCount);
     } catch (err) {
       console.error("Erro ao buscar detalhes da squad:", err);
       removeSkeletons();
-      renderSquadDetails(null, []);
+      renderSquadDetails(null, null, 0);
     }
   }
 
@@ -176,10 +237,21 @@ document.addEventListener("DOMContentLoaded", function () {
             />
           </div>
         </div>
-        <div class="projects-count" data-i18n="squads_detail.active_projects"></div>
+        <div class="projects-count" id="projects-count" style="display: inline-block; background: #2f7d32; color: #fff; border-radius: 50px; padding: 4px 10px; font-size: 14px; font-weight: 500; margin-bottom: 12px;">0 projetos ativos</div>
         <div class="description" data-i18n="squads_detail.description"></div>
-        <div class="info-line"></div>
-        <div class="info-line"></div>
+        <div class="info-line">
+          <strong data-i18n="squads_detail.members"></strong> <span id="members-count">0</span>
+        </div>
+        <div class="info-line" id="hours-info">
+          <strong>Horas totais:</strong> <span id="total-hours">-</span> • 
+          <strong>Horas aplicadas:</strong> <span id="allocated-hours-info">-</span>
+        </div>
+        <div class="info-line" id="po-info" style="display: none;">
+          <strong>PO:</strong> <span id="po-name">-</span>
+        </div>
+        <div class="info-line" id="sprint-info" style="display: none;">
+          <strong>Duração do Sprint:</strong> <span id="sprint-duration">-</span> semanas
+        </div>
         <div class="skills d-flex flex-column"></div>
         <div class="data-block"></div>
         <div class="data-block"></div>
@@ -187,37 +259,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Adiciona os listeners nos botões após renderizar
       bindSummaryActionButtons();
     }
-    // Remove skeleton dos cards de stats
-    const stats = document.querySelectorAll(".stats-container .card");
-    if (stats && stats.length) {
-      // Espera-se 3 cards: horas alocadas, índice de sobrecarga
-      if (stats[0])
-        stats[0].innerHTML = `
-        <span class="stats-title" data-i18n="squads_detail.allocated_hours"></span>
-        <span id="allocated-hours"></span>
-        <span id="allocated-hours-available" class="stats-available"></span>
-      `;
-      if (stats[1])
-        stats[1].innerHTML = `
-        <span class="stats-title" data-i18n="squads_detail.overload_index"></span>
-        <span id="overload-index"></span>
-      `;
-    }
-    // Remove skeleton dos cards de finanças
-    const finances = document.querySelectorAll(".financial-overview .card");
-    if (finances && finances.length) {
-      // Espera-se 2 cards: investimento mensal, orçamento total
-      if (finances[0])
-        finances[0].innerHTML = `
-        <span class="stats-title" data-i18n="squads_detail.monthly_investment"></span>
-        <span id="monthly-investment"></span>
-      `;
-      if (finances[1])
-        finances[1].innerHTML = `
-        <span class="stats-title" data-i18n="squads_detail.total_budget"></span>
-        <span id="total-budget"></span>
-      `;
-    }
+    // Cards de stats e finanças foram removidos
     // Remove skeleton da equipe
     const membersList = document.getElementById("members-list");
     if (membersList) {
@@ -231,7 +273,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Função para preencher os campos do HTML com os dados da squad
-  function renderSquadDetails(squad, allocations) {
+  function renderSquadDetails(squad, squadDetails, activeProjectsCount = 0) {
     // Fallback para '-'
     const get = (obj, key, fallback = "-") =>
       obj && obj[key] ? obj[key] : fallback;
@@ -254,99 +296,142 @@ document.addEventListener("DOMContentLoaded", function () {
     const descEl = document.querySelector(
       '.description[data-i18n="squads_detail.description"]'
     );
-    if (descEl) descEl.textContent = get(squad, "description");
-    // Área e membros
-    const infoLines = document.querySelectorAll(".info-line");
-    if (infoLines && infoLines.length > 0) {
-      // Primeira info-line: membros
-      const memberCount = allocations && Array.isArray(allocations)
-        ? allocations.length
-        : (squad.memberCount || get(squad, "members", 0));
-      infoLines[0].innerHTML = `<strong data-i18n="squads_detail.members"></strong> ${memberCount}`;
+    if (descEl) {
+      const description = get(squad, "description", get(squadDetails, "teamDescription", "-"));
+      descEl.textContent = description;
+      descEl.removeAttribute("data-i18n");
     }
-    // Projetos ativos
-    const projectsCountEl = document.querySelector(
-      '.projects-count[data-i18n="squads_detail.active_projects"]'
-    );
+    
+    // Projetos ativos - atualizar dinamicamente
+    const projectsCountEl = document.getElementById("projects-count");
     if (projectsCountEl) {
-      // Tenta buscar projetos da squad ou usar contagem
-      const projectCount = squad.projectsList && Array.isArray(squad.projectsList)
-        ? squad.projectsList.length
-        : (squad.activeProjects || get(squad, "projetosAtivos", "0"));
-      projectsCountEl.textContent = `${projectCount} projetos ativos`;
+      projectsCountEl.textContent = `${activeProjectsCount} projeto${activeProjectsCount !== 1 ? 's' : ''} ativo${activeProjectsCount !== 1 ? 's' : ''}`;
     }
-    // Stats e finanças (usa os campos se existirem, senão '-')
-    let used, total, percent, score, monthlyValue, budgetValue;
-    if (squad) {
-      used = get(squad, "allocatedHours", get(squad, "horasAlocadas", "-"));
-      total = get(squad, "totalHours", get(squad, "horasTotais", "-"));
-      percent =
-        used !== "-" &&
-        total !== "-" &&
-        !isNaN(used) &&
-        !isNaN(total) &&
-        Number(total) > 0
-          ? Math.round((Number(used) / Number(total)) * 100)
-          : "-";
-      monthlyValue = get(squad, "monthlyInvestment", get(squad, "preco", "-"));
-      budgetValue = get(
-        squad,
-        "totalBudget",
-        get(squad, "orcamentoTotal", "-")
-      );
-    } else {
-      used = total = percent = score = monthlyValue = budgetValue = "-";
+    
+    // Membros
+    const membersCountEl = document.getElementById("members-count");
+    if (membersCountEl) {
+      const memberCount = squadDetails && squadDetails.membersCount !== undefined
+        ? squadDetails.membersCount
+        : (squad && squad.memberCount) || 0;
+      membersCountEl.textContent = memberCount;
     }
-    // Preenche campos de stats
-    const i18n = window.i18n;
-    if (i18n) {
-      const elAllocatedHours = document.getElementById("allocated-hours");
-      if (elAllocatedHours)
-        elAllocatedHours.textContent =
-          used !== "-"
-            ? i18n
-                .t("squads_detail.allocated_hours_value")
-                .replace("{used}", used)
-            : "-";
-
-      const elAllocatedHoursAvailable = document.getElementById(
-        "allocated-hours-available"
-      );
-      if (elAllocatedHoursAvailable && total !== "-") {
-        elAllocatedHoursAvailable.textContent = i18n
-          .t("squads_detail.allocated_hours_available")
-          .replace("{total}", total);
+    
+    // Horas totais e aplicadas
+    const totalHoursEl = document.getElementById("total-hours");
+    const allocatedHoursInfoEl = document.getElementById("allocated-hours-info");
+    let totalHours = "-";
+    let allocatedHours = "-";
+    
+    if (totalHoursEl) {
+      totalHours = (squadDetails?.totalHours) ?? (squad?.totalHours) ?? "-";
+      totalHoursEl.textContent = totalHours !== "-" ? `${totalHours}h` : "-";
+    }
+    if (allocatedHoursInfoEl) {
+      allocatedHours = (squadDetails?.allocatedHours) ?? (squad?.allocatedHours) ?? "-";
+      allocatedHoursInfoEl.textContent = allocatedHours !== "-" ? `${allocatedHours}h` : "-";
+    }
+    
+    // Índice de sobrecarga (calculado com base nos colaboradores e nas horas alocadas e disponíveis)
+    const overloadInfoEl = document.getElementById("overload-info");
+    const overloadPercentEl = document.getElementById("overload-percent");
+    if (overloadInfoEl && overloadPercentEl) {
+      let overloadPercent = "-";
+      
+      // Tenta calcular baseado nas horas disponíveis reais dos colaboradores
+      if (squadDetails && squadDetails.members && Array.isArray(squadDetails.members) && squadDetails.members.length > 0) {
+        // Calcula horas disponíveis totais dos colaboradores para a sprint
+        let totalAvailableHours = 0;
+        const sprintDuration = squadDetails.sprintDuration || squad?.sprintDuration || 4;
+        
+        console.log("Calculando índice de sobrecarga - Sprint duration:", sprintDuration);
+        
+        squadDetails.members.forEach((member, index) => {
+          // Tenta pegar horas semanais do colaborador
+          let memberWeeklyHours = 0;
+          
+          if (member.workHoursPerWeek) {
+            memberWeeklyHours = Number(member.workHoursPerWeek);
+          } else if (member.monthlyHours) {
+            // Se só temos monthlyHours, divide por 4 para obter semanais
+            memberWeeklyHours = Number(member.monthlyHours) / 4;
+          } else {
+            // Default: 40 horas semanais
+            memberWeeklyHours = 40;
+          }
+          
+          if (memberWeeklyHours > 0) {
+            const memberAvailableForSprint = memberWeeklyHours * sprintDuration;
+            totalAvailableHours += memberAvailableForSprint;
+            console.log(`Membro ${index + 1} (${member.name}): ${memberWeeklyHours}h/semana × ${sprintDuration} semanas = ${memberAvailableForSprint}h disponíveis`);
+          }
+        });
+        
+        console.log("Total de horas disponíveis:", totalAvailableHours);
+        
+        // Horas alocadas totais
+        let totalAllocatedHours = 0;
+        if (allocatedHours !== "-" && !isNaN(Number(allocatedHours))) {
+          totalAllocatedHours = Number(allocatedHours);
+        } else if (squadDetails.allocatedHours !== undefined && squadDetails.allocatedHours !== null) {
+          totalAllocatedHours = Number(squadDetails.allocatedHours) || 0;
+        }
+        
+        console.log("Total de horas alocadas:", totalAllocatedHours);
+        
+        // Calcula índice de sobrecarga
+        if (totalAvailableHours > 0 && totalAllocatedHours >= 0) {
+          const percent = Math.round((totalAllocatedHours / totalAvailableHours) * 100);
+          overloadPercent = `${percent}%`;
+          console.log(`Índice de sobrecarga calculado: ${overloadPercent}`);
+        }
+      } else if (totalHours !== "-" && allocatedHours !== "-" && 
+          !isNaN(Number(totalHours)) && !isNaN(Number(allocatedHours)) && 
+          Number(totalHours) > 0) {
+        // Fallback: usa o cálculo baseado em totalHours da squad
+        const percent = Math.round((Number(allocatedHours) / Number(totalHours)) * 100);
+        overloadPercent = `${percent}%`;
+        console.log(`Índice de sobrecarga (fallback): ${overloadPercent}`);
       }
-
-      const elOverloadIndex = document.getElementById("overload-index");
-      if (elOverloadIndex)
-        elOverloadIndex.textContent =
-          percent !== "-"
-            ? i18n
-                .t("squads_detail.overload_index_value")
-                .replace("{percent}", percent)
-            : "-";
-
-      const elMonthlyInvestment = document.getElementById("monthly-investment");
-      if (elMonthlyInvestment)
-        elMonthlyInvestment.textContent =
-          monthlyValue !== "-"
-            ? i18n
-                .t("squads_detail.monthly_investment_value")
-                .replace("{value}", monthlyValue)
-            : "-";
-
-      const elTotalBudget = document.getElementById("total-budget");
-      if (elTotalBudget)
-        elTotalBudget.textContent =
-          budgetValue !== "-"
-            ? i18n
-                .t("squads_detail.total_budget_value")
-                .replace("{value}", budgetValue)
-            : "-";
+      
+      overloadPercentEl.textContent = overloadPercent;
+      overloadInfoEl.style.display = "block";
+      console.log("Elemento de sobrecarga exibido:", overloadPercent);
+    } else {
+      // Tenta novamente após um delay caso os elementos ainda não estejam no DOM
+      setTimeout(() => {
+        const retryOverloadInfoEl = document.getElementById("overload-info");
+        const retryOverloadPercentEl = document.getElementById("overload-percent");
+        if (retryOverloadInfoEl && retryOverloadPercentEl) {
+          let overloadPercent = "-";
+          if (totalHours !== "-" && allocatedHours !== "-" && 
+              !isNaN(Number(totalHours)) && !isNaN(Number(allocatedHours)) && 
+              Number(totalHours) > 0) {
+            const percent = Math.round((Number(allocatedHours) / Number(totalHours)) * 100);
+            overloadPercent = `${percent}%`;
+          }
+          retryOverloadPercentEl.textContent = overloadPercent;
+          retryOverloadInfoEl.style.display = "block";
+        }
+      }, 500);
     }
-    // Membros (usando allocations)
-    renderMembros(allocations);
+    
+    // Duração do Sprint
+    const sprintInfoEl = document.getElementById("sprint-info");
+    const sprintDurationEl = document.getElementById("sprint-duration");
+    if (sprintInfoEl && sprintDurationEl) {
+      const sprintDuration = (squadDetails?.sprintDuration) ?? (squad?.sprintDuration) ?? null;
+      if (sprintDuration && sprintDuration !== "-") {
+        sprintDurationEl.textContent = sprintDuration;
+        sprintInfoEl.style.display = "block";
+      } else {
+        sprintInfoEl.style.display = "none";
+      }
+    }
+    
+    // Cards de stats e finanças foram removidos - não precisamos mais preencher
+    // Membros (usando squadDetails)
+    renderMembros(squadDetails);
     // Projetos
     renderProjetos(squad && squad.projectsList);
   }
@@ -418,84 +503,207 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Função para renderizar membros
-  function renderMembros(allocations) {
+  function renderMembros(squadDetails) {
     const membersList = document.getElementById("members-list");
     if (!membersList) return;
-    if (!Array.isArray(allocations) || allocations.length === 0) {
-      membersList.innerHTML = "<p style='text-align: center; color: #666;'>Nenhum membro alocado</p>";
+    
+    // Verificar se temos detalhes da squad com membros
+    if (!squadDetails || !squadDetails.members || !Array.isArray(squadDetails.members) || squadDetails.members.length === 0) {
+      membersList.innerHTML = "<p style='text-align: center; color: #666; padding: 20px;'>Nenhum membro alocado</p>";
       return;
     }
     
-    // Busca dados dos colaboradores para calcular horas disponíveis
-    Promise.all(
-      allocations.map(async (aloc) => {
-        try {
-          const employee = aloc.employee;
-          if (!employee || !employee.id) return aloc;
-          
-          // Busca alocações do colaborador para calcular horas disponíveis
-          const allAllocations = await apiService.getSquadsByCollaboratorId(employee.id);
-          const weeklyHours = employee.workHoursPerWeek || 40;
-          const monthlyHours = weeklyHours * 4;
-          
-          // Calcula horas mensais alocadas (soma todas as alocações × 4)
-          const totalAllocatedMonthly = allAllocations && Array.isArray(allAllocations)
-            ? allAllocations.reduce((sum, alloc) => {
-                const weekly = alloc.allocatedHours || 0;
-                return sum + (weekly * 4); // Converte para mensal
-              }, 0)
-            : 0;
-          
-          const availableMonthly = Math.max(0, monthlyHours - totalAllocatedMonthly);
-          const allocatedWeekly = aloc.allocatedHours || 0;
-          const allocatedMonthly = allocatedWeekly * 4; // Horas mensais desta alocação
-          
-          return {
-            ...aloc,
-            allocatedMonthly,
-            availableMonthly,
-            weeklyHours,
-            monthlyHours
-          };
-        } catch (error) {
-          console.error("Erro ao buscar dados do colaborador:", error);
-          const allocatedWeekly = aloc.allocatedHours || 0;
-          return {
-            ...aloc,
-            allocatedMonthly: allocatedWeekly * 4,
-            availableMonthly: "-",
-            weeklyHours: 40,
-            monthlyHours: 160
-          };
-        }
-      })
-    ).then((membersWithHours) => {
-      membersList.innerHTML = membersWithHours
-        .map((aloc) => {
-          const nome = aloc.employee?.name || "-";
-          const status = aloc.employee?.status || "Ativo";
-          const funcao = aloc.position || "-";
-          const horasAlocadasMensais = aloc.allocatedMonthly || 0;
-          const horasDisponiveis = aloc.availableMonthly !== undefined ? aloc.availableMonthly : "-";
-          
-          return `
-            <div class="member-card card">
-              <div class="member-header">
-                <strong>${nome}</strong>
-                <span class="status-badge">${status}</span>
-              </div>
-              <p class="custom-p custom-margin function"><span data-i18n="squads_detail.functions"></span></p>
-              <div class="tags">
-                <span>${funcao}</span>
-              </div>
-              <p class="custom-p"><span data-i18n="squads_detail.allocated"></span> ${horasAlocadasMensais}h/mês</p>
-              <p class="custom-p"><span data-i18n="squads_detail.available"></span> ${horasDisponiveis !== "-" ? horasDisponiveis + "h/mês" : "-"}</p>
-            </div>
-          `;
-        })
-        .join("");
-      if (window.i18n) window.i18n.apply();
+    // Função para formatar moeda
+    function formatCurrency(value) {
+      if (!value) return "-";
+      return `R$ ${Number(value).toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+    }
+    
+    // Total investido da squad
+    const totalInvestedFormatted = squadDetails.totalInvestedValue 
+      ? formatCurrency(squadDetails.totalInvestedValue)
+      : null;
+    
+    // Agregar todas as skills únicas
+    const allSkillsMap = new Map();
+    squadDetails.members.forEach(member => {
+      if (member.skills && Array.isArray(member.skills)) {
+        member.skills.forEach(skill => {
+          if (!allSkillsMap.has(skill.id)) {
+            allSkillsMap.set(skill.id, skill);
+          }
+        });
+      }
     });
+    const allSkills = Array.from(allSkillsMap.values());
+    
+    // HTML do total investido - ocupa 2 colunas
+    let topSectionHTML = "";
+    if (totalInvestedFormatted || allSkills.length > 0) {
+      topSectionHTML = `
+        <div class="total-invested-card" style="grid-column: 1 / -1; margin-bottom: 20px; padding: 14px; background: rgba(245, 245, 245, 0.9); border-radius: 8px; border: 1px solid #e0e0e0;">
+          ${totalInvestedFormatted ? `
+            <div style="margin-bottom: ${allSkills.length > 0 ? '14px' : '0'}; padding-bottom: ${allSkills.length > 0 ? '14px' : '0'}; border-bottom: ${allSkills.length > 0 ? '1px solid #e0e0e0' : 'none'};">
+              <strong style="font-size: 14px; color: #333; display: block; margin-bottom: 4px;">Total investido na squad:</strong>
+              <span style="font-size: 16px; color: #2f7d32; font-weight: 700;">${totalInvestedFormatted}</span>
+            </div>
+          ` : ''}
+          ${allSkills.length > 0 ? `
+            <div>
+              <strong style="font-size: 14px; color: #333; display: block; margin-bottom: 10px;">Skills agregadas da equipe:</strong>
+              <div id="skills-container" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                <div id="skills-list" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                  ${allSkills.slice(0, 3).map(skill => 
+                    `<span style="padding: 5px 10px; background: #e0f2ff; color: #0366d6; border-radius: 12px; font-size: 12px; font-weight: 500;">${skill.name}</span>`
+                  ).join("")}
+                </div>
+                ${allSkills.length > 3 ? `
+                  <button 
+                    id="show-all-skills-btn" 
+                    data-showing-all="false"
+                    style="padding: 5px 12px; background: #7d1bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-family: poppins; font-weight: 500; transition: background 0.2s;"
+                    onmouseover="this.style.background='#5e13c6'"
+                    onmouseout="this.style.background='#7d1bff'">
+                    Ver todas (${allSkills.length})
+                  </button>
+                  <span style="font-size: 11px; color: #666; margin-left: 6px;">
+                    Mostrando 3 de ${allSkills.length}
+                  </span>
+                ` : ''}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+    
+    // HTML dos membros com background mais cinza - 2 por linha
+    const membersHTML = squadDetails.members
+      .map((member, idx) => {
+        const nome = member.name || "N/A";
+        const jobTitle = member.jobTitle || null;
+        const allocatedHours = member.allocatedHours || 0;
+        const investedValueFormatted = member.investedValue 
+          ? formatCurrency(member.investedValue)
+          : null;
+        const memberSkills = member.skills || [];
+        
+        return `
+          <div class="member-item" style="background: #f5f5f5; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e0e0e0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <strong style="font-size: 15px; color: #333;">${nome}</strong>
+              <span style="font-size: 13px; color: #666; font-weight: 600;">${allocatedHours}h</span>
+            </div>
+            <div style="font-size: 12px; color: #555; margin-top: 6px;">
+              ${jobTitle ? `
+                <div style="margin-bottom: 6px;">
+                  <strong>Cargo:</strong> ${jobTitle}
+                </div>
+              ` : ''}
+              ${memberSkills.length > 0 ? `
+                <div style="margin-bottom: 6px;">
+                  <strong style="font-size: 11px; color: #666;">Skills:</strong>
+                  <div id="member-skills-${idx}" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;">
+                    ${memberSkills.slice(0, 3).map(skill => 
+                      `<span style="padding: 3px 8px; background: #e8e8e8; color: #555; border-radius: 10px; font-size: 10px;">${skill.name}</span>`
+                    ).join("")}
+                    ${memberSkills.length > 3 ? `
+                      <button 
+                        class="show-member-skills-btn" 
+                        data-member-idx="${idx}" 
+                        data-showing-all="false"
+                        style="padding: 3px 8px; background: #ddd; color: #555; border: none; border-radius: 10px; cursor: pointer; font-size: 10px; font-weight: 500;">
+                        +${memberSkills.length - 3}
+                      </button>
+                    ` : ''}
+                  </div>
+                </div>
+              ` : ''}
+              ${investedValueFormatted ? `
+                <div style="margin-top: 8px; padding: 8px; background: rgba(255, 255, 255, 0.9); border-radius: 4px; border-left: 3px solid #28a745;">
+                  <div style="font-size: 11px; color: #000; font-weight: 600;">
+                    <strong>Parte do salário aplicado no projeto:</strong> ${investedValueFormatted}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+    
+    membersList.innerHTML = topSectionHTML + membersHTML;
+    
+    // Adicionar event listeners para paginação de skills
+    setTimeout(() => {
+      // Botão "Ver todas" para skills agregadas
+      const showAllSkillsBtn = document.getElementById("show-all-skills-btn");
+      if (showAllSkillsBtn) {
+        const newBtn = showAllSkillsBtn.cloneNode(true);
+        showAllSkillsBtn.parentNode.replaceChild(newBtn, showAllSkillsBtn);
+        newBtn.addEventListener("click", function() {
+          const showingAll = this.getAttribute("data-showing-all") === "true";
+          const skillsList = document.getElementById("skills-list");
+          if (skillsList) {
+            if (showingAll) {
+              skillsList.innerHTML = allSkills.slice(0, 3).map(skill => 
+                `<span style="padding: 5px 10px; background: #e0f2ff; color: #0366d6; border-radius: 12px; font-size: 12px; font-weight: 500;">${skill.name}</span>`
+              ).join("");
+              this.textContent = `Ver todas (${allSkills.length})`;
+              this.setAttribute("data-showing-all", "false");
+              this.nextElementSibling.textContent = `Mostrando 3 de ${allSkills.length}`;
+            } else {
+              skillsList.innerHTML = allSkills.map(skill => 
+                `<span style="padding: 5px 10px; background: #e0f2ff; color: #0366d6; border-radius: 12px; font-size: 12px; font-weight: 500;">${skill.name}</span>`
+              ).join("");
+              this.textContent = "Ver menos";
+              this.setAttribute("data-showing-all", "true");
+              this.nextElementSibling.textContent = `Mostrando todas (${allSkills.length})`;
+            }
+          }
+        });
+      }
+      
+      // Botões "Ver mais" para skills individuais dos membros
+      document.querySelectorAll(".show-member-skills-btn").forEach((btn) => {
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        newBtn.addEventListener("click", function() {
+          const memberIdx = parseInt(this.getAttribute("data-member-idx"));
+          const showingAll = this.getAttribute("data-showing-all") === "true";
+          const memberSkillsDiv = document.getElementById(`member-skills-${memberIdx}`);
+          const member = squadDetails.members[memberIdx];
+          const memberSkills = member?.skills || [];
+          
+          if (memberSkillsDiv) {
+            if (showingAll) {
+              memberSkillsDiv.innerHTML = memberSkills.slice(0, 3).map(skill => 
+                `<span style="padding: 3px 8px; background: #e8e8e8; color: #555; border-radius: 10px; font-size: 10px;">${skill.name}</span>`
+              ).join("") + 
+              `<button class="show-member-skills-btn" data-member-idx="${memberIdx}" data-showing-all="false" style="padding: 3px 8px; background: #ddd; color: #555; border: none; border-radius: 10px; cursor: pointer; font-size: 10px; font-weight: 500;">+${memberSkills.length - 3}</button>`;
+            } else {
+              memberSkillsDiv.innerHTML = memberSkills.map(skill => 
+                `<span style="padding: 3px 8px; background: #e8e8e8; color: #555; border-radius: 10px; font-size: 10px;">${skill.name}</span>`
+              ).join("") + 
+              `<button class="show-member-skills-btn" data-member-idx="${memberIdx}" data-showing-all="true" style="padding: 3px 8px; background: #ddd; color: #555; border: none; border-radius: 10px; cursor: pointer; font-size: 10px; font-weight: 500;">Ver menos</button>`;
+            }
+            
+            // Re-adicionar listener ao novo botão
+            const newBtn2 = memberSkillsDiv.querySelector(".show-member-skills-btn");
+            if (newBtn2) {
+              const clonedBtn = newBtn2.cloneNode(true);
+              newBtn2.parentNode.replaceChild(clonedBtn, newBtn2);
+              clonedBtn.addEventListener("click", arguments.callee);
+            }
+          }
+        });
+      });
+    }, 100);
+    
+    if (window.i18n) window.i18n.apply();
   }
 
   // Função para renderizar projetos
@@ -510,17 +718,33 @@ document.addEventListener("DOMContentLoaded", function () {
     projectsCards.innerHTML = projetos
       .map((projeto) => {
         const nome = projeto.name || projeto.titulo || projeto.title || "-";
-        const status = projeto.status || "-";
-        const startedAt = projeto.startedAt || projeto.comeco || projeto.start || "-";
-        const endedAt = projeto.endedAt || projeto.fim || projeto.end || "-";
+        
+        // Tratar status corretamente (pode ser objeto ou string)
+        let statusText = "-";
+        let statusObj = projeto.status;
+        if (statusObj) {
+          if (typeof statusObj === 'object' && statusObj !== null) {
+            statusText = statusObj.name || statusObj.description || statusObj.status || "-";
+          } else if (typeof statusObj === 'string') {
+            statusText = statusObj;
+          }
+        }
+        
+        const startedAt = projeto.startedAt || projeto.comeco || projeto.start || projeto.startDate || "-";
+        const endedAt = projeto.endedAt || projeto.fim || projeto.end || projeto.endDate || "-";
         
         // Formata datas se necessário
         const formatDate = (dateStr) => {
           if (!dateStr || dateStr === "-") return "-";
           try {
-            const date = new Date(dateStr);
-            if (isNaN(date.getTime())) return dateStr;
-            return date.toLocaleDateString("pt-BR");
+            // Se for string ISO, tenta parsear
+            if (typeof dateStr === 'string') {
+              const date = new Date(dateStr);
+              if (!isNaN(date.getTime())) {
+                return date.toLocaleDateString("pt-BR");
+              }
+            }
+            return dateStr;
           } catch {
             return dateStr;
           }
@@ -531,7 +755,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="project-info">
               <div class="project-title">
                 <strong class="project-title">${nome}</strong>
-                <span class="project-status">${status}</span>
+                <span class="project-status">${statusText}</span>
               </div>
               <div class="dates">
                 <span>

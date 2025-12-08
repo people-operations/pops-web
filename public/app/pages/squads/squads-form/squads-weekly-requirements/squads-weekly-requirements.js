@@ -1,3 +1,41 @@
+// Mostra loader IMEDIATAMENTE se estiver editando ou tiver squadId (antes de qualquer coisa)
+(function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isEdit = !!urlParams.get("id");
+  const squadId = urlParams.get("squadId") || urlParams.get("id");
+  
+  // Mostra loader se estiver editando ou se tiver squadId (modo criação com squad já criada)
+  if (isEdit || squadId) {
+    const loader = document.getElementById("loader");
+    const mainContent = document.getElementById("main-content");
+    if (loader) {
+      loader.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+          <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #7d1bff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+          <p style="color: #7d1bff; font-size: 16px;">Carregando requisitos semanais...</p>
+        </div>
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+      loader.style.display = "flex";
+      loader.style.zIndex = "99999";
+      loader.style.position = "fixed";
+      loader.style.top = "0";
+      loader.style.left = "0";
+      loader.style.width = "100vw";
+      loader.style.height = "100vh";
+      loader.style.backgroundColor = "#fff";
+    }
+    if (mainContent) {
+      mainContent.classList.add("hidden");
+    }
+  }
+})();
+
 // Duração da sprint em semanas (será buscada da squad)
 let sprintDuration = 0;
 // Horas semanais padrão (será buscada dos colaboradores ou usa 40h como padrão)
@@ -131,7 +169,54 @@ function renderRoleCard(container, role) {
   container.appendChild(card);
 }
 
-function loadRolesFromPreviousStep() {
+async function loadRolesFromPreviousStep() {
+  // Verifica se está em modo edição
+  const urlParams = new URLSearchParams(window.location.search);
+  const squadId = urlParams.get("squadId") || urlParams.get("id");
+  const isEdit = !!urlParams.get("id");
+  
+  // Se estiver editando, carrega as horas alocadas das funções existentes
+  if (isEdit && squadId) {
+    try {
+      const api = await import("../../../../../assets/js/apiService.js").then(m => m.apiService);
+      const squadDetails = await api.getSquadDetails(squadId);
+      
+      if (squadDetails && squadDetails.members && Array.isArray(squadDetails.members)) {
+        // Agrupa membros por jobTitle (função) e pega as horas alocadas
+        const rolesByJobTitle = new Map();
+        
+        squadDetails.members.forEach(member => {
+          const jobTitle = member.jobTitle || "Sem função";
+          const allocatedHours = member.allocatedHours || 0;
+          
+          if (!rolesByJobTitle.has(jobTitle)) {
+            rolesByJobTitle.set(jobTitle, {
+              id: jobTitle.toLowerCase().replace(/\s+/g, '-'),
+              title: jobTitle,
+              funcao: jobTitle,
+              quantity: 0,
+              hours: allocatedHours, // Horas semanais alocadas
+            });
+          }
+          
+          const role = rolesByJobTitle.get(jobTitle);
+          role.quantity = (role.quantity || 0) + 1;
+          // Se houver múltiplos membros com a mesma função, mantém a primeira hora alocada
+          // (assumindo que todos têm a mesma alocação)
+        });
+        
+        // Converte Map para array
+        const rolesArray = Array.from(rolesByJobTitle.values());
+        if (rolesArray.length > 0) {
+          console.log("✅ Roles carregadas com horas alocadas:", rolesArray);
+          return rolesArray;
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao carregar horas alocadas:", error);
+    }
+  }
+  
   // Carrega as roles do localStorage, mantendo todos os campos relevantes
   const raw = localStorage.getItem("squads.selectedRoles");
   if (raw) {
@@ -139,13 +224,14 @@ function loadRolesFromPreviousStep() {
       const parsed = JSON.parse(raw);
       return parsed.map((r) => ({
         id: r.id,
-        title: r.title,
+        title: r.title || r.funcao,
+        funcao: r.funcao || r.title,
         seniority: r.seniority,
         hardSkills: r.hardSkills,
         softSkills: r.softSkills,
         quantity: r.quantity || 1,
         hint: r.hint || "1- 40 horas por pessoa",
-        hours: r.hours ?? 0,
+        hours: r.hours ?? r.allocatedHours ?? 0,
       }));
     } catch {}
   }
@@ -187,12 +273,55 @@ function checkNextButton() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // mostra conteúdo (caso você use skeleton/loader em app.js)
-  document.getElementById("main-content")?.classList.remove("hidden");
-
-  // Recupera squadId da URL
+  // Declara urlParams uma única vez no início
   const urlParams = new URLSearchParams(window.location.search);
-  const squadId = urlParams.get("squadId");
+  const isEdit = !!urlParams.get("id");
+  const squadId = urlParams.get("squadId") || urlParams.get("id");
+  
+  // Declara loader e mainContent uma única vez no início do escopo
+  const loader = document.getElementById("loader");
+  const mainContent = document.getElementById("main-content");
+  
+  // Garante que o loader esteja visível se estiver editando ou se houver squadId
+  
+  if (isEdit || squadId) {
+    // Se estiver editando ou tiver squadId, mostra loader enquanto carrega
+    if (loader) {
+      loader.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+          <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #7d1bff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+          <p style="color: #7d1bff; font-size: 16px;">Carregando requisitos semanais...</p>
+        </div>
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+      loader.style.display = "flex";
+      loader.style.zIndex = "99999";
+      loader.style.position = "fixed";
+      loader.style.top = "0";
+      loader.style.left = "0";
+      loader.style.width = "100vw";
+      loader.style.height = "100vh";
+      loader.style.backgroundColor = "#fff";
+      loader.classList.remove("hidden");
+    }
+    if (mainContent) {
+      mainContent.classList.add("hidden");
+    }
+  } else {
+    // Se não estiver editando e não tiver squadId, mostra conteúdo imediatamente
+    if (loader) {
+      loader.style.display = "none";
+      loader.classList.add("hidden");
+    }
+    if (mainContent) {
+      mainContent.classList.remove("hidden");
+    }
+  }
 
   // Busca sprintDuration da squad se houver squadId
   if (squadId) {
@@ -249,13 +378,38 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const list = document.getElementById("weeklyList");
-  window.__roles = loadRolesFromPreviousStep();
+  window.__roles = await loadRolesFromPreviousStep();
 
   window.__roles.forEach((r) => renderRoleCard(list, r));
   checkNextButton();
+  
+  // Esconde loader após carregar tudo (tanto em modo edição quanto criação)
+  if (loader) {
+    loader.style.display = "none";
+    loader.classList.add("hidden");
+  }
+  if (mainContent) {
+    mainContent.classList.remove("hidden");
+  }
 
   // Botões
+  // Mostra botão salvar se estiver editando
+  const saveBtn = document.getElementById("saveBtn");
+  if (saveBtn && isEdit) {
+    saveBtn.style.display = "inline-block";
+    saveBtn.addEventListener("click", () => {
+      // Salva os weekly requirements
+      localStorage.setItem("squads.weeklyRequirements", JSON.stringify(window.__roles || []));
+      if (window.showNotification) {
+        window.showNotification("success", "Requisitos semanais salvos com sucesso!");
+      }
+    });
+  }
+  
   document.getElementById("backBtn")?.addEventListener("click", () => {
+    // Voltar para members, mantendo o id
+    const param = isEdit ? `id=${squadId}` : (squadId ? `squadId=${squadId}` : "");
+    window.location.href = `../squads-members/squads-members.html${param ? `?${param}` : ""}`;
     window.location.href = `../squads-roles/squads-roles.html${
       squadId ? `?squadId=${squadId}` : ""
     }`;
@@ -263,10 +417,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById("nextBtn")?.addEventListener("click", () => {
     // Salva as roles com as horas definidas para o próximo passo
-    localStorage.setItem(
-      "squads.weeklyRequirements",
-      JSON.stringify(window.__roles)
-    );
+    const weeklyReqs = window.__roles || [];
+    
+    // Salva antes de avançar (se estiver criando, finaliza)
+    if (!isEdit) {
+      // No modo criação, finaliza o processo
+      localStorage.setItem("squads.weeklyRequirements", JSON.stringify(weeklyReqs));
+      // Redireciona para listagem
+      if (window.showNotification) {
+        window.showNotification("success", "Squad criada com sucesso!");
+      }
+      setTimeout(() => {
+        window.location.href = "../../squads.html";
+      }, 1000);
+    } else {
+      // No modo edição, apenas salva
+      localStorage.setItem("squads.weeklyRequirements", JSON.stringify(weeklyReqs));
+      if (window.showNotification) {
+        window.showNotification("success", "Requisitos semanais salvos com sucesso!");
+      }
+    }
     // Também atualiza as roles no localStorage para manter as horas junto das roles
     localStorage.setItem(
       "squads.selectedRoles",

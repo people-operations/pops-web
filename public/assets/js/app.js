@@ -231,6 +231,7 @@ window.addEventListener("click", function (e) {
 });
 
 // Esconde o loader e mostra o conteúdo principal após as traduções
+// MAS NÃO esconde se estiver em página de formulário (squads-form ou projects-form) - tanto em modo criação quanto edição
 document.addEventListener("DOMContentLoaded", () => {
   const tryShowContent = () => {
     if (
@@ -238,10 +239,20 @@ document.addEventListener("DOMContentLoaded", () => {
       window.i18n.messages &&
       Object.keys(window.i18n.messages).length > 0
     ) {
-      const loader = document.getElementById("loader");
-      if (loader) loader.classList.add("hidden");
-      const mainContent = document.getElementById("main-content");
-      if (mainContent) mainContent.classList.remove("hidden");
+      // Verifica se está em página de formulário
+      // Páginas de formulário (squads-form, projects-form) mantêm o loader ativo para carregar projetos/dados
+      const currentPath = window.location.pathname;
+      const isFormPage = currentPath.includes('squads-form') || currentPath.includes('projects-form');
+      
+      // Se estiver em página de formulário, NÃO esconde o loader aqui
+      // O loader será escondido apenas quando os dados/projetos terminarem de carregar
+      // Para outras páginas (como squads-detail, projects-detail), esconde normalmente
+      if (!isFormPage) {
+        const loader = document.getElementById("loader");
+        if (loader) loader.classList.add("hidden");
+        const mainContent = document.getElementById("main-content");
+        if (mainContent) mainContent.classList.remove("hidden");
+      }
     } else {
       setTimeout(tryShowContent, 50);
     }
@@ -290,8 +301,6 @@ window.initProfileLink = function() {
         basePath = "../../collaborators/collaborators-detail/collaborators-detail.html";
       } else if (currentPath.includes("/dashboard/")) {
         basePath = "../collaborators/collaborators-detail/collaborators-detail.html";
-      } else if (currentPath.includes("/inbox/")) {
-        basePath = "../collaborators/collaborators-detail/collaborators-detail.html";
       }
       
       if (userId) {
@@ -303,10 +312,105 @@ window.initProfileLink = function() {
   }
 };
 
+/**
+ * Decodifica um JWT token e retorna o payload
+ */
+function decodeJWT(token) {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Token JWT inválido');
+    }
+    
+    // Decodifica o payload (segunda parte do token)
+    const payload = parts[1];
+    // Substitui caracteres base64url para base64 padrão
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    // Adiciona padding se necessário
+    const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+    // Decodifica
+    const decoded = JSON.parse(atob(padded));
+    return decoded;
+  } catch (error) {
+    console.error('Erro ao decodificar token JWT:', error);
+    return null;
+  }
+}
+
+/**
+ * Obtém o access_level do token JWT
+ */
+function getAccessLevelFromToken() {
+  try {
+    const token = localStorage.getItem("idToken");
+    if (!token) {
+      return null;
+    }
+    
+    const payload = decodeJWT(token);
+    return payload?.access_level ? Number(payload.access_level) : null;
+  } catch (error) {
+    console.error('Erro ao obter access_level:', error);
+    return null;
+  }
+}
+
+/**
+ * Aplica controle de acesso aos elementos com data-require-access
+ */
+window.applyAccessControl = function() {
+  const accessLevel = getAccessLevelFromToken();
+  
+  if (accessLevel === null || accessLevel === undefined) {
+    // Se não houver token, oculta todos os elementos protegidos
+    document.querySelectorAll('[data-require-access]').forEach(element => {
+      element.style.display = 'none';
+    });
+    return;
+  }
+  
+  // Processa elementos com data-require-access
+  document.querySelectorAll('[data-require-access]').forEach((element) => {
+    const requiredLevel = element.getAttribute('data-require-access');
+    // Suporta números separados por vírgula: "1,2" ou "1, 2"
+    const levels = requiredLevel.split(',').map((l) => Number(l.trim()));
+    
+    if (!levels.includes(accessLevel)) {
+      element.style.display = 'none';
+    }
+  });
+};
+
+/**
+ * Adiciona atributos de controle de acesso aos links da navbar
+ * Links de Colaboradores e Configurações (Tipos/Status de Projeto) só aparecem para access_level 1 ou 2
+ */
+window.setupNavbarAccessControl = function() {
+  // Adiciona atributo data-require-access em todos os links de colaboradores na navbar
+  document.querySelectorAll('nav a[href*="collaborators.html"]').forEach(link => {
+    if (!link.hasAttribute('data-require-access')) {
+      link.setAttribute('data-require-access', '1,2');
+    }
+  });
+  
+  // Adiciona atributo data-require-access em todos os links de tipos/status de projeto na sidebar
+  document.querySelectorAll('aside a[href*="project-types"], aside a[href*="project-status"]').forEach(link => {
+    if (!link.hasAttribute('data-require-access')) {
+      link.setAttribute('data-require-access', '1,2');
+    }
+  });
+};
+
 // Inicializa automaticamente quando o DOM estiver pronto
 document.addEventListener("DOMContentLoaded", function () {
   window.initAvatar();
   window.initProfileLink();
+  
+  // Configura controle de acesso da navbar
+  window.setupNavbarAccessControl();
+  
+  // Aplica controle de acesso aos elementos com data-require-access
+  window.applyAccessControl();
   
   // Dashboard agora está disponível para todos os níveis (1, 2 e 3)
   // Níveis 1 e 2 veem dashboard de gestão, nível 3 vê dashboard de colaborador

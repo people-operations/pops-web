@@ -1,4 +1,12 @@
 import { apiService, getAuthTokenOrThrow } from "../../../../assets/js/apiService.js";
+import { requireAuth, requireAccess } from "../../../../assets/js/permissions.js";
+
+// Verificar autenticação e acesso imediatamente
+if (!requireAuth()) {
+  // Redireciona para login
+} else if (!requireAccess([1, 2], "../../../dashboard/dashboard.html")) {
+  // Redireciona para dashboard com mensagem de erro
+}
 
 let allProjectStatuses = [];
 let projectStatuses = [];

@@ -445,6 +445,33 @@ export const apiService = {
     }
   },
 
+  async updateSquad(squadId, squad) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(
+        `http://localhost:8083/api-squad/teams/${squadId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(squad),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Erro ao atualizar squad:", error.message);
+      throw error;
+    }
+  },
+
   async deleteSquadById(squadId) {
     try {
       const token = getAuthTokenOrThrow();
@@ -516,6 +543,93 @@ export const apiService = {
     }
   },
 
+  /**
+   * Busca todas as alocações de um funcionário específico
+   * @param {number} personId - ID do funcionário
+   * @returns {Promise<Array>} - Lista de alocações
+   */
+  async getAllocationsByEmployeeId(personId) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(
+        `http://localhost:8083/api-squad/teams/allocations/person/${personId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return []; // Retornar array vazio se não houver alocações
+        }
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+
+      const allocations = await response.json();
+      return Array.isArray(allocations) ? allocations : [];
+    } catch (error) {
+      console.error("Erro ao buscar alocações do funcionário:", error);
+      return []; // Retornar array vazio em caso de erro
+    }
+  },
+
+  /**
+   * Busca todas as alocações (apenas para managers)
+   * @returns {Promise<Array>} - Lista de todas as alocações
+   */
+  async getAllocations() {
+    try {
+      // Buscar todas as squads primeiro
+      const squads = await this.getAllSquads();
+      const allAllocations = [];
+      
+      // Buscar alocações de cada squad
+      for (const squad of squads) {
+        try {
+          const allocations = await this.getSquadAllocations(squad.id);
+          if (allocations && Array.isArray(allocations)) {
+            allAllocations.push(...allocations);
+          }
+        } catch (error) {
+          console.warn(`Erro ao buscar alocações do squad ${squad.id}:`, error);
+        }
+      }
+      
+      return allAllocations;
+    } catch (error) {
+      console.error("Erro ao buscar todas as alocações:", error);
+      return [];
+    }
+  },
+
+  async getSquadDetails(squadId) {
+    try {
+      const token = getAuthTokenOrThrow();
+      const response = await fetch(
+        `http://localhost:8083/api-squad/teams/${squadId}/details`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+
+      const details = await response.json();
+      return details;
+    } catch (error) {
+      console.error("Erro ao carregar detalhes do squad:", error);
+      return null;
+    }
+  },
+
   async insertSquadAllocations(squadId, allocations) {
     try {
       const token = getAuthTokenOrThrow();
@@ -531,13 +645,30 @@ export const apiService = {
         }
       );
 
-      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      if (!response.ok) {
+        // Tenta ler a mensagem de erro do servidor
+        let errorMessage = `Erro HTTP: ${response.status}`;
+        try {
+          const errorBody = await response.text();
+          if (errorBody) {
+            try {
+              const errorJson = JSON.parse(errorBody);
+              errorMessage = errorJson.message || errorJson.error || errorMessage;
+            } catch {
+              errorMessage = errorBody || errorMessage;
+            }
+          }
+        } catch (e) {
+          console.warn("Não foi possível ler mensagem de erro do servidor:", e);
+        }
+        throw new Error(errorMessage);
+      }
 
       const result = await response.json();
       return result;
     } catch (error) {
       console.error("Erro ao inserir alocações do squad:", error);
-      return null;
+      throw error; // Re-lança o erro para que o chamador possa tratá-lo
     }
   },
 
